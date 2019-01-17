@@ -1,12 +1,13 @@
 import argparse, os, gzip
-import estimators_lib
+import ips_snips
 import ds_parse
+
 
 def compute_estimates(log_fp):
     # Init estimators
-    online = estimators_lib.IPS_SNIPS_Estimators()
-    baseline1 = estimators_lib.IPS_SNIPS_Estimators()
-    baselineR = estimators_lib.IPS_SNIPS_Estimators()
+    online = ips_snips.Estimator()
+    baseline1 = ips_snips.Estimator()
+    baselineR = ips_snips.Estimator()
 
     print('Processing: {}'.format(log_fp))
     bytes_count = 0

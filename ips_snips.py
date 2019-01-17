@@ -1,4 +1,4 @@
-class IPS_SNIPS_Estimators:
+class Estimator:
     def __init__(self):
         ############################### Aggregates quantities ######################################
         #
