@@ -13,16 +13,16 @@ class IPS_SNIPS_Estimators:
     
         self.data = {'n':0.,'N':0,'d':0.,'Ne':0,'c':0.,'SoS':0}
 
-    def add_example(self, p_log, r, p_pred):
-        self.data['N'] += 1
+    def add_example(self, p_log, r, p_pred, count=1):
+        self.data['N'] += count
         if p_pred > 0:
             p_over_p = p_pred/p_log
-            self.data['d'] += p_over_p
-            self.data['Ne'] += 1
+            self.data['d'] += p_over_p*count
+            self.data['Ne'] += count
             if r != 0:
-                self.data['n'] += r*p_over_p
+                self.data['n'] += r*p_over_p*count
                 self.data['c'] = max(self.data['c'], r*p_over_p)
-                self.data['SoS'] += (r*p_over_p)**2
+                self.data['SoS'] += ((r*p_over_p)**2)*count
                 
     def get_estimate(self, type):
         if self.data['N'] == 0:
