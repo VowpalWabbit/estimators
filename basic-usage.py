@@ -1,5 +1,6 @@
 import argparse, os, gzip
 import ips_snips
+import mle
 import ds_parse
 
 
@@ -8,6 +9,9 @@ def compute_estimates(log_fp):
     online = ips_snips.Estimator()
     baseline1 = ips_snips.Estimator()
     baselineR = ips_snips.Estimator()
+    online_mle = mle.Estimator()
+    baseline1_mle = mle.Estimator()
+    baselineR_mle = mle.Estimator()
 
     print('Processing: {}'.format(log_fp))
     bytes_count = 0
@@ -36,6 +40,10 @@ def compute_estimates(log_fp):
             baseline1.add_example(data['p'], r, 1 if data['a'] == 1 else 0)
             baselineR.add_example(data['p'], r, 1/data['num_a'])
 
+            online_mle.add_example(data['p'], r, data['p'])
+            baseline1_mle.add_example(data['p'], r, 1 if data['a'] == 1 else 0)
+            baselineR_mle.add_example(data['p'], r, 1/data['num_a'])
+
             evts += 1
 
     if log_fp.endswith('.gz'):
@@ -48,9 +56,15 @@ def compute_estimates(log_fp):
     print('online_ips:',online.get_estimate('ips'))
     print('baseline1_ips:',baseline1.get_estimate('ips'))
     print('baselineR_ips:',baselineR.get_estimate('ips'))
+
     print('online_snips:',online.get_estimate('snips'))
     print('baseline1_snips:',baseline1.get_estimate('snips'))
     print('baselineR_snips:',baselineR.get_estimate('snips'))
+
+    print('online_mle:',online_mle.get_estimate())
+    print('baseline1_mle:',baseline1_mle.get_estimate())
+    print('baselineR_mle:',baselineR_mle.get_estimate())
+
 
 if __name__ == '__main__':
 
