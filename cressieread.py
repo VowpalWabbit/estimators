@@ -124,8 +124,9 @@ class Interval:
                                        sumwsqr - sumwsq * r
                                        - (1/n) * sumw * (sumwr - r * sumw)
                                    )
-                            missing = max(0, 1 - sumofw)
+                            missing = 1 - sumofw
                             gstar += sign * missing * r
+
                             candidates.append(gstar)
                 else:
                     barw = (wfake + sumw) / (1 + n)
@@ -143,12 +144,12 @@ class Interval:
                             y = 0
 
                         if z <= 0 and y * z >= 0:
-                            gstar = x - sqrt(2 * y * z)
                             kappa = sqrt(y / (2 * z)) if y * z > 0 else 0
-                            beta = (-kappa * (1 - barw) - (barwsqr - barw * barwr)) / (barwsq - barw*barw)
-                            gamma = -kappa - beta * barw - barwr
-
-                            candidates.append(gstar)
+                            if isclose(kappa, 0):
+                                candidates.append(sign * r)
+                            else:
+                                gstar = x - sqrt(2 * y * z)
+                                candidates.append(gstar)
 
             best = min(candidates)
             vbound = min(rmax, max(rmin, sign*best))
