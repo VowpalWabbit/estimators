@@ -114,7 +114,6 @@ class Interval:
                     if z <= 0 and y * z >= 0:
                         kappa = sqrt(y / (2 * z))
                         if isclose(kappa, 0):
-                            assert False
                             candidates.append(sign * r)
                         else:
                             gstar = sign * sumwr / n - 1/(kappa * (1 + n)) * (
