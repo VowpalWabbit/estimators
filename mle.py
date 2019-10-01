@@ -1,67 +1,74 @@
 # Empirical likehood estimator
 
-import numpy as np
+from math import fsum, inf
 
 class Estimator:
     # NB: This works better you use the true wmin and wmax
-    def __init__(self, wmin=0, wmax=np.inf):
+    #     which is _not_ the empirical minimum and maximum
+    #     but rather the actual smallest and largest possible values
+    def __init__(self, wmin=0, wmax=inf):
         assert wmin < 1
         assert wmax > 1
 
-        self.data = []
-        self.n = 0
         self.wmin = wmin
         self.wmax = wmax
 
+        self.data = []
+
     def add_example(self, p_log, r, p_pred, count=1):
         if count > 0:
-            self.data.append((count, p_pred/p_log, r))
-            self.n += count
-            self.wmax = max(self.wmax, p_pred/p_log)
-            self.wmin = min(self.wmin, p_pred/p_log)
+            w = p_pred / p_log
+            assert w >= 0, 'Error: negative importance weight'
 
-    def graddualobjective(self, beta):
-       return sum(c * (w - 1)/((w - 1) * beta + self.n)
+            self.data.append((count, w, r))
+            self.wmax = max(self.wmax, w)
+            self.wmin = min(self.wmin, w)
+
+    def graddualobjective(self, n, beta):
+       return fsum(c * (w - 1)/((w - 1) * beta + n)
                   for c, w, _ in self.data)
 
     def get_estimate(self, rmin=0, rmax=1):
         from scipy.optimize import brentq
 
-        assert self.n > 0, 'Error: No data point added'
+        n = fsum(c for c, _, _ in self.data)
+        assert n > 0, 'Error: No data point added'
 
-        betaub = self.n / (1 - self.wmin)
+        betaub = n / (1 - self.wmin)
         betamax = min(betaub,
-                      min(( (self.n - c) / (1 - w)
+                      min(( (n - c) / (1 - w)
                             for c, w, _ in self.data
                             if w < 1
                           ),
                           default=betaub))
 
-        betalb = 0 if self.wmax == np.inf else self.n / (1 - self.wmax)
+        betalb = 0 if self.wmax == inf else n / (1 - self.wmax)
         betamin = max(betalb,
-                      max(( (self.n - c) / (1 - w)
+                      max(( (n - c) / (1 - w)
                             for c, w, _ in self.data
                             if w > 1
                           ),
                           default=betalb))
 
-        gradmin = self.graddualobjective(betamin)
-        gradmax = self.graddualobjective(betamax)
+        gradmin = self.graddualobjective(n, betamin)
+        gradmax = self.graddualobjective(n, betamax)
 
         if gradmin * gradmax < 0:
-            betastar = brentq(f=self.graddualobjective, a=betamin, b=betamax)
+            betastar = brentq(f=lambda x: self.graddualobjective(n, x),
+                              a=betamin,
+                              b=betamax)
         elif gradmin < 0:
             betastar = betamin
         else:
             betastar = betamax
 
-        sumofw = sum(c * w / ((w - 1) * betastar + self.n)
+        sumofw = fsum(c * w / ((w - 1) * betastar + n)
                      for c, w, _ in self.data)
-        remw = max(0.0, 1.0 - sumofw)
+        missing = max(0.0, 1.0 - sumofw)
 
-        vhat = sum(c * w * r / ((w - 1) * betastar + self.n)
+        vhat = fsum(c * w * r / ((w - 1) * betastar + n)
                    for c, w, r in self.data)
-        rhatmissing = sum(r for _, _, r in self.data) / self.n
-        vhat += remw * rhatmissing
+        rhatmissing = fsum(c * r for c, _, r in self.data) / n
+        vhat += missing * rhatmissing
 
         return vhat
