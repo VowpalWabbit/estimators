@@ -104,6 +104,7 @@ class Interval:
             candidates = []
             for wfake in (self.wmin, self.wmax):
                 if wfake == inf:
+                    x = sign * (r + (sumwr - sumw * r) / n)
                     y = (  (r * sumw - sumwr)**2 / (n * (1 + n))
                          - (r**2 * sumwsq - 2 * r * sumwsqr + sumwsqrsq) / (1 + n)
                         )
@@ -116,16 +117,7 @@ class Interval:
                         if isclose(kappa, 0):
                             candidates.append(sign * r)
                         else:
-                            gstar = sign * sumwr / n - 1/(kappa * (1 + n)) * (
-                                        sumwsqrsq - sumwsqr * r
-                                        - (1/n) * sumwr * (sumwr - r * sumw)
-                                    )
-                            sumofw = sumw / n - 1/(kappa * (1 + n)) * sign * (
-                                       sumwsqr - sumwsq * r
-                                       - (1/n) * sumw * (sumwr - r * sumw)
-                                   )
-                            missing = 1 - sumofw
-                            gstar += sign * missing * r
+                            gstar = x - sqrt(2 * y * z)
 
                             candidates.append(gstar)
                 else:
