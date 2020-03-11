@@ -1,6 +1,7 @@
 import math
-from scipy.stats import beta
 from sklearn.linear_model import LinearRegression
+import numpy as np
+import pudb
 
 
 class Estimator:
@@ -28,5 +29,5 @@ class Estimator:
         if self.data['N'] == 0:
             raise('Error: No data point added')
 
-        reg = LinearRegression().fit(self.data['r'], self.data['N'])
-        return ref.coef_, reg.intercept_
+        reg = LinearRegression().fit(np.array(self.data['r']).reshape(-1, 1), np.array(self.data['pred']).reshape(-1, 1))
+        return reg.coef_[0][0], reg.intercept_[0]
