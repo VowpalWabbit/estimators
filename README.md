@@ -7,3 +7,9 @@ Given different policies, the metric of interest is their reward. One way to mea
 The alternative is off-policy evaluation: Given data logs collected by using a logging policy, off-policy evaluation can estimate the expected rewards for different target policies and provide confidence intervals around such estimates.
 
 This repo collects estimators to perform such off-policy evaluation.
+
+## Tests
+Run tests with:
+```sh
+python3 -m pytest
+```
