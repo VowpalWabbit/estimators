@@ -25,8 +25,7 @@ class Estimator:
             self.wmin = min(self.wmin, w)
 
     def graddualobjective(self, n, beta):
-       return fsum(c * (w - 1)/((w - 1) * beta + n)
-                  for c, w, _ in self.data)
+        return fsum(c * (w - 1)/((w - 1) * beta + n) for c, w, _ in self.data)
 
     def get_estimate(self, rmin=0, rmax=1):
         from scipy.optimize import brentq

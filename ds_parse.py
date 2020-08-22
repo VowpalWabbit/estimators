@@ -1,4 +1,7 @@
-import sys
+import sys, os
+import json
+import ast
+import re
 
 def update_progress(current, total=None, prefix=''):
     if total:
@@ -35,5 +38,139 @@ def json_cooked(x):
     data['a'] = int(data['a_vec'][0])
     data['num_a'] = len(data['a_vec'])
     data['skipLearn'] = b'"_skipLearn":true' in x[ind2+34:ind3] # len('"_label_Action":1,"_labelIndex":0,') = 34
-            
+
     return data
+
+def ds_json_parse(x, cp=False):
+    """
+        Parses a line from a logging policy file based on expected structure
+
+        Parameters
+        ----------
+        x : str
+             line from logging policy in a pre-determined format
+        cp : bool
+            indicator variable, if true then consider it as a content personalization with contextual bandits example
+            
+        Returns
+        -------
+        data : dict
+        """
+    
+    data = {}
+    
+    try:
+        dat_json = json.loads(x.strip())
+        if cp:
+            data['cost'] = dat_json['_label_cost']
+            data['p'] = dat_json['_label_probability']
+            data['a_vec'] = dat_json['a']
+            data['a'] = int(dat_json['_label_Action'])
+            data['num_a'] = len(list(dat_json['a']))
+            data['c_user'] = dat_json['c_user']
+            data['c_time_of_day'] = dat_json['c_time_of_day']
+            data['r'] = 0 if float(data['cost']) == 0.0 else -int(data['cost'])
+            data['XNamespace'] = str("c_user: "+str(dat_json['c_user'])+" c_time_of_day: "+str(dat_json['c_time_of_day']))
+            data['skipLearn'] = 0
+        else:
+            data['p'] = dat_json['p']
+            data['probas'] = dat_json['probas']
+            data['a_vec'] = list(range(1,int(dat_json['num_a'])+1))
+            data['a'] = 1+int(dat_json['a'])
+            data['num_a'] = dat_json['num_a']
+            data['r'] = int(dat_json['r'])
+            data['cost'] = -int(dat_json['r'])
+            str_xns = re.sub('[{"" }]', '', str(dat_json['XNamespace']))
+            data['XNamespace'] = re.sub('[,]', ' ', str_xns)
+            data['skipLearn'] = 0
+
+    except:
+
+        data['skipLearn'] = 1
+        print(data)
+    return data
+
+def parse_file(log_fp, file_out, cp=False):
+    """
+        Parses data from a logging policy file and creates a file containing the format to use in our pipeline
+
+        Parameters
+        ----------
+        log_fp : str
+             Path to the file containing the logging policy data
+        file_out : str
+            Path to the file containing the reformated logging policy data
+            
+        Returns
+        -------
+        None
+        """
+    # Init estimators
+    print('\nParsing file... Processing: {}'.format(log_fp))
+    evts = 0
+    bytes_count = 0
+    tot_bytes = os.path.getsize(log_fp)
+    
+    idxx = 0
+    data_file = open(file_out,"w+")
+
+    for i,x in enumerate(gzip.open(log_fp, 'rb') if log_fp.endswith('.gz') else open(log_fp, 'rb')):
+        # display progress
+        bytes_count += len(x)
+        if (i+1) % 10000 == 0:
+            if log_fp.endswith('.gz'):
+                update_progress(i+1)
+            else:
+                update_progress(bytes_count,tot_bytes)
+
+        # parse dsjson file
+        if x.startswith(b'{"_label_cost":') and x.strip().endswith(b'}'):
+
+            data = ds_json_parse(x, cp)
+
+            if data['skipLearn']:
+                continue
+            data_file.write(str(data) + "\r\n")
+            
+            evts += 1
+            idxx += 1
+        
+        if x.startswith(b'{"XNamespace":') and x.strip().endswith(b'}'):
+            data = ds_json_parse(x, cp)
+            #data= ast.literal_eval(x)
+
+            if data['skipLearn']:
+                continue
+            data_file.write(str(data) + "\r\n")
+            
+            evts += 1
+            idxx += 1
+
+    if log_fp.endswith('.gz'):
+        len_text = update_progress(i+1)
+    else:
+        len_text = update_progress(bytes_count,tot_bytes)
+    
+    data_file.close()
+    
+def create_json(_fin, _fout):
+    """
+        Creates a well formated JSON file for the logging policy data
+
+        Parameters
+        ----------
+        _fin : str
+             Path to the file containing the reformated logging policy data
+        _fout : str
+            Path to the file containing the logging policy data in JSON format
+            
+        Returns
+        -------
+        None
+        """
+    data = []
+    for i, inst in enumerate(open(_fin)):
+        data.append(ast.literal_eval(inst))
+    
+    with open(_fout, 'w') as fout:
+        json.dump(data , fout)
