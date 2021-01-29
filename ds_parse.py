@@ -37,3 +37,24 @@ def json_cooked(x):
     data['skipLearn'] = b'"_skipLearn":true' in x[ind2+34:ind3] # len('"_label_Action":1,"_labelIndex":0,') = 34
             
     return data
+
+def json_cooked_continuous_actions(x):
+    #################################
+    # Optimized version based on expected structure:
+    # {"_label_ca":{"cost":0,"pdf_value":0.0181818,"action":185.5},"Timestamp":"2017-10-24T00:00:15.5160000Z","Version":"1","EventId":"fa68cd9a71764118a635fd3d7a908634","c":{}}"
+    # Assumption: "Version" value is 1 digit string
+    #
+    # Performance: 4x faster than Python JSON parser js = json.loads(x.strip())
+    #################################
+    ind1 = x.find(b',',22)              # equal to: x.find(',"pdf_value',16)
+    ind2 = x.find(b',',ind1+13)         # equal to: x.find(',"action',ind1+23)
+    ind3 = x.find(b'}',ind2+10)
+    ind4 = x.find(b',"T',ind3+34)       # equal to: x.find(',"Timestamp',ind2+34)
+
+    data = {}
+    data['cost'] = float(x[21:ind1])                   # len('{"_label_ca":"cost":') = 21
+    data['p'] = float(x[ind1+13:ind2])          # len(',"pdf_value":') = 13
+    data['a'] = float(x[ind2+10:ind3])
+    data['skipLearn'] = b'"_skipLearn":true' in x
+
+    return data
