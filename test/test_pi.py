@@ -22,9 +22,7 @@ def test_single_slot_pi_equivalent_to_ips():
 
 
 def test_cats_ips():
-    pi_estimator = pseudo_inverse.Estimator()
     ips_estimator = ips_snips.Estimator()
-    is_close = lambda a, b: abs(a - b) <= 1e-6 * (1 + abs(a) + abs(b))
 
     prob_logs = [0.151704, 0.006250, 0.086, 0.086]
     action_logs = [15.0, 3.89, 22.3, 17.34]
@@ -50,7 +48,6 @@ def test_cats_ips():
             assert data['pred_p'] == 1.0
             assert data['p'] != logged_prob
 
-        pi_estimator.add_example([data['p']], r, [data['pred_p']])
         ips_estimator.add_example(data['p'], r, data['pred_p'])
-        assert is_close(pi_estimator.get_estimate('pi') , ips_estimator.get_estimate('ips'))
+        assert ips_estimator.get_estimate('ips') >= ips_estimator.get_estimate('snips')
 

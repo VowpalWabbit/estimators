@@ -57,7 +57,7 @@ class Estimator:
                 bounds.append(beta.ppf(alpha / 2, successes, n - successes + 1))
                 bounds.append(beta.ppf(1 - alpha / 2, successes + 1, n - successes))
         elif type == "gaussian":
-            if SoS > 0.0:
+            if SoS > 0.0 and den > 1:
                 zGaussianCdf = {
                   0.25: 1.15,
                   0.1: 1.645,
