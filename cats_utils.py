@@ -12,7 +12,7 @@ def get_cats_transformer(args):
     if args.num_actions and args.max_value and args.min_value and args.bandwidth:
         return CatsTransformer(args.num_actions, args.bandwidth, args.max_value, args.min_value)
     else:
-        raise RuntimeError("Not all of the required arguments for running with continuous actions have been provided.")
+        return
 
 class CatsTransformer:
     def __init__(self, num_actions, bandwidth, max_value, min_value):

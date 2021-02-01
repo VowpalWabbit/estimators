@@ -58,7 +58,7 @@ def compute_estimates(log_fp, cats_transformer=None):
         if x.startswith(b'{"_label_ca":') and x.strip().endswith(b'}'):
             data = ds_parse.json_cooked_continuous_actions(x)
             if cats_transformer is None:
-                raise RuntimeError("Continuous action label was supplied but cats_transformer is empty!")
+                raise RuntimeError("Not all of the required arguments for running with continuous actions have been provided.")
             data = cats_transformer.transform(data, data['a'])
 
             if data['skipLearn']:
