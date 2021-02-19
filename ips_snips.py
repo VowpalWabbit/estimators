@@ -35,7 +35,10 @@ class Estimator:
         if type == 'ips':
             return self.data['n']/self.data['N']
         elif type == 'snips':
-            return self.data['n']/self.data['d']
+            if self.data['d']==0:
+                return 0.0
+            else:
+                return self.data['n']/self.data['d']
         else:
             raise('Error: Incorrect estimator type {}. Supported options are ips or snips'.format(type))
 
