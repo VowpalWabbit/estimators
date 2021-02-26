@@ -3,6 +3,7 @@ import cressieread
 import ips_snips
 import mle
 import ds_parse
+import dm
 
 
 def compute_estimates(log_fp):
@@ -16,6 +17,7 @@ def compute_estimates(log_fp):
     online_cressieread = cressieread.Estimator()
     baseline1_cressieread = cressieread.Estimator()
     baselineR_cressieread = cressieread.Estimator()
+    direct = dm.Estimator()
 
     print('Processing: {}'.format(log_fp))
     bytes_count = 0
@@ -52,6 +54,8 @@ def compute_estimates(log_fp):
             baseline1_cressieread.add_example(data['p'], r, 1 if data['a'] == 1 else 0)
             baselineR_cressieread.add_example(data['p'], r, 1/data['num_a'])
 
+            dm.add_example(data['p'], r, data['p'])
+
             evts += 1
 
     if log_fp.endswith('.gz'):
@@ -84,6 +88,7 @@ def compute_estimates(log_fp):
     print('baseline1_cressieread:',baseline1_cressieread.get_estimate())
     print('baselineR_cressieread:',baselineR_cressieread.get_estimate())
 
+    print('direct_method:', dm.get_estimate())
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
