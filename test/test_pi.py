@@ -41,12 +41,10 @@ def test_cats_ips():
             pred_action = logged_action + 2 * bandwidth
             data = cats_transformer.transform(data, pred_action) # pred_action should be too far away, so pred_p should be 0
             assert data['pred_p'] == 0.0
-            assert data['p'] == logged_prob
         else:
             pred_action = logged_action
             data = cats_transformer.transform(data, logged_action) # same action, so pred_p should be 1
-            assert data['pred_p'] == 1.0
-            assert data['p'] != logged_prob
+            assert data['pred_p'] == 1.0 / (2 * bandwidth)
 
         ips_estimator.add_example(data['p'], r, data['pred_p'])
         assert ips_estimator.get_estimate('ips') >= ips_estimator.get_estimate('snips')
