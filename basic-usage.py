@@ -59,7 +59,10 @@ def compute_estimates(log_fp, cats_transformer=None):
             data = ds_parse.json_cooked_continuous_actions(x)
             if cats_transformer is None:
                 raise RuntimeError("Not all of the required arguments for running with continuous actions have been provided.")
+            # passing logged action as predicted action to transformer
             data = cats_transformer.transform(data, data['a'])
+            # passing baseline action as predicted action to transformer
+            data_baseline1 = cats_transformer.transform(data, cats_transformer.get_baseline1_prediction())
 
             if data['skipLearn']:
                 continue
@@ -68,15 +71,15 @@ def compute_estimates(log_fp, cats_transformer=None):
 
             # Update estimators with tuple (p_log, r, p_pred)
             online.add_example(data['p'], r, data['p'])
-            baseline1.add_example(data['p'], r, data['pred_p'])
-            baselineR.add_example(data['p'], r, data['pred_p'])
+            baseline1.add_example(data['p'], r, data_baseline1['pred_p'])
+            baselineR.add_example(data['p'], r, 1.0 / cats_transformer.continuous_range)
 
             online_mle.add_example(data['p'], r, data['p'])
-            baseline1_mle.add_example(data['p'], r, data['pred_p'])
+            baseline1_mle.add_example(data['p'], r, data_baseline1['pred_p'])
             baselineR_mle.add_example(data['p'], r, 1.0 / cats_transformer.continuous_range)
 
             online_cressieread.add_example(data['p'], r, data['p'])
-            baseline1_cressieread.add_example(data['p'], r, data['pred_p'])
+            baseline1_cressieread.add_example(data['p'], r, data_baseline1['pred_p'])
             baselineR_cressieread.add_example(data['p'], r, 1.0 / cats_transformer.continuous_range)
 
             evts += 1

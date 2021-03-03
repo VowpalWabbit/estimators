@@ -49,3 +49,22 @@ def test_cats_ips():
         ips_estimator.add_example(data['p'], r, data['pred_p'])
         assert ips_estimator.get_estimate('ips') >= ips_estimator.get_estimate('snips')
 
+
+def test_cats_baseline():
+    max_value = 32
+    min_value = 0
+    bandwidth = 1
+    num_actions = 8
+    cats_transformer = cats_utils.CatsTransformer(num_actions=num_actions, min_value=min_value, max_value=max_value, bandwidth=bandwidth)
+    baseline = cats_transformer.get_baseline1_prediction()
+    ## unit range is 4, min_value is 0 so baseline action should be the centre of the firt unit range, starting off from min_value i.e. 2
+    assert baseline == 2
+
+    max_value = 33
+    min_value = 1
+    bandwidth = 1
+    num_actions = 8
+    cats_transformer = cats_utils.CatsTransformer(num_actions=num_actions, min_value=min_value, max_value=max_value, bandwidth=bandwidth)
+    baseline = cats_transformer.get_baseline1_prediction()
+    ## unit range is 4, min_value is 1 so baseline action should be the centre of the firt unit range, starting off from min_value i.e. 3
+    assert baseline == 3

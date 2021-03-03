@@ -2,10 +2,10 @@ import argparse
 import math
 
 def set_custom_args(parser):
-    parser.add_argument('--max_value', help="max value for continuous action range", required=False)
-    parser.add_argument('--min_value', help="min value for continuous action range", required=False)
-    parser.add_argument('--num_actions', help="number of actions used to discretize continuous range", required=False)
-    parser.add_argument('--bandwidth', help="Bandwidth (radius) of randomization around discrete actions in terms of continuous range ", required=False)
+    parser.add_argument('--max_value', help="[CATS estimator] max value for continuous action range", required=False)
+    parser.add_argument('--min_value', help="[CATS estimator] min value for continuous action range", required=False)
+    parser.add_argument('--num_actions', help="[CATS estimator] number of actions used to discretize continuous range", required=False)
+    parser.add_argument('--bandwidth', help="[CATS estimator] bandwidth (radius) of randomization around discrete actions in terms of continuous range ", required=False)
     return parser
 
 def get_cats_transformer(args):
@@ -23,6 +23,9 @@ class CatsTransformer:
 
         self.continuous_range = self.max_value - self.min_value
         self.unit_range = self.continuous_range / float(self.num_actions)
+    
+    def get_baseline1_prediction(self):
+        return self.min_value + (self.unit_range / 2.0)
     
     def transform(self, data, pred_a):        
         logged_a = data['a']
