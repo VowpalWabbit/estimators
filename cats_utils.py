@@ -30,7 +30,7 @@ class CatsTransformer:
     def transform(self, data, pred_a):        
         logged_a = data['a']
 
-        ctr = math.floor(pred_a / self.unit_range)
+        ctr = min((self.num_actions - 1), math.floor((pred_a - self.min_value) / self.unit_range))
         centre = self.min_value + ctr * self.unit_range + (self.unit_range / 2.0)
 
         if(math.isclose(centre, logged_a, abs_tol=self.bandwidth)):

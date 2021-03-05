@@ -24,9 +24,9 @@ def test_single_slot_pi_equivalent_to_ips():
 def test_cats_ips():
     ips_estimator = ips_snips.Estimator()
 
-    prob_logs = [0.151704, 0.006250, 0.086, 0.086]
-    action_logs = [15.0, 3.89, 22.3, 17.34]
-    rewards = [0.1, 0.2, 0, 1.0]
+    prob_logs = [0.151704, 0.006250, 0.086, 0.086, 0.086]
+    action_logs = [15.0, 3.89, 22.3, 17.34, 31]
+    rewards = [0.1, 0.2, 0, 1.0, 1.0]
 
     max_value = 32
     bandwidth = 1
@@ -48,6 +48,25 @@ def test_cats_ips():
 
         ips_estimator.add_example(data['p'], r, data['pred_p'])
         assert ips_estimator.get_estimate('ips') >= ips_estimator.get_estimate('snips')
+
+def test_cats_transformer_on_edges():
+    prob_logs = [0.151704, 0.006250, 0.086, 0.086]
+    action_logs = [0, 1, 31, 32]
+    rewards = [1.0, 1.0, 1.0, 1.0]
+
+    max_value = 32
+    bandwidth = 2
+    cats_transformer = cats_utils.CatsTransformer(num_actions=8, min_value=0, max_value=max_value, bandwidth=bandwidth)
+
+    for logged_action, r, logged_prob in zip(action_logs, rewards, prob_logs):
+        data = {}
+        data['a'] = logged_action
+        data['cost'] = r
+        data['p'] = logged_prob
+    
+        pred_action = logged_action
+        data = cats_transformer.transform(data, logged_action) # same action, so pred_p should be 1
+        assert data['pred_p'] == 1.0 / (2 * bandwidth)
 
 
 def test_cats_baseline():
