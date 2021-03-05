@@ -34,7 +34,7 @@ class CatsTransformer:
         centre = self.min_value + ctr * self.unit_range + (self.unit_range / 2.0)
 
         if(math.isclose(centre, logged_a, abs_tol=self.bandwidth)):
-            b = min(self.max_value, logged_a + self.bandwidth) - max(self.min_value, logged_a - self.bandwidth)
+            b = min(self.max_value, centre + self.bandwidth) - max(self.min_value, centre - self.bandwidth)
             data['pred_p'] = 1.0 / b
         else:
             data['pred_p'] = 0.0
