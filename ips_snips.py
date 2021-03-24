@@ -35,7 +35,10 @@ class Estimator:
         if type == 'ips':
             return self.data['n']/self.data['N']
         elif type == 'snips':
-            return self.data['n']/self.data['d']
+            if self.data['d'] != 0:
+                return self.data['n']/self.data['d']
+            else:
+                return 0
         else:
             raise('Error: Incorrect estimator type {}. Supported options are ips or snips'.format(type))
 
@@ -54,7 +57,7 @@ class Estimator:
                 bounds.append(beta.ppf(alpha / 2, successes, n - successes + 1))
                 bounds.append(beta.ppf(1 - alpha / 2, successes + 1, n - successes))
         elif type == "gaussian":
-            if SoS > 0.0:
+            if SoS > 0.0 and den > 1:
                 zGaussianCdf = {
                   0.25: 1.15,
                   0.1: 1.645,
