@@ -2,7 +2,7 @@ import argparse, os, gzip
 from contextual_bandits import cressieread
 from contextual_bandits import ips_snips
 from contextual_bandits import mle
-import ds_parse
+from utils import ds_parse
 from contextual_bandits import cats_utils
 
 
