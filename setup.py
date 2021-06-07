@@ -6,7 +6,7 @@ with open("README.md", "r") as f:
 setuptools.setup(
     name="vw-estimators",
     version="0.0.1",
-    description="Python package of estimators to perform off-policy evaluation ",
+    description="Python package of estimators to perform off-policy evaluation",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/VowpalWabbit/estimators.git",
@@ -18,7 +18,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering"
     ],
-    packages=["estimators"],
+    packages=["estimators", "estimators.contextual_bandits", "estimators.slates", "estimators.utils"],
     install_requires= ['scipy>=0.9'],
     tests_require=['pytest'],
     python_requires=">=3.6",
