@@ -18,7 +18,7 @@ def test_single_slot_pi_equivalent_to_ips():
     for p_log, r, p_pred in zip(p_logs, rewards, p_preds):
         pi_estimator.add_example([p_log], r, [p_pred])
         ips_estimator.add_example(p_log, r, p_pred)
-        assert is_close(pi_estimator.get_estimate('pi') , ips_estimator.get_estimate('ips'))
+        assert is_close(pi_estimator.get_estimate('pi') , ips_estimator.get_estimate({'type':'ips'}))
 
 
 def test_cats_ips():
@@ -47,7 +47,7 @@ def test_cats_ips():
             assert data['pred_p'] == 1.0 / (2 * bandwidth)
 
         ips_estimator.add_example(data['p'], r, data['pred_p'])
-        assert ips_estimator.get_estimate('ips') >= ips_estimator.get_estimate('snips')
+        assert ips_estimator.get_estimate({'type':'ips'}) >= ips_estimator.get_estimate({'type':'snips'})
 
 def test_cats_transformer_on_edges():
     prob_logs = [0.151704, 0.006250, 0.086, 0.086]

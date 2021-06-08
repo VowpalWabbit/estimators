@@ -1,8 +1,9 @@
 import math
 from scipy.stats import beta
+from cb import ContextualBandits
 
 
-class Estimator:
+class Estimator(ContextualBandits):
     def __init__(self):
         ############################### Aggregates quantities ######################################
         #
@@ -28,13 +29,13 @@ class Estimator:
                 self.data['c'] = max(self.data['c'], r*p_over_p)
                 self.data['SoS'] += ((r*p_over_p)**2)*count
 
-    def get_estimate(self, type):
+    def get_estimate(self, info):
         if self.data['N'] == 0:
             raise('Error: No data point added')
 
-        if type == 'ips':
+        if info['type'] == 'ips':
             return self.data['n']/self.data['N']
-        elif type == 'snips':
+        elif info['type'] == 'snips':
             if self.data['d'] != 0:
                 return self.data['n']/self.data['d']
             else:
@@ -43,20 +44,20 @@ class Estimator:
             raise('Error: Incorrect estimator type {}. Supported options are ips or snips'.format(type))
 
 
-    def get_interval(self, type, alpha=0.05):
+    def get_interval(self, info, alpha=0.05):
         bounds = []
         num = self.data['n']
         den = self.data['N']
         maxWeightedCost = self.data['c']
         SoS = self.data['SoS']
 
-        if type == "clopper-pearson":
+        if info['type'] == "clopper-pearson":
             if maxWeightedCost > 0.0:
                 successes = num / maxWeightedCost
                 n = den / maxWeightedCost
                 bounds.append(beta.ppf(alpha / 2, successes, n - successes + 1))
                 bounds.append(beta.ppf(1 - alpha / 2, successes + 1, n - successes))
-        elif type == "gaussian":
+        elif info['type'] == "gaussian":
             if SoS > 0.0 and den > 1:
                 zGaussianCdf = {
                   0.25: 1.15,

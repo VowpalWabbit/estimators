@@ -92,20 +92,20 @@ def compute_estimates(log_fp, cats_transformer=None):
 
     print('\nProcessed {} events out of {} lines'.format(evts,i+1))
 
-    print('online_ips:',online.get_estimate('ips'))
+    print('online_ips:',online.get_estimate({'type':'ips'}))
 
-    print('baseline1_ips:', baseline1.get_estimate('ips'))
-    print('baseline1 gaussian ci:', baseline1.get_interval('gaussian'))
-    print('baseline1 clopper pearson ci:', baseline1.get_interval('clopper-pearson'))
+    print('baseline1_ips:', baseline1.get_estimate({'type':'ips'}))
+    print('baseline1 gaussian ci:', baseline1.get_interval({'type':'gaussian'}))
+    print('baseline1 clopper pearson ci:', baseline1.get_interval({'type':'clopper-pearson'}))
 
-    print('baselineR_ips:',baselineR.get_estimate('ips'))
-    print('baselineR gaussian ci:', baselineR.get_interval('gaussian'))
-    print('baselineR clopper pearson ci:', baselineR.get_interval('clopper-pearson'))
+    print('baselineR_ips:',baselineR.get_estimate({'type':'ips'}))
+    print('baselineR gaussian ci:', baselineR.get_interval({'type':'gaussian'}))
+    print('baselineR clopper pearson ci:', baselineR.get_interval({'type':'clopper-pearson'}))
 
 
-    print('online_snips:',online.get_estimate('snips'))
-    print('baseline1_snips:',baseline1.get_estimate('snips'))
-    print('baselineR_snips:',baselineR.get_estimate('snips'))
+    print('online_snips:',online.get_estimate({'type':'snips'}))
+    print('baseline1_snips:',baseline1.get_estimate({'type':'snips'}))
+    print('baselineR_snips:',baselineR.get_estimate({'type':'snips'}))
 
     print('online_mle:',online_mle.get_estimate())
     print('baseline1_mle:',baseline1_mle.get_estimate())
