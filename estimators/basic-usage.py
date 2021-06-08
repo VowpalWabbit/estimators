@@ -1,9 +1,9 @@
 import argparse, os, gzip
-import cressieread
-import ips_snips
-import mle
-import ds_parse
-import cats_utils
+from contextual_bandits import cressieread
+from contextual_bandits import ips_snips
+from contextual_bandits import mle
+from utils import ds_parse
+from contextual_bandits import cats_utils
 
 
 def compute_estimates(log_fp, cats_transformer=None):

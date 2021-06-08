@@ -1,9 +1,9 @@
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import pseudo_inverse
-import ips_snips
-import cats_utils
+from slates import pseudo_inverse
+from contextual_bandits import ips_snips
+from contextual_bandits import cats_utils
 
 def test_single_slot_pi_equivalent_to_ips():
     """PI should be equivalent to IPS when there is only a single slot"""

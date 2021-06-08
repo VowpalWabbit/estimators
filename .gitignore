@@ -1,0 +1,24 @@
+#Jupyter notebook checkpoints
+**/.ipynb_checkpoints/*
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info
+
+# Python build artifacts
+build/
+dist/
+
+#ignored examples files
+examples/*.log
+
+# Editors
+.vscode/
+.idea/
+
+# Type checking
+.mypy_cache
+
+.coverage
