@@ -32,14 +32,11 @@ class Estimator:
         if r != 0:
             self.data['n'] += r*p_over_ps*count
 
-    def get_estimate(self, type):
+    def get_estimate(self):
         if self.data['N'] == 0:
             raise('Error: No data point added')
 
-        if type == 'pi':
-            return self.data['n']/self.data['N']
-        else:
-            raise('Error: Incorrect estimator type {}. Supported options are pi'.format(type))
+        return self.data['n']/self.data['N']
 
 
 class Interval:

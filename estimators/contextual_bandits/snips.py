@@ -22,7 +22,7 @@ class Estimator:
             if r != 0:
                 self.data['n'] += r*p_over_p*count
 
-    def get_estimate(self, type):
+    def get_estimate(self):
         if self.data['N'] == 0:
             raise('Error: No data point added')
 
