@@ -1,12 +1,14 @@
 import math
 from scipy.stats import beta
+from slates_helper import SlatesEstimator
+from slates_helper import SlatesInterval
 
 # PseudoInverse estimator for slate recommendation. The following implements the
 # case for a Cartesian product when mu is a product distribution. This can be
 # seen in example 4 of the paper.
 # https://arxiv.org/abs/1605.04812
 
-class Estimator:
+class Estimator(SlatesEstimator):
     def __init__(self):
         self.data = {'n':0.,'N':0}
 
@@ -39,7 +41,7 @@ class Estimator:
         return self.data['n']/self.data['N']
 
 
-class Interval:
+class Interval(SlatesInterval):
     def __init__(self):
         self.data = {'n':0.,'N':0, 'SoS':0}
 
