@@ -1,8 +1,9 @@
 # Empirical likehood estimator
 
 from math import fsum, inf
+from cb_helper import CbEstimator
 
-class Estimator:
+class Estimator(CbEstimator):
     # NB: This works better you use the true wmin and wmax
     #     which is _not_ the empirical minimum and maximum
     #     but rather the actual smallest and largest possible values
@@ -28,7 +29,7 @@ class Estimator:
        return fsum(c * (w - 1)/((w - 1) * beta + n)
                   for c, w, _ in self.data)
 
-    def get_estimate(self, rmin=0, rmax=1):
+    def get_estimate(self):
         from scipy.optimize import brentq
 
         n = fsum(c for c, _, _ in self.data)

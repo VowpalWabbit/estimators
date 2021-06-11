@@ -1,8 +1,9 @@
 # CR(-2) is particularly computationally convenient
 
 from math import fsum, inf
+from cb_helper import CbEstimator
 
-class Estimator:
+class Estimator(CbEstimator):
     # NB: This works better you use the true wmin and wmax
     #     which is _not_ the empirical minimum and maximum
     #     but rather the actual smallest and largest possible values
@@ -24,7 +25,7 @@ class Estimator:
             self.wmax = max(self.wmax, w)
             self.wmin = min(self.wmin, w)
 
-    def get_estimate(self, rmin=0, rmax=1):
+    def get_estimate(self):
         n = fsum(c for c, _, _ in self.data)
         assert n > 0, 'Error: No data point added'
 
