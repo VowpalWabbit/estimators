@@ -1,9 +1,9 @@
 # Empirical likehood estimator
 
 from math import fsum, inf
-from cb_helper import CbEstimator
+from cb_base import Estimator
 
-class Estimator(CbEstimator):
+class MLEestimator(Estimator):
     # NB: This works better you use the true wmin and wmax
     #     which is _not_ the empirical minimum and maximum
     #     but rather the actual smallest and largest possible values

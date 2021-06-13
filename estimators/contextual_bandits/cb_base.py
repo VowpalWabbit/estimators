@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-class CbEstimator(ABC):
+class Estimator(ABC):
 	""" Interface for implementation of slates estimator """
 
 	@abstractmethod
@@ -26,7 +26,7 @@ class CbEstimator(ABC):
 		"""
 		...
 
-class CbInterval(ABC):
+class Interval(ABC):
 	""" Interface for implementation of slates estimator interval """
 
 	@abstractmethod

@@ -1,9 +1,9 @@
 # CR(-2) is particularly computationally convenient
 
 from math import fsum, inf
-from cb_helper import CbEstimator
+from cb_base import Estimator
 
-class Estimator(CbEstimator):
+class CressiereadEstimator(Estimator):
     # NB: This works better you use the true wmin and wmax
     #     which is _not_ the empirical minimum and maximum
     #     but rather the actual smallest and largest possible values
@@ -54,7 +54,7 @@ class Estimator(CbEstimator):
 
         return vhat
 
-class Interval:
+class CressiereadInterval:
     # NB: This works better you use the true wmin and wmax
     #     which is _not_ the empirical minimum and maximum
     #     but rather the actual smallest and largest possible values

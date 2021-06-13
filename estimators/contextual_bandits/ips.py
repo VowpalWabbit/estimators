@@ -1,9 +1,9 @@
 import math
 from scipy.stats import beta
-from cb_helper import CbEstimator
-from cb_helper import CbInterval
+from cb_base import Estimator
+from cb_base import Interval
 
-class Estimator(CbEstimator):
+class IPSestimator(Estimator):
 
     def __init__(self):
         ################################# Aggregates quantities #########################################
@@ -28,7 +28,7 @@ class Estimator(CbEstimator):
 
         return self.data['n']/self.data['N']
 
-class Interval(CbInterval):
+class IPSinterval(Interval):
 
     def __init__(self):
         ################################# Aggregates quantities #########################################
