@@ -1,19 +1,19 @@
-""" Interface for implementation of slates estimator """
+""" Interface for implementation of contextual bandit estimators """
 
 from abc import ABC, abstractmethod
 from typing import List
 
 class Estimator(ABC):
-	""" Interface for implementation of slates estimator """
+	""" Interface for implementation of contextual bandit estimators """
 
 	@abstractmethod
 	def add_example(self, p_log: float, r: float, p_pred: float, count: int) -> None:
 		""" 
 		Args:
-			p_log: probability
-			r: reward value
-			p_pred:
-			count:
+			p_log: probability of the logging policy
+			r: reward for choosing an action in the given context
+			p_pred: predicted probability of making decision
+			count: weight
 		"""
 		...
 
@@ -27,16 +27,16 @@ class Estimator(ABC):
 		...
 
 class Interval(ABC):
-	""" Interface for implementation of slates estimator interval """
+	""" Interface for implementation of contextual bandit estimators interval """
 
 	@abstractmethod
 	def add_example(self, p_log: float, r: float, p_pred: float, count: int) -> None:
 		""" 
 		Args:
-			p_log: probability
-			r: reward value
-			p_pred:
-			count:
+			p_log: probability of the logging policy
+			r: reward for choosing an action in the given context
+			p_pred: predicted probability of making decision
+			count: weight
 		"""
 		...
 
