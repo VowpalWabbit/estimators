@@ -29,7 +29,7 @@ class MLEestimator(Estimator):
        return fsum(c * (w - 1)/((w - 1) * beta + n)
                   for c, w, _ in self.data)
 
-    def get_estimate(self):
+    def get(self):
         from scipy.optimize import brentq
 
         n = fsum(c for c, _, _ in self.data)

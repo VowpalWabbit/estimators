@@ -22,7 +22,7 @@ class GaussianInterval(Interval):
                 self.data['n'] += r*p_over_p*count
                 self.data['SoS'] += ((r*p_over_p)**2)*count
 
-    def get_interval(self, alpha=0.05):
+    def get(self, alpha=0.05):
         bounds = []
         num = self.data['n']
         den = self.data['N']

@@ -23,7 +23,7 @@ class ClopperPearsonInterval(Interval):
                 self.data['n'] += r*p_over_p*count
                 self.data['c'] = max(self.data['c'], r*p_over_p)
 
-    def get_interval(self, alpha=0.05):
+    def get(self, alpha=0.05):
         bounds = []
         num = self.data['n']
         den = self.data['N']

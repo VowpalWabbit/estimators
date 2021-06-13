@@ -32,7 +32,7 @@ class PseudoInverseEstimator(Estimator):
         if r != 0:
             self.data['n'] += r*p_over_ps*count
 
-    def get_estimate(self):
+    def get(self):
         if self.data['N'] == 0:
             raise('Error: No data point added')
 

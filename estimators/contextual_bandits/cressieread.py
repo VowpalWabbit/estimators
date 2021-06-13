@@ -25,7 +25,7 @@ class CressiereadEstimator(Estimator):
             self.wmax = max(self.wmax, w)
             self.wmin = min(self.wmin, w)
 
-    def get_estimate(self):
+    def get(self):
         n = fsum(c for c, _, _ in self.data)
         assert n > 0, 'Error: No data point added'
 
@@ -76,7 +76,7 @@ class CressiereadInterval:
             self.wmax = max(self.wmax, w)
             self.wmin = min(self.wmin, w)
 
-    def get_interval(self, alpha=0.05, rmin=0, rmax=1):
+    def get(self, alpha=0.05, rmin=0, rmax=1):
         from math import isclose, sqrt
         from scipy.stats import f
 
