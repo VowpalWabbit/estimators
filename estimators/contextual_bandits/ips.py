@@ -1,5 +1,3 @@
-import math
-from scipy.stats import beta
 from cb_base import Estimator
 
 class IPSestimator(Estimator):

@@ -1,5 +1,3 @@
-import math
-from scipy.stats import beta
 from cb_base import Estimator
 
 class SNIPSestimator(Estimator):
@@ -13,7 +11,7 @@ class SNIPSestimator(Estimator):
         #
         #################################################################################################
 
-        self.data = {'n':0.,'N':0,'d':0.,'c':0.,'SoS':0}
+        self.data = {'n':0.,'N':0,'d':0.}
 
     def add_example(self, p_log, r, p_pred, count=1):
         self.data['N'] += count

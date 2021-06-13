@@ -1,5 +1,4 @@
 import math
-from scipy.stats import beta
 from cb_base import Interval
 
 class GaussianInterval(Interval):
@@ -9,12 +8,11 @@ class GaussianInterval(Interval):
         #
         # 'n':   IPS of numerator
         # 'N':   total number of samples in bin from log (IPS = n/N)
-        # 'c':   max abs. value of numerator's items (needed for Clopper-Pearson confidence intervals)
         # 'SoS': sum of squares of numerator's items (needed for Gaussian confidence intervals)
         #
         #################################################################################################
 
-        self.data = {'n':0.,'N':0,'c':0.,'SoS':0}
+        self.data = {'n':0.,'N':0,'SoS':0}
 
     def add_example(self, p_log, r, p_pred, count=1):
         self.data['N'] += count
@@ -22,14 +20,12 @@ class GaussianInterval(Interval):
             p_over_p = p_pred/p_log
             if r != 0:
                 self.data['n'] += r*p_over_p*count
-                self.data['c'] = max(self.data['c'], r*p_over_p)
                 self.data['SoS'] += ((r*p_over_p)**2)*count
 
     def get_interval(self, alpha=0.05):
         bounds = []
         num = self.data['n']
         den = self.data['N']
-        maxWeightedCost = self.data['c']
         SoS = self.data['SoS']
 
         if SoS > 0.0 and den > 1:
