@@ -41,10 +41,9 @@ class Interval(ABC):
 		...
 
 	@abstractmethod
-	def get_interval(self, type: str, alpha: float) -> List:
+	def get_interval(self, alpha: float) -> List:
 		""" Calculates the CI
 		Args:
-			type: Specifies the interval type
 			alpha: alpha value
 		Returns:
 			Returns the confidence interval as list[float]
