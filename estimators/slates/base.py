@@ -7,12 +7,12 @@ class Estimator(ABC):
 	""" Interface for implementation of slates estimator """
 
 	@abstractmethod
-	def add_example(self, p_log: List, r: float, p_pred: List, count: float) -> None:
+	def add_example(self, p_logs: List, r: float, p_preds: List, count: float) -> None:
 		""" 
 		Args:
-			p_log: probability of the logging policy
+			p_logs: List of probabilities of the logging policy
 			r: reward for choosing an action in the given context
-			p_pred: predicted probability of making decision
+			p_preds: List of predicted probabilities of making decision
 			count: weight
 		"""
 		...
@@ -29,12 +29,12 @@ class Interval(ABC):
 	""" Interface for implementation of slates estimator interval """
 
 	@abstractmethod
-	def add_example(self, p_log: List, r: float, p_pred: List, count: float) -> None:
+	def add_example(self, p_logs: List, r: float, p_preds: List, count: float) -> None:
 		""" 
 		Args:
-			p_log: probability of the logging policy
+			p_logs: List of probabilities of the logging policy
 			r: reward for choosing an action in the given context
-			p_pred: predicted probability of making decision
+			p_preds: List of predicted probabilities of making decision
 			count: weight
 		"""
 		...
