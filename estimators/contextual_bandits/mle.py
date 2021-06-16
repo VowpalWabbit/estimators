@@ -1,7 +1,7 @@
 # Empirical likehood estimator
 
 from math import fsum, inf
-from cb_base import Estimator
+from base import Estimator
 
 class MLEestimator(Estimator):
     # NB: This works better you use the true wmin and wmax

@@ -1,5 +1,5 @@
 import math
-from slates_base import Interval
+from base import Interval
 
 class GaussianInterval(Interval):
     def __init__(self):

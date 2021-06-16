@@ -1,6 +1,6 @@
-from cb_base import Estimator
+from base import Estimator
 
-class IPSestimator(Estimator):
+class IPSEstimator(Estimator):
 
     def __init__(self):
         ################################# Aggregates quantities #########################################

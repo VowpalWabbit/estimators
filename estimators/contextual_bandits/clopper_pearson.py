@@ -1,6 +1,6 @@
 import math
 from scipy.stats import beta
-from cb_base import Interval
+from base import Interval
 
 class ClopperPearsonInterval(Interval):
 

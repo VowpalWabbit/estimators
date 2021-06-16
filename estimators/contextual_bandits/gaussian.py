@@ -1,5 +1,5 @@
 import math
-from cb_base import Interval
+from base import Interval
 
 class GaussianInterval(Interval):
 

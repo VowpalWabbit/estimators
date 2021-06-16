@@ -1,5 +1,5 @@
 import math
-from slates_base import Estimator
+from base import Estimator
 
 # PseudoInverse estimator for slate recommendation. The following implements the
 # case for a Cartesian product when mu is a product distribution. This can be
