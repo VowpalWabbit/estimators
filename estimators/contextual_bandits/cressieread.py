@@ -1,7 +1,7 @@
 # CR(-2) is particularly computationally convenient
 
 from math import fsum, inf
-from base import Estimator
+from contextual_bandits.base import Estimator
 
 class CressiereadEstimator(Estimator):
     # NB: This works better you use the true wmin and wmax

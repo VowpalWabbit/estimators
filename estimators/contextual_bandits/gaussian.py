@@ -1,5 +1,5 @@
 import math
-from base import Interval
+from contextual_bandits.base import Interval
 
 class GaussianInterval(Interval):
 

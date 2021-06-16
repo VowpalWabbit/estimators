@@ -1,4 +1,4 @@
-from base import Estimator
+from contextual_bandits.base import Estimator
 
 class IPSEstimator(Estimator):
 
