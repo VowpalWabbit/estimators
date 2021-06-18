@@ -1,14 +1,9 @@
 import math
-from slates.base import Estimator
+from base import Interval
 
-# PseudoInverse estimator for slate recommendation. The following implements the
-# case for a Cartesian product when mu is a product distribution. This can be
-# seen in example 4 of the paper.
-# https://arxiv.org/abs/1605.04812
-
-class PseudoInverseEstimator(Estimator):
+class GaussianInterval(Interval):
     def __init__(self):
-        self.data = {'n':0.,'N':0}
+        self.data = {'n':0.,'N':0, 'SoS':0}
 
     def add_example(self, p_logs, r, p_preds, count=1):
         """Expects lists for logged probabilities and predicted probabilities. These should correspond to each slot.
@@ -31,9 +26,26 @@ class PseudoInverseEstimator(Estimator):
 
         if r != 0:
             self.data['n'] += r*p_over_ps*count
+            self.data['SoS'] += ((r*p_over_ps)**2)*count
 
-    def get(self):
-        if self.data['N'] == 0:
-            raise('Error: No data point added')
+    def get(self, alpha=0.05):
+        bounds = []
+        num = self.data['n']
+        den = self.data['N']
+        SoS = self.data['SoS']
 
-        return self.data['n']/self.data['N']
+        if SoS > 0.0:
+            zGaussianCdf = {
+                0.25: 1.15,
+                0.1: 1.645,
+                0.05: 1.96
+            }
+
+            variance = (SoS - num * num / den) / (den - 1)
+            gaussDelta = zGaussianCdf[alpha] * math.sqrt(variance/den)
+            bounds.append(num / den - gaussDelta)
+            bounds.append(num / den + gaussDelta)
+
+        if not bounds:
+            bounds = [0, 0]
+        return bounds

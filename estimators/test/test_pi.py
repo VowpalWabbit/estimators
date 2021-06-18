@@ -2,13 +2,14 @@ import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from slates import pseudo_inverse
-from contextual_bandits import ips_snips
+from contextual_bandits import ips
+from contextual_bandits import snips
 from contextual_bandits import cats_utils
 
 def test_single_slot_pi_equivalent_to_ips():
     """PI should be equivalent to IPS when there is only a single slot"""
-    pi_estimator = pseudo_inverse.Estimator()
-    ips_estimator = ips_snips.Estimator()
+    pi_estimator = pseudo_inverse.PseudoInverseEstimator()
+    ips_estimator = ips.IPSEstimator()
     is_close = lambda a, b: abs(a - b) <= 1e-6 * (1 + abs(a) + abs(b))
 
     p_logs = [0.8, 0.25, 0.5, 0.2]
@@ -18,11 +19,12 @@ def test_single_slot_pi_equivalent_to_ips():
     for p_log, r, p_pred in zip(p_logs, rewards, p_preds):
         pi_estimator.add_example([p_log], r, [p_pred])
         ips_estimator.add_example(p_log, r, p_pred)
-        assert is_close(pi_estimator.get_estimate('pi') , ips_estimator.get_estimate('ips'))
+        assert is_close(pi_estimator.get() , ips_estimator.get())
 
 
 def test_cats_ips():
-    ips_estimator = ips_snips.Estimator()
+    ips_estimator = ips.IPSEstimator()
+    snips_estimator = snips.SNIPSEstimator()
 
     prob_logs = [0.151704, 0.006250, 0.086, 0.086, 0.086]
     action_logs = [15.0, 3.89, 22.3, 17.34, 31]
@@ -47,7 +49,8 @@ def test_cats_ips():
             assert data['pred_p'] == 1.0 / (2 * bandwidth)
 
         ips_estimator.add_example(data['p'], r, data['pred_p'])
-        assert ips_estimator.get_estimate('ips') >= ips_estimator.get_estimate('snips')
+        snips_estimator.add_example(data['p'], r, data['pred_p'])
+        assert ips_estimator.get() >= snips_estimator.get()
 
 def test_cats_transformer_on_edges():
     prob_logs = [0.151704, 0.006250, 0.086, 0.086]

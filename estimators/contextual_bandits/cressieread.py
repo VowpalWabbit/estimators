@@ -1,8 +1,10 @@
 # CR(-2) is particularly computationally convenient
 
 from math import fsum, inf
+from contextual_bandits.base import Estimator
+from contextual_bandits.base import Interval
 
-class Estimator:
+class CressiereadEstimator(Estimator):
     # NB: This works better you use the true wmin and wmax
     #     which is _not_ the empirical minimum and maximum
     #     but rather the actual smallest and largest possible values
@@ -24,7 +26,7 @@ class Estimator:
             self.wmax = max(self.wmax, w)
             self.wmin = min(self.wmin, w)
 
-    def get_estimate(self, rmin=0, rmax=1):
+    def get(self):
         n = fsum(c for c, _, _ in self.data)
         assert n > 0, 'Error: No data point added'
 
@@ -53,16 +55,19 @@ class Estimator:
 
         return vhat
 
-class Interval:
+class CressiereadInterval(Interval):
     # NB: This works better you use the true wmin and wmax
     #     which is _not_ the empirical minimum and maximum
     #     but rather the actual smallest and largest possible values
-    def __init__(self, wmin=0, wmax=inf):
+    def __init__(self, wmin=0, wmax=inf, rmin=0, rmax=1):
         assert wmin < 1
         assert wmax > 1
 
         self.wmin = wmin
         self.wmax = wmax
+
+        self.rmin = rmin
+        self.rmax = rmax
 
         self.data = []
 
@@ -75,7 +80,7 @@ class Interval:
             self.wmax = max(self.wmax, w)
             self.wmin = min(self.wmin, w)
 
-    def get_interval(self, alpha=0.05, rmin=0, rmax=1):
+    def get(self, alpha=0.05):
         from math import isclose, sqrt
         from scipy.stats import f
 
@@ -100,7 +105,7 @@ class Interval:
         phi = (-uncgstar - Delta) / (2 * (1 + n))
 
         bounds = []
-        for r, sign in ((rmin, 1), (rmax, -1)):
+        for r, sign in ((self.rmin, 1), (self.rmax, -1)):
             candidates = []
             for wfake in (self.wmin, self.wmax):
                 if wfake == inf:
@@ -144,7 +149,7 @@ class Interval:
                                 candidates.append(gstar)
 
             best = min(candidates)
-            vbound = min(rmax, max(rmin, sign*best))
+            vbound = min(self.rmax, max(self.rmin, sign*best))
             bounds.append(vbound)
 
         return bounds
