@@ -1,9 +1,9 @@
 # Empirical likehood estimator
 
 from math import fsum, inf
-from contextual_bandits.base import Estimator
+from bandits import base
 
-class MLEestimator(Estimator):
+class Estimator(base.Estimator):
     # NB: This works better you use the true wmin and wmax
     #     which is _not_ the empirical minimum and maximum
     #     but rather the actual smallest and largest possible values
