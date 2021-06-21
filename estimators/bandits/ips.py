@@ -1,6 +1,6 @@
-from contextual_bandits.base import Estimator
+from bandits import base
 
-class IPSEstimator(Estimator):
+class Estimator(base.Estimator):
 
     def __init__(self):
         ################################# Aggregates quantities #########################################

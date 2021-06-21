@@ -1,10 +1,9 @@
 # CR(-2) is particularly computationally convenient
 
 from math import fsum, inf
-from contextual_bandits.base import Estimator
-from contextual_bandits.base import Interval
+from bandits import base
 
-class CressiereadEstimator(Estimator):
+class Estimator(base.Estimator):
     # NB: This works better you use the true wmin and wmax
     #     which is _not_ the empirical minimum and maximum
     #     but rather the actual smallest and largest possible values
@@ -55,7 +54,7 @@ class CressiereadEstimator(Estimator):
 
         return vhat
 
-class CressiereadInterval(Interval):
+class Interval(base.Interval):
     # NB: This works better you use the true wmin and wmax
     #     which is _not_ the empirical minimum and maximum
     #     but rather the actual smallest and largest possible values
