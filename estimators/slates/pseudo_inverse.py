@@ -1,12 +1,12 @@
 import math
-from slates.base import Estimator
+from slates import base
 
 # PseudoInverse estimator for slate recommendation. The following implements the
 # case for a Cartesian product when mu is a product distribution. This can be
 # seen in example 4 of the paper.
 # https://arxiv.org/abs/1605.04812
 
-class PseudoInverseEstimator(Estimator):
+class Estimator(base.Estimator):
     def __init__(self):
         self.data = {'n':0.,'N':0}
 
