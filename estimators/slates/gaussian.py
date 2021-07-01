@@ -1,7 +1,7 @@
 import math
-from base import Interval
+from slates import base
 
-class GaussianInterval(Interval):
+class Interval(base.Interval):
     def __init__(self):
         self.data = {'n':0.,'N':0, 'SoS':0}
 
