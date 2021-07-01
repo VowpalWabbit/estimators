@@ -18,7 +18,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering"
     ],
-    packages=["estimators", "estimators.contextual_bandits", "estimators.slates", "estimators.utils"],
+    packages=["estimators", "estimators.bandits", "estimators.slates", "estimators.utils"],
     install_requires= ['scipy>=0.9'],
     tests_require=['pytest'],
     python_requires=">=3.6",
