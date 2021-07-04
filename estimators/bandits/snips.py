@@ -1,4 +1,4 @@
-from bandits import base
+from estimators.bandits import base
 
 class Estimator(base.Estimator):
 

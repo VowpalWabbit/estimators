@@ -1,7 +1,7 @@
 # Empirical likehood estimator
 
 from math import fsum, inf
-from bandits import base
+from estimators.bandits import base
 
 class Estimator(base.Estimator):
     # NB: This works better you use the true wmin and wmax

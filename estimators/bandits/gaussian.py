@@ -1,5 +1,5 @@
 import math
-from bandits import base
+from estimators.bandits import base
 
 class Interval(base.Interval):
 
