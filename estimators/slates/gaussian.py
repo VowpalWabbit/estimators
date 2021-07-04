@@ -1,5 +1,5 @@
 import math
-from slates import base
+from estimators.slates import base
 
 class Interval(base.Interval):
     def __init__(self):
