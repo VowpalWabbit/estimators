@@ -4,7 +4,53 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from slates import pseudo_inverse
 from bandits import ips
 from bandits import snips
+from bandits import mle
+from bandits import cressieread
 from bandits import cats_utils
+
+def test_ips():
+    ips_estimator = ips.Estimator()
+
+    p_log = 0.3
+    p_pred = 0.6
+    reward = 1
+
+    ips_estimator.add_example(p_log, reward, p_pred)
+    assert ips_estimator.get() == 2.0
+
+
+def test_snips():
+    snips_estimator = snips.Estimator()
+
+    p_log = 0.3
+    p_pred = 0.6
+    reward = 1
+
+    snips_estimator.add_example(p_log, reward, p_pred)
+    assert snips_estimator.get() == 1.0
+
+
+def test_mle():
+    mle_estimator = mle.Estimator()
+
+    p_log = 0.3
+    p_pred = 0.6
+    reward = 1
+
+    mle_estimator.add_example(p_log, reward, p_pred)
+    assert mle_estimator.get() == 1.0
+
+
+def test_cressieread():
+    cressieread_estimator = cressieread.Estimator()
+
+    p_log = 0.3
+    p_pred = 0.6
+    reward = 1
+
+    cressieread_estimator.add_example(p_log, reward, p_pred)
+    assert cressieread_estimator.get() == 1.0
+
 
 def test_single_slot_pi_equivalent_to_ips():
     """PI should be equivalent to IPS when there is only a single slot"""
