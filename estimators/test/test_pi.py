@@ -67,6 +67,21 @@ def test_single_slot_pi_equivalent_to_ips():
         ips_estimator.add_example(p_log, r, p_pred)
         assert is_close(pi_estimator.get() , ips_estimator.get())
 
+def simulate():
+    return  1, 1, 1
+
+def run_simulation(listofestimators, num_examples, function):
+    is_close = lambda a, b: abs(a - b) <= 1e-6 * (1 + abs(a) + abs(b))
+    for Estimator in listofestimators:
+        for index in range(0,num_examples):
+            p_log, reward, p_pred = function()
+            Estimator[0].add_example(p_log, reward, p_pred)
+        assert is_close(Estimator[0].get(), Estimator[1])
+
+def test_bandits():
+    listofestimators = [(ips.Estimator(), 1), (snips.Estimator(), 1), (mle.Estimator(), 1), (cressieread.Estimator(), 1)]
+    run_simulation(listofestimators, 4, simulate)
+
 
 def test_cats_ips():
     ips_estimator = ips.Estimator()
