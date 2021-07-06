@@ -42,7 +42,7 @@ def example_generator1():
             'r': 1,
             'p_pred': 1}
 
-def example_generator2(i, epsilon, p_pred):
+def example_generator2(i, epsilon, p_pred=0.5):
     # Logged Policy
     # 0 - (1-epsilon) : Reward is always zero
     # 1 - epsilon : Reward is always 1
@@ -54,6 +54,18 @@ def example_generator2(i, epsilon, p_pred):
     return {'p_log': epsilon if chosen == 1 else 1 - epsilon,
             'r': 1 if chosen == 1 else 0,
             'p_pred':p_pred}
+
+def example_generator3(i, epsilon, delta=0.5):
+    # Logged Policy
+    # 0 - (1-epsilon) : Reward is Bernoulli(delta)
+    # 1 - epsilon : Reward is Bernoulli(1-delta)
+
+    # p_pred: 1 if action is chosen, 0 if action not chosen
+
+    chosen = int(random.random() < epsilon)
+    return {'p_log': epsilon if chosen == 1 else 1 - epsilon,
+            'r': int(random.random() < 1-delta) if chosen == 1 else int(random.random() < delta),
+            'p_pred': int(chosen==1)}
 
 def run_estimator(function, listofestimators, num_examples):
     is_close = lambda a, b: abs(a - b) <= 1e-6 * (1 + abs(a) + abs(b))
@@ -69,7 +81,7 @@ def run_estimator(function, listofestimators, num_examples):
 def run_interval(function, listofintervals, n1, n2):
     """ n1 is the smaller than n2; Number of examples increase => narrowing CI"""
 
-    datagen = lambda i: function(i, epsilon=0.5, p_pred=0.5)
+    datagen = lambda i: function(i, epsilon=0.5)
 
     for interval in listofintervals:
 
@@ -96,10 +108,13 @@ def test_bandits():
     listofestimators = [(ips.Estimator(), 1), (snips.Estimator(), 1), (mle.Estimator(), 1), (cressieread.Estimator(), 1)]
     run_estimator(example_generator1, listofestimators, 4)
 
+
 def test_intervals():
     """ To test for narrowing intervals """
     listofintervals = [cressieread.Interval(), gaussian.Interval(), clopper_pearson.Interval()]
     run_interval(example_generator2, listofintervals, 100, 10000)
+    run_interval(example_generator3, listofintervals, 100, 10000)
+
 
 def test_cats_ips():
     ips_estimator = ips.Estimator()
@@ -130,6 +145,7 @@ def test_cats_ips():
         ips_estimator.add_example(data['p'], r, data['pred_p'])
         snips_estimator.add_example(data['p'], r, data['pred_p'])
         assert ips_estimator.get() >= snips_estimator.get()
+
 
 def test_cats_transformer_on_edges():
     prob_logs = [0.151704, 0.006250, 0.086, 0.086]
