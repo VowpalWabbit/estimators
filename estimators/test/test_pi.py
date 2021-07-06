@@ -92,6 +92,7 @@ def run_interval(function, listofintervals, n1, n2):
             interval_n1.add_example(p_log=data['p_log'], r=data['r'], p_pred=data['p_pred'])
         result_n1 = interval_n1.get()
         width_n1 = result_n1[1]-result_n1[0]
+        assert width_n1 > 0
 
         # For n2 number of examples
         interval_n2 = copy.deepcopy(interval)
@@ -100,6 +101,7 @@ def run_interval(function, listofintervals, n1, n2):
             interval_n2.add_example(p_log=data['p_log'], r=data['r'], p_pred=data['p_pred'])
         result_n2 = interval_n2.get()
         width_n2 = result_n2[1]-result_n2[0]
+        assert width_n2 > 0
 
         assert width_n2 < width_n1
 
