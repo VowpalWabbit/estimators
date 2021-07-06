@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, random, copy
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from slates import pseudo_inverse
@@ -7,6 +7,8 @@ from bandits import snips
 from bandits import mle
 from bandits import cressieread
 from bandits import cats_utils
+from bandits import gaussian
+from bandits import clopper_pearson
 
 def test_ips():
     ips_estimator = ips.Estimator()
@@ -67,21 +69,62 @@ def test_single_slot_pi_equivalent_to_ips():
         ips_estimator.add_example(p_log, r, p_pred)
         assert is_close(pi_estimator.get() , ips_estimator.get())
 
-def simulate():
-    return  1, 1, 1
+def example_generator1():
+    return  {'p_log': 1,
+            'r': 1,
+            'p_pred': 1}
 
-def run_simulation(listofestimators, num_examples, function):
+def example_generator2(i, epsilon):
+    # Logged Policy
+    # 0 - (1-epsilon) : Reward is always zero
+    # 1 - epsilon : Reward is always 1
+
+    # policy to estimate
+    # 0, 1 - 0.5
+
+    chosen = int(random.random() < epsilon)
+    return {'p_log': epsilon if chosen == 1 else 1 - epsilon,
+            'r': 1 if chosen == 1 else 0,
+            'p_pred':0.5}
+
+def run_estimator(function, listofestimators, num_examples):
     is_close = lambda a, b: abs(a - b) <= 1e-6 * (1 + abs(a) + abs(b))
     for Estimator in listofestimators:
         for index in range(0,num_examples):
-            p_log, reward, p_pred = function()
-            Estimator[0].add_example(p_log, reward, p_pred)
+            data = function()
+            Estimator[0].add_example(p_log=data['p_log'], r=data['r'], p_pred=data['p_pred'])
         assert is_close(Estimator[0].get(), Estimator[1])
+
+def run_interval(function, listofintervals, n1, n2):
+    datagen = lambda i: function(i, 0.5)
+
+    for interval in listofintervals:
+
+        # For n1 number of examples
+        interval_n1 = copy.deepcopy(interval)
+        for i in range(n1):
+            data = datagen(i)
+            interval_n1.add_example(p_log=data['p_log'], r=data['r'], p_pred=data['p_pred'])
+        result_n1 = interval_n1.get()
+        CI_n1 = abs(result_n1[1]-result_n1[0])
+
+        # For n2 number of examples
+        interval_n2 = copy.deepcopy(interval)
+        for i in range(n2):
+            data = datagen(i)
+            interval_n2.add_example(p_log=data['p_log'], r=data['r'], p_pred=data['p_pred'])
+        result_n2 = interval_n2.get()
+        CI_n2 = abs(result_n2[1]-result_n2[0])
+
+        assert (CI_n2 - CI_n1) < 0
 
 def test_bandits():
     listofestimators = [(ips.Estimator(), 1), (snips.Estimator(), 1), (mle.Estimator(), 1), (cressieread.Estimator(), 1)]
-    run_simulation(listofestimators, 4, simulate)
+    run_estimator(example_generator1, listofestimators, 4)
 
+def test_intervals():
+    listofintervals = [cressieread.Interval(), gaussian.Interval(), clopper_pearson.Interval()]
+    run_interval(example_generator2, listofintervals, 100, 10000)
 
 def test_cats_ips():
     ips_estimator = ips.Estimator()
