@@ -1,14 +1,14 @@
 import os, sys, random, copy
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from slates import pseudo_inverse
-from bandits import ips
-from bandits import snips
-from bandits import mle
-from bandits import cressieread
-from bandits import cats_utils
-from bandits import gaussian
-from bandits import clopper_pearson
+from estimators.slates import pseudo_inverse
+from estimators.bandits import ips
+from estimators.bandits import snips
+from estimators.bandits import mle
+from estimators.bandits import cressieread
+from estimators.bandits import cats_utils
+from estimators.bandits import gaussian
+from estimators.bandits import clopper_pearson
 
 def test_bandits_unit_test():
     listofestimators = [(ips.Estimator(), 2.0), (snips.Estimator(), 1.0), (mle.Estimator(), 1.0), (cressieread.Estimator(), 1.0)]
