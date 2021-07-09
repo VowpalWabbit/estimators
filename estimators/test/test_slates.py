@@ -42,7 +42,7 @@ def test_slates():
     # p_logs = [1,1,1,1]
     # p_pred = [1,1,1,1]
     # reward = 1
-    estimates = helper.run_estimator(datagen=lambda: example_generator(num_slots=4), listofestimators=listofestimators, num_examples=4)
+    estimates = helper.get_estimate(datagen=lambda: example_generator(num_slots=4), listofestimators=listofestimators, num_examples=4)
 
     is_close = lambda a, b: abs(a - b) <= 1e-6 * (1 + abs(a) + abs(b))
     for Estimator, estimate in zip(listofestimators, estimates):
@@ -74,4 +74,8 @@ def test_intervals():
 
         return data
 
-    helper.run_interval(lambda: example_generator(num_slots=4, epsilon=0.5), listofintervals, n1=100, n2=10000)
+    widths_n1, widths_n2 = helper.calc_CI_width(lambda: example_generator(num_slots=4, epsilon=0.5), listofintervals, n1=100, n2=10000)
+    for width_n1, width_n2 in zip(widths_n1, widths_n2):
+        assert width_n1 > 0
+        assert width_n2 > 0
+        assert width_n2 < width_n1

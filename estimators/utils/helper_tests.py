@@ -18,7 +18,7 @@ class Helper():
         return Object
 
 
-    def run_estimator(self, datagen, listofestimators, num_examples):
+    def get_estimate(self, datagen, listofestimators, num_examples):
         estimates = []
         for Estimator in listofestimators:
             # Estimator is a tuple
@@ -30,21 +30,21 @@ class Helper():
 
         return estimates
 
-    def run_interval(self, datagen, listofintervals, n1, n2):
+    def calc_CI_width(self, datagen, listofintervals, n1, n2):
         """ n1 is smaller than n2; Number of examples increase => narrowing CI"""
 
+        width_n1 = []
+        width_n2 = []
         for interval in listofintervals:
 
             # For n1 number of examples
             interval_n1 = self.run_add_example(datagen, interval, n1)
             result_n1 = interval_n1.get()
-            width_n1 = result_n1[1]-result_n1[0]
-            assert width_n1 > 0
+            width_n1.append(result_n1[1]-result_n1[0])
 
             # For n2 number of examples
             interval_n2 = self.run_add_example(datagen, interval, n2)
             result_n2 = interval_n2.get()
-            width_n2 = result_n2[1]-result_n2[0]
-            assert width_n2 > 0
+            width_n2.append(result_n2[1]-result_n2[0])
 
-            assert width_n2 < width_n1
+        return width_n1, width_n2
