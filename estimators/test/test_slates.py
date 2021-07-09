@@ -4,7 +4,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from estimators.slates import pseudo_inverse
 from estimators.slates import gaussian
 from estimators.bandits import ips
-from estimators.utils.helper_tests import SlatesHelper
 from estimators.utils.helper_tests import Helper
 
 helper = Helper()
@@ -43,7 +42,11 @@ def test_slates():
     # p_logs = [1,1,1,1]
     # p_pred = [1,1,1,1]
     # reward = 1
-    helper.run_estimator(datagen=lambda: example_generator(num_slots=4), listofestimators=listofestimators, num_examples=4)
+    estimates = helper.run_estimator(datagen=lambda: example_generator(num_slots=4), listofestimators=listofestimators, num_examples=4)
+
+    is_close = lambda a, b: abs(a - b) <= 1e-6 * (1 + abs(a) + abs(b))
+    for Estimator, estimate in zip(listofestimators, estimates):
+        assert is_close(Estimator[1], estimate)
 
 def test_intervals():
     ''' To test for narrowing intervals '''

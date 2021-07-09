@@ -19,14 +19,16 @@ class Helper():
 
 
     def run_estimator(self, datagen, listofestimators, num_examples):
-        is_close = lambda a, b: abs(a - b) <= 1e-6 * (1 + abs(a) + abs(b))
+        estimates = []
         for Estimator in listofestimators:
             # Estimator is a tuple
             # Estimator[0] is object of class Estimator()
             # Estimator[1] is expected value of the estimator
             
             estimator = self.run_add_example(datagen, Estimator[0], num_examples)
-            assert is_close(estimator.get(), Estimator[1])
+            estimates.append(estimator.get())
+
+        return estimates
 
     def run_interval(self, datagen, listofintervals, n1, n2):
         """ n1 is smaller than n2; Number of examples increase => narrowing CI"""
