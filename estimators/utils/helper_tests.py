@@ -3,41 +3,6 @@ import random, copy
 class BanditsHelper():
     ''' Helper Function for bandit tests '''
 
-    def example_generator1():
-        return  {'p_log': 1,
-                'r': 1,
-                'p_pred': 1}
-
-    def example_generator2(i, epsilon, p_pred=0.5):
-        # Logged Policy
-        # 0 - (1-epsilon) : Reward is always zero
-        # 1 - epsilon : Reward is always 1
-
-        # p_pred: Fixed at p_pred parameter
-
-        # policy to estimate
-        # 0, 1 reward- for probability p_pred
-
-        chosen = int(random.random() < epsilon)
-        return {'p_log': epsilon if chosen == 1 else 1 - epsilon,
-                'r': 1 if chosen == 1 else 0,
-                'p_pred':p_pred}
-
-    def example_generator3(i, epsilon, delta=0.5):
-        # Logged Policy
-        # 0 - (1-epsilon) : Reward is Bernoulli(delta)
-        # 1 - epsilon : Reward is Bernoulli(1-delta)
-
-        # p_pred: 1 if action is chosen, 0 if action not chosen
-
-        # policy to estimate
-        # (delta), (1-delta) reward from a Bernoulli distribution - for probability p_pred
-
-        chosen = int(random.random() < epsilon)
-        return {'p_log': epsilon if chosen == 1 else 1 - epsilon,
-                'r': int(random.random() < 1-delta) if chosen == 1 else int(random.random() < delta),
-                'p_pred': int(chosen==1)}
-
     def run_estimator(function, listofestimators, num_examples):
         is_close = lambda a, b: abs(a - b) <= 1e-6 * (1 + abs(a) + abs(b))
         for Estimator in listofestimators:
@@ -78,57 +43,6 @@ class BanditsHelper():
 
 class SlatesHelper():
     ''' Helper Function for slates tests '''
-
-    def example_generator1(num_slots):
-        # num_slots represents the len(p_logs) or len(p_pred) for each example
-        data = {'p_logs': [], 'r': 0.0, 'p_preds': []}
-        for s in range(num_slots):
-            data['p_logs'].append(1)
-            data['p_preds'].append(1)
-        data['r'] = 1
-        return  data
-
-    def example_generator2(i, num_slots, epsilon, p_pred=0.5):
-
-        data = {'p_logs': [], 'r': 0.0, 'p_preds': []}
-
-        for s in range(num_slots):
-            # Logged Policy for each slot s
-            # 0 - (1-epsilon) : Reward is always zero
-            # 1 - epsilon : Reward is always 1
-
-            # p_pred: Fixed at p_pred parameter
-
-            # policy to estimate
-            # 0, 1 reward- for probability p_pred; looking at the matches per slot s
-
-            chosen = int(random.random() < epsilon)
-            data['p_logs'].append(epsilon if chosen == 1 else 1 - epsilon)
-            data['r'] += 1 if chosen == 1 else 0
-            data['p_preds'].append(p_pred)
-
-        return data
-
-    def example_generator3(i, num_slots, epsilon, delta=0.5):
-
-        data = {'p_logs': [], 'r': 0.0, 'p_preds': []}
-
-        for s in range(num_slots):
-            # Logged Policy for each slot s
-            # 0 - (1-epsilon) : Reward is Bernoulli(delta)
-            # 1 - epsilon : Reward is Bernoulli(1-delta)
-
-            # p_pred: 1 if action is chosen, 0 if action not chosen
-
-            # policy to estimate
-            # (delta), (1-delta) reward from a Bernoulli distribution - for probability p_pred; looking at the matches per slot s
-
-            chosen = int(random.random() < epsilon)
-            data['p_logs'].append(epsilon if chosen == 1 else 1 - epsilon)
-            data['r'] += int(random.random() < 1-delta) if chosen == 1 else int(random.random() < delta)
-            data['p_preds'].append(int(chosen==1))
-
-        return data
 
     def run_estimator(function, listofestimators, num_examples, num_slots):
         is_close = lambda a, b: abs(a - b) <= 1e-6 * (1 + abs(a) + abs(b))

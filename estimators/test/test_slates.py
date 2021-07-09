@@ -27,15 +27,45 @@ def test_slates():
     # The tuple (Estimator, expected value) for each estimator is stored in listofestimators
     listofestimators = [(pseudo_inverse.Estimator(), 1)]
 
+    def example_generator(num_slots):
+        # num_slots represents the len(p_logs) or len(p_pred) for each example
+        data = {'p_logs': [], 'r': 0.0, 'p_preds': []}
+        for s in range(num_slots):
+            data['p_logs'].append(1)
+            data['p_preds'].append(1)
+        data['r'] = 1
+        return  data
+
     # 4 examples; each example of the type->
     # p_logs = [1,1,1,1]
     # p_pred = [1,1,1,1]
     # reward = 1
-    SlatesHelper.run_estimator(SlatesHelper.example_generator1, listofestimators, num_examples=4, num_slots=4)
+    SlatesHelper.run_estimator(example_generator, listofestimators, num_examples=4, num_slots=4)
 
 def test_intervals():
     ''' To test for narrowing intervals '''
 
     listofintervals = [gaussian.Interval()]
-    SlatesHelper.run_interval(SlatesHelper.example_generator2, listofintervals, n1=100, n2=10000, num_slots=4)
-    SlatesHelper.run_interval(SlatesHelper.example_generator3, listofintervals, n1=100, n2=10000, num_slots=4)
+
+    def example_generator(i, num_slots, epsilon, delta=0.5):
+
+        data = {'p_logs': [], 'r': 0.0, 'p_preds': []}
+
+        for s in range(num_slots):
+            # Logged Policy for each slot s
+            # 0 - (1-epsilon) : Reward is Bernoulli(delta)
+            # 1 - epsilon : Reward is Bernoulli(1-delta)
+
+            # p_pred: 1 if action is chosen, 0 if action not chosen
+
+            # policy to estimate
+            # (delta), (1-delta) reward from a Bernoulli distribution - for probability p_pred; looking at the matches per slot s
+
+            chosen = int(random.random() < epsilon)
+            data['p_logs'].append(epsilon if chosen == 1 else 1 - epsilon)
+            data['r'] += int(random.random() < 1-delta) if chosen == 1 else int(random.random() < delta)
+            data['p_preds'].append(int(chosen==1))
+
+        return data
+
+    SlatesHelper.run_interval(example_generator, listofintervals, n1=100, n2=10000, num_slots=4)

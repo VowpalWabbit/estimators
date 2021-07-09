@@ -28,18 +28,34 @@ def test_bandits():
     # The tuple (Estimator, expected value) for each estimator is stored in listofestimators
     listofestimators = [(ips.Estimator(), 1), (snips.Estimator(), 1), (mle.Estimator(), 1), (cressieread.Estimator(), 1)]
 
-    # 4 examples; each example of the type->
-    # p_logs = 1
-    # p_pred = 1
-    # reward = 1
-    BanditsHelper.run_estimator(BanditsHelper.example_generator1, listofestimators, num_examples=4)
+    def example_generator(index=1):
+        return  {'p_log': 1,
+                'r': 1,
+                'p_pred': 1}
+
+    BanditsHelper.run_estimator(example_generator, listofestimators, num_examples=4)
 
 
 def test_intervals():
     """ To test for narrowing intervals """
     listofintervals = [cressieread.Interval(), gaussian.Interval(), clopper_pearson.Interval()]
-    BanditsHelper.run_interval(BanditsHelper.example_generator2, listofintervals, 100, 10000)
-    BanditsHelper.run_interval(BanditsHelper.example_generator3, listofintervals, 100, 10000)
+
+    def example_generator(i, epsilon, delta=0.5):
+        # Logged Policy
+        # 0 - (1-epsilon) : Reward is Bernoulli(delta)
+        # 1 - epsilon : Reward is Bernoulli(1-delta)
+
+        # p_pred: 1 if action is chosen, 0 if action not chosen
+
+        # policy to estimate
+        # (delta), (1-delta) reward from a Bernoulli distribution - for probability p_pred
+
+        chosen = int(random.random() < epsilon)
+        return {'p_log': epsilon if chosen == 1 else 1 - epsilon,
+                'r': int(random.random() < 1-delta) if chosen == 1 else int(random.random() < delta),
+                'p_pred': int(chosen==1)}
+
+    BanditsHelper.run_interval(example_generator, listofintervals, 100, 10000)
 
 
 def test_cats_ips():
