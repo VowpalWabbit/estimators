@@ -8,7 +8,7 @@ from estimators.bandits import cressieread
 from estimators.bandits import cats_utils
 from estimators.bandits import gaussian
 from estimators.bandits import clopper_pearson
-from estimators.utils.helper_tests import BanditsHelper
+from estimators.utils.helper_tests import Helper
 
 def test_bandits_unit_test():
     listofestimators = [(ips.Estimator(), 2.0), (snips.Estimator(), 1.0), (mle.Estimator(), 1.0), (cressieread.Estimator(), 1.0)]
@@ -33,7 +33,7 @@ def test_bandits():
                 'r': 1,
                 'p_pred': 1}
 
-    BanditsHelper.run_estimator(example_generator, listofestimators, num_examples=4)
+    Helper.run_estimator(example_generator, listofestimators, num_examples=4)
 
 
 def test_intervals():
@@ -55,7 +55,7 @@ def test_intervals():
                 'r': int(random.random() < 1-delta) if chosen == 1 else int(random.random() < delta),
                 'p_pred': int(chosen==1)}
 
-    BanditsHelper.run_interval(lambda i: example_generator(i, epsilon=0.5), listofintervals, 100, 10000)
+    Helper.run_interval(lambda i: example_generator(i, epsilon=0.5), listofintervals, 100, 10000)
 
 
 def test_cats_ips():
