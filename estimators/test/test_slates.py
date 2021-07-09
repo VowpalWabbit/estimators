@@ -7,6 +7,8 @@ from estimators.bandits import ips
 from estimators.utils.helper_tests import SlatesHelper
 from estimators.utils.helper_tests import Helper
 
+helper = Helper()
+
 def test_single_slot_pi_equivalent_to_ips():
     """PI should be equivalent to IPS when there is only a single slot"""
     pi_estimator = pseudo_inverse.Estimator()
@@ -41,14 +43,14 @@ def test_slates():
     # p_logs = [1,1,1,1]
     # p_pred = [1,1,1,1]
     # reward = 1
-    Helper.run_estimator(lambda: example_generator(num_slots=4), listofestimators, num_examples=4)
+    helper.run_estimator(datagen=lambda: example_generator(num_slots=4), listofestimators=listofestimators, num_examples=4)
 
 def test_intervals():
     ''' To test for narrowing intervals '''
 
     listofintervals = [gaussian.Interval()]
 
-    def example_generator(i, num_slots, epsilon, delta=0.5):
+    def example_generator(num_slots, epsilon, delta=0.5):
 
         data = {'p_logs': [], 'r': 0.0, 'p_preds': []}
 
@@ -69,4 +71,4 @@ def test_intervals():
 
         return data
 
-    SlatesHelper.run_interval(lambda i: example_generator(i, num_slots=4, epsilon=0.5), listofintervals, n1=100, n2=10000)
+    helper.run_interval(lambda: example_generator(num_slots=4, epsilon=0.5), listofintervals, n1=100, n2=10000)
