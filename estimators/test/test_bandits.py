@@ -23,9 +23,16 @@ def test_bandits_unit_test():
 
 
 def test_bandits():
+    ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
+
     # The tuple (Estimator, expected value) for each estimator is stored in listofestimators
     listofestimators = [(ips.Estimator(), 1), (snips.Estimator(), 1), (mle.Estimator(), 1), (cressieread.Estimator(), 1)]
-    BanditsHelper.run_estimator(BanditsHelper.example_generator1, listofestimators, 4)
+
+    # 4 examples; each example of the type->
+    # p_logs = 1
+    # p_pred = 1
+    # reward = 1
+    BanditsHelper.run_estimator(BanditsHelper.example_generator1, listofestimators, num_examples=4)
 
 
 def test_intervals():
