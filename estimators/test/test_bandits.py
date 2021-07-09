@@ -55,7 +55,7 @@ def test_intervals():
                 'r': int(random.random() < 1-delta) if chosen == 1 else int(random.random() < delta),
                 'p_pred': int(chosen==1)}
 
-    BanditsHelper.run_interval(example_generator, listofintervals, 100, 10000)
+    BanditsHelper.run_interval(lambda i: example_generator(i, epsilon=0.5), listofintervals, 100, 10000)
 
 
 def test_cats_ips():

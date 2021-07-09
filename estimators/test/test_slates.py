@@ -40,7 +40,7 @@ def test_slates():
     # p_logs = [1,1,1,1]
     # p_pred = [1,1,1,1]
     # reward = 1
-    SlatesHelper.run_estimator(example_generator, listofestimators, num_examples=4, num_slots=4)
+    SlatesHelper.run_estimator(lambda: example_generator(num_slots=4), listofestimators, num_examples=4)
 
 def test_intervals():
     ''' To test for narrowing intervals '''
@@ -68,4 +68,4 @@ def test_intervals():
 
         return data
 
-    SlatesHelper.run_interval(example_generator, listofintervals, n1=100, n2=10000, num_slots=4)
+    SlatesHelper.run_interval(lambda i: example_generator(i, num_slots=4, epsilon=0.5), listofintervals, n1=100, n2=10000)

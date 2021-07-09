@@ -3,21 +3,19 @@ import random, copy
 class BanditsHelper():
     ''' Helper Function for bandit tests '''
 
-    def run_estimator(function, listofestimators, num_examples):
+    def run_estimator(datagen, listofestimators, num_examples):
         is_close = lambda a, b: abs(a - b) <= 1e-6 * (1 + abs(a) + abs(b))
         for Estimator in listofestimators:
             # Estimator is a tuple
             # Estimator[0] is object of class Estimator()
             # Estimator[1] is expected value of the estimator
             for index in range(0,num_examples):
-                data = function()
+                data = datagen()
                 Estimator[0].add_example(p_log=data['p_log'], r=data['r'], p_pred=data['p_pred'])
             assert is_close(Estimator[0].get(), Estimator[1])
 
-    def run_interval(function, listofintervals, n1, n2):
+    def run_interval(datagen, listofintervals, n1, n2):
         """ n1 is smaller than n2; Number of examples increase => narrowing CI"""
-
-        datagen = lambda i: function(i, epsilon=0.5)
 
         for interval in listofintervals:
 
@@ -44,21 +42,19 @@ class BanditsHelper():
 class SlatesHelper():
     ''' Helper Function for slates tests '''
 
-    def run_estimator(function, listofestimators, num_examples, num_slots):
+    def run_estimator(datagen, listofestimators, num_examples):
         is_close = lambda a, b: abs(a - b) <= 1e-6 * (1 + abs(a) + abs(b))
         for Estimator in listofestimators:
             # Estimator is a tuple
             # Estimator[0] is object of class Estimator()
             # Estimator[1] is expected value of the estimator
             for n in range(num_examples):
-                data = function(num_slots)
+                data = datagen()
                 Estimator[0].add_example(p_logs=data['p_logs'], r=data['r'], p_preds=data['p_preds'])
             assert is_close(Estimator[0].get(), Estimator[1])
 
-    def run_interval(function, listofintervals, n1, n2, num_slots):
+    def run_interval(datagen, listofintervals, n1, n2):
         """ n1 is smaller than n2; Number of examples increase => narrowing CI"""
-
-        datagen = lambda i: function(i, num_slots, epsilon=0.5)
 
         for interval in listofintervals:
 
