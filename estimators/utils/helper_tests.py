@@ -70,3 +70,26 @@ class BanditsHelper():
             assert width_n2 > 0
 
             assert width_n2 < width_n1
+
+class SlatesHelper():
+    ''' Helper Function for bandit tests '''
+
+    def example_generator1(num_slots):
+        # num_slots represents the len(p_logs) or len(p_pred) for each example
+        data = {'p_logs': [], 'r': 0.0, 'p_preds': []}
+        for s in range(num_slots):
+            data['p_logs'].append(1)
+            data['p_preds'].append(1)
+        data['r'] = 1
+        return  data
+
+    def run_estimator(function, listofestimators, num_examples, num_slots):
+        is_close = lambda a, b: abs(a - b) <= 1e-6 * (1 + abs(a) + abs(b))
+        for Estimator in listofestimators:
+            # Estimator is a tuple
+            # Estimator[0] is object of class Estimator()
+            # Estimator[1] is expected value of the estimator
+            for n in range(num_examples):
+                data = function(num_slots)
+                Estimator[0].add_example(p_logs=data['p_logs'], r=data['r'], p_preds=data['p_preds'])
+            assert is_close(Estimator[0].get(), Estimator[1])
