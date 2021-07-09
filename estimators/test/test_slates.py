@@ -9,7 +9,8 @@ from estimators.utils.helper_tests import Helper
 helper = Helper()
 
 def test_single_slot_pi_equivalent_to_ips():
-    """PI should be equivalent to IPS when there is only a single slot"""
+    ''' PI should be equivalent to IPS when there is only a single slot '''
+
     pi_estimator = pseudo_inverse.Estimator()
     ips_estimator = ips.Estimator()
     is_close = lambda a, b: abs(a - b) <= 1e-6 * (1 + abs(a) + abs(b))
@@ -29,7 +30,7 @@ def test_slates():
     # The tuple (Estimator, expected value) for each estimator is stored in listofestimators
     listofestimators = [(pseudo_inverse.Estimator(), 1)]
 
-    def example_generator(num_slots):
+    def datagen(num_slots):
         # num_slots represents the len(p_logs) or len(p_pred) for each example
         data = {'p_logs': [], 'r': 0.0, 'p_preds': []}
         for s in range(num_slots):
@@ -42,18 +43,18 @@ def test_slates():
     # p_logs = [1,1,1,1]
     # p_pred = [1,1,1,1]
     # reward = 1
-    estimates = helper.get_estimate(datagen=lambda: example_generator(num_slots=4), listofestimators=listofestimators, num_examples=4)
+    estimates = helper.get_estimate(lambda: datagen(num_slots=4), listofestimators, num_examples=4)
 
     is_close = lambda a, b: abs(a - b) <= 1e-6 * (1 + abs(a) + abs(b))
     for Estimator, estimate in zip(listofestimators, estimates):
         assert is_close(Estimator[1], estimate)
 
 def test_intervals():
-    ''' To test for narrowing intervals '''
+    ''' To test for narrowing intervals; Number of examples increase => narrowing CI '''
 
     listofintervals = [gaussian.Interval()]
 
-    def example_generator(num_slots, epsilon, delta=0.5):
+    def datagen(num_slots, epsilon, delta=0.5):
 
         data = {'p_logs': [], 'r': 0.0, 'p_preds': []}
 
@@ -74,7 +75,7 @@ def test_intervals():
 
         return data
 
-    widths_n1, widths_n2 = helper.calc_CI_width(lambda: example_generator(num_slots=4, epsilon=0.5), listofintervals, n1=100, n2=10000)
+    widths_n1, widths_n2 = helper.calc_CI_width(lambda: datagen(num_slots=4, epsilon=0.5), listofintervals, n1=100, n2=10000)
     for width_n1, width_n2 in zip(widths_n1, widths_n2):
         assert width_n1 > 0
         assert width_n2 > 0

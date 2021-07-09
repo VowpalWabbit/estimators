@@ -17,7 +17,6 @@ class Helper():
 
         return Object
 
-
     def get_estimate(self, datagen, listofestimators, num_examples):
         estimates = []
         for Estimator in listofestimators:
@@ -31,7 +30,7 @@ class Helper():
         return estimates
 
     def calc_CI_width(self, datagen, listofintervals, n1, n2):
-        """ n1 is smaller than n2; Number of examples increase => narrowing CI"""
+        ''' Note: n1 is smaller than n2 '''
 
         width_n1 = []
         width_n2 = []

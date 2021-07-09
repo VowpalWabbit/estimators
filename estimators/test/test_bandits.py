@@ -30,12 +30,12 @@ def test_bandits():
     # The tuple (Estimator, expected value) for each estimator is stored in listofestimators
     listofestimators = [(ips.Estimator(), 1), (snips.Estimator(), 1), (mle.Estimator(), 1), (cressieread.Estimator(), 1)]
 
-    def example_generator(index=1):
+    def datagen():
         return  {'p_log': 1,
                 'r': 1,
                 'p_pred': 1}
 
-    estimates = helper.get_estimate(example_generator, listofestimators, num_examples=4)
+    estimates = helper.get_estimate(datagen, listofestimators, num_examples=4)
 
     is_close = lambda a, b: abs(a - b) <= 1e-6 * (1 + abs(a) + abs(b))
     for Estimator, estimate in zip(listofestimators, estimates):
@@ -43,10 +43,11 @@ def test_bandits():
 
 
 def test_intervals():
-    """ To test for narrowing intervals """
+    ''' To test for narrowing intervals; Number of examples increase => narrowing CI '''
+
     listofintervals = [cressieread.Interval(), gaussian.Interval(), clopper_pearson.Interval()]
 
-    def example_generator(epsilon, delta=0.5):
+    def datagen(epsilon, delta=0.5):
         # Logged Policy
         # 0 - (1-epsilon) : Reward is Bernoulli(delta)
         # 1 - epsilon : Reward is Bernoulli(1-delta)
@@ -61,7 +62,7 @@ def test_intervals():
                 'r': int(random.random() < 1-delta) if chosen == 1 else int(random.random() < delta),
                 'p_pred': int(chosen==1)}
 
-    widths_n1, widths_n2 = helper.calc_CI_width(lambda: example_generator(epsilon=0.5), listofintervals, 100, 10000)
+    widths_n1, widths_n2 = helper.calc_CI_width(lambda: datagen(epsilon=0.5), listofintervals, 100, 10000)
     for width_n1, width_n2 in zip(widths_n1, widths_n2):
         assert width_n1 > 0
         assert width_n2 > 0
