@@ -23,7 +23,7 @@ def test_single_slot_pi_equivalent_to_ips():
 
 def test_slates():
     ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
-    
+
     # The tuple (Estimator, expected value) for each estimator is stored in listofestimators
     listofestimators = [(pseudo_inverse.Estimator(), 1)]
 
@@ -32,3 +32,10 @@ def test_slates():
     # p_pred = [1,1,1,1]
     # reward = 1
     SlatesHelper.run_estimator(SlatesHelper.example_generator1, listofestimators, num_examples=4, num_slots=4)
+
+def test_intervals():
+    ''' To test for narrowing intervals '''
+
+    listofintervals = [gaussian.Interval()]
+    SlatesHelper.run_interval(SlatesHelper.example_generator2, listofintervals, n1=100, n2=10000, num_slots=4)
+    SlatesHelper.run_interval(SlatesHelper.example_generator3, listofintervals, n1=100, n2=10000, num_slots=4)
