@@ -8,9 +8,7 @@ from estimators.bandits import cressieread
 from estimators.bandits import cats_utils
 from estimators.bandits import gaussian
 from estimators.bandits import clopper_pearson
-from estimators.utils.helper_tests import Helper
-
-helper = Helper()
+from estimators.test.utils import Helper
 
 def test_bandits_unit_test():
     listofestimators = [(ips.Estimator(), 2.0), (snips.Estimator(), 1.0), (mle.Estimator(), 1.0), (cressieread.Estimator(), 1.0)]
@@ -35,7 +33,7 @@ def test_bandits():
                 'r': 1,
                 'p_pred': 1}
 
-    estimates = helper.get_estimate(datagen, listofestimators, num_examples=4)
+    estimates = Helper.get_estimate(datagen, listofestimators, num_examples=4)
 
     is_close = lambda a, b: abs(a - b) <= 1e-6 * (1 + abs(a) + abs(b))
     for Estimator, estimate in zip(listofestimators, estimates):
@@ -62,7 +60,7 @@ def test_intervals():
                 'r': int(random.random() < 1-delta) if chosen == 1 else int(random.random() < delta),
                 'p_pred': int(chosen==1)}
 
-    widths_n1, widths_n2 = helper.calc_CI_width(lambda: datagen(epsilon=0.5), listofintervals, 100, 10000)
+    widths_n1, widths_n2 = Helper.calc_CI_width(lambda: datagen(epsilon=0.5), listofintervals, 100, 10000)
     for width_n1, width_n2 in zip(widths_n1, widths_n2):
         assert width_n1 > 0
         assert width_n2 > 0

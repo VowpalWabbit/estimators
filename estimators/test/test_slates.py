@@ -4,9 +4,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from estimators.slates import pseudo_inverse
 from estimators.slates import gaussian
 from estimators.bandits import ips
-from estimators.utils.helper_tests import Helper
-
-helper = Helper()
+from estimators.test.utils import Helper
 
 def test_single_slot_pi_equivalent_to_ips():
     ''' PI should be equivalent to IPS when there is only a single slot '''
@@ -43,7 +41,7 @@ def test_slates():
     # p_logs = [1,1,1,1]
     # p_pred = [1,1,1,1]
     # reward = 1
-    estimates = helper.get_estimate(lambda: datagen(num_slots=4), listofestimators, num_examples=4)
+    estimates = Helper.get_estimate(lambda: datagen(num_slots=4), listofestimators, num_examples=4)
 
     is_close = lambda a, b: abs(a - b) <= 1e-6 * (1 + abs(a) + abs(b))
     for Estimator, estimate in zip(listofestimators, estimates):
@@ -75,7 +73,7 @@ def test_intervals():
 
         return data
 
-    widths_n1, widths_n2 = helper.calc_CI_width(lambda: datagen(num_slots=4, epsilon=0.5), listofintervals, n1=100, n2=10000)
+    widths_n1, widths_n2 = Helper.calc_CI_width(lambda: datagen(num_slots=4, epsilon=0.5), listofintervals, n1=100, n2=10000)
     for width_n1, width_n2 in zip(widths_n1, widths_n2):
         assert width_n1 > 0
         assert width_n2 > 0
