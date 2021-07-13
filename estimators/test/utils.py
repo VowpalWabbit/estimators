@@ -4,6 +4,12 @@ class Helper():
     ''' Helper Class for tests '''
 
     @staticmethod
+    def assert_is_close(n1, n2):
+        ''' Function to check if two numbers n1 and n2 are nearly equal'''
+
+        assert abs(n1 - n2) <= 1e-6 * (1 + abs(n1) + abs(n2))
+
+    @staticmethod
     def run_add_example(datagen, class_object, num_examples):
         # class_object is the object of class Estimator() or class Interval()
         Object = copy.deepcopy(class_object)

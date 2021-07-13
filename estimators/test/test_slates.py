@@ -11,7 +11,6 @@ def test_single_slot_pi_equivalent_to_ips():
 
     pi_estimator = pseudo_inverse.Estimator()
     ips_estimator = ips.Estimator()
-    is_close = lambda a, b: abs(a - b) <= 1e-6 * (1 + abs(a) + abs(b))
 
     p_logs = [0.8, 0.25, 0.5, 0.2]
     p_preds = [0.6, 0.4, 0.3, 0.9]
@@ -20,7 +19,7 @@ def test_single_slot_pi_equivalent_to_ips():
     for p_log, r, p_pred in zip(p_logs, rewards, p_preds):
         pi_estimator.add_example([p_log], r, [p_pred])
         ips_estimator.add_example(p_log, r, p_pred)
-        assert is_close(pi_estimator.get() , ips_estimator.get())
+        Helper.assert_is_close(pi_estimator.get() , ips_estimator.get())
 
 def test_slates():
     ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
@@ -43,9 +42,8 @@ def test_slates():
     # reward = 1
     estimates = Helper.get_estimate(lambda: datagen(num_slots=4), listofestimators, num_examples=4)
 
-    is_close = lambda a, b: abs(a - b) <= 1e-6 * (1 + abs(a) + abs(b))
     for Estimator, estimate in zip(listofestimators, estimates):
-        assert is_close(Estimator[1], estimate)
+        Helper.assert_is_close(Estimator[1], estimate)
 
 def test_intervals():
     ''' To test for narrowing intervals; Number of examples increase => narrowing CI '''

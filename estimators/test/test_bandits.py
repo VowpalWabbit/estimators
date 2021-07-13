@@ -35,9 +35,8 @@ def test_bandits():
 
     estimates = Helper.get_estimate(datagen, listofestimators, num_examples=4)
 
-    is_close = lambda a, b: abs(a - b) <= 1e-6 * (1 + abs(a) + abs(b))
     for Estimator, estimate in zip(listofestimators, estimates):
-        assert is_close(Estimator[1], estimate)
+        Helper.assert_is_close(Estimator[1], estimate)
 
 
 def test_intervals():
