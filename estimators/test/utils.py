@@ -10,19 +10,19 @@ class Helper():
         assert abs(n1 - n2) <= 1e-6 * (1 + abs(n1) + abs(n2))
 
     @staticmethod
-    def run_add_example(datagen, class_object, num_examples):
+    def run_add_example(datagen, estimator, num_examples):
         # class_object is the object of class Estimator() or class Interval()
-        Object = copy.deepcopy(class_object)
+        Estimator = copy.deepcopy(estimator)
 
         for n in range(0,num_examples):
             data = datagen()
             if type(list(data.values())[0]) is list:
                 # if data['p_logs'] is a list then it is slates
-                Object.add_example(p_logs=data['p_logs'], r=data['r'], p_preds=data['p_preds'])
+                Estimator.add_example(p_logs=data['p_logs'], r=data['r'], p_preds=data['p_preds'])
             else:
-                Object.add_example(p_log=data['p_log'], r=data['r'], p_pred=data['p_pred'])
+                Estimator.add_example(p_log=data['p_log'], r=data['r'], p_pred=data['p_pred'])
 
-        return Object
+        return Estimator
 
     @staticmethod
     def get_estimate(datagen, listofestimators, num_examples):
