@@ -33,13 +33,13 @@ def test_bandits():
                 'r': 1,
                 'p_pred': 1}
 
-    estimates = Helper.get_estimate(datagen, listofestimators, num_examples=4)
+    estimates = Helper.get_estimate(datagen, listofestimators=[l[0] for l in listofestimators], num_examples=4)
 
     for Estimator, estimate in zip(listofestimators, estimates):
         Helper.assert_is_close(Estimator[1], estimate)
 
 
-def test_intervals():
+def test_narrowing_intervals():
     ''' To test for narrowing intervals; Number of examples increase => narrowing CI '''
 
     listofintervals = [cressieread.Interval(), gaussian.Interval(), clopper_pearson.Interval()]
@@ -59,8 +59,12 @@ def test_intervals():
                 'r': int(random.random() < 1-delta) if chosen == 1 else int(random.random() < delta),
                 'p_pred': int(chosen==1)}
 
-    widths_n1, widths_n2 = Helper.calc_CI_width(lambda: datagen(epsilon=0.5), listofintervals, 100, 10000)
-    for width_n1, width_n2 in zip(widths_n1, widths_n2):
+    intervals_n1 = Helper.get_estimate(lambda: datagen(epsilon=0.5), listofintervals, num_examples=100)
+    intervals_n2 = Helper.get_estimate(lambda: datagen(epsilon=0.5), listofintervals, num_examples=10000)
+
+    for interval_n1, interval_n2 in zip(intervals_n1, intervals_n2):
+        width_n1 = interval_n1[1] - interval_n1[0]
+        width_n2 = interval_n2[1] - interval_n2[0]
         assert width_n1 > 0
         assert width_n2 > 0
         assert width_n2 < width_n1

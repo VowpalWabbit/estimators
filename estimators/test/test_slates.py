@@ -29,10 +29,10 @@ def test_slates():
 
     def datagen(num_slots):
         # num_slots represents the len(p_logs) or len(p_pred) for each example
-        data = {'p_logs': [], 'r': 0.0, 'p_preds': []}
+        data = {'p_log': [], 'r': 0.0, 'p_pred': []}
         for s in range(num_slots):
-            data['p_logs'].append(1)
-            data['p_preds'].append(1)
+            data['p_log'].append(1)
+            data['p_pred'].append(1)
         data['r'] = 1
         return  data
 
@@ -40,19 +40,19 @@ def test_slates():
     # p_logs = [1,1,1,1]
     # p_pred = [1,1,1,1]
     # reward = 1
-    estimates = Helper.get_estimate(lambda: datagen(num_slots=4), listofestimators, num_examples=4)
+    estimates = Helper.get_estimate(lambda: datagen(num_slots=4), listofestimators=[l[0] for l in listofestimators], num_examples=4)
 
     for Estimator, estimate in zip(listofestimators, estimates):
         Helper.assert_is_close(Estimator[1], estimate)
 
-def test_intervals():
+def test_narrowing_intervals():
     ''' To test for narrowing intervals; Number of examples increase => narrowing CI '''
 
     listofintervals = [gaussian.Interval()]
 
     def datagen(num_slots, epsilon, delta=0.5):
 
-        data = {'p_logs': [], 'r': 0.0, 'p_preds': []}
+        data = {'p_log': [], 'r': 0.0, 'p_pred': []}
 
         for s in range(num_slots):
             # Logged Policy for each slot s
@@ -65,14 +65,18 @@ def test_intervals():
             # (delta), (1-delta) reward from a Bernoulli distribution - for probability p_pred; looking at the matches per slot s
 
             chosen = int(random.random() < epsilon)
-            data['p_logs'].append(epsilon if chosen == 1 else 1 - epsilon)
+            data['p_log'].append(epsilon if chosen == 1 else 1 - epsilon)
             data['r'] += int(random.random() < 1-delta) if chosen == 1 else int(random.random() < delta)
-            data['p_preds'].append(int(chosen==1))
+            data['p_pred'].append(int(chosen==1))
 
         return data
 
-    widths_n1, widths_n2 = Helper.calc_CI_width(lambda: datagen(num_slots=4, epsilon=0.5), listofintervals, n1=100, n2=10000)
-    for width_n1, width_n2 in zip(widths_n1, widths_n2):
+    intervals_n1 = Helper.get_estimate(lambda: datagen(num_slots=4, epsilon=0.5), listofintervals, num_examples=100)
+    intervals_n2 = Helper.get_estimate(lambda: datagen(num_slots=4, epsilon=0.5), listofintervals, num_examples=10000)
+
+    for interval_n1, interval_n2 in zip(intervals_n1, intervals_n2):
+        width_n1 = interval_n1[1] - interval_n1[0]
+        width_n2 = interval_n2[1] - interval_n2[0]
         assert width_n1 > 0
         assert width_n2 > 0
         assert width_n2 < width_n1
