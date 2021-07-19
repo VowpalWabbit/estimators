@@ -18,11 +18,9 @@ class Estimator(ABC):
 		...
 
 	@abstractmethod
-	def get(self, type: str) -> float:
+	def get(self) -> float:
 		""" Calculates the selected estimator
 
-		Args:
-			type: Specifies the estimator to be used
 		Returns:
 			The estimator value
 		"""
