@@ -1,8 +1,8 @@
 from estimators.ccb import base
 
-class Estimator(base.Estimator, FirstSlotEstimator):
-    def __init__(self):
-        estimator = FirstSlotEstimator
+class Estimator(base.Estimator):
+    def __init__(self, FirstSlotEstimator):
+        self.estimator = FirstSlotEstimator
 
     def add_example(self, p_logs, r, p_preds, count=1):
         """Expects lists for logged probabilities, rewards and predicted probabilities. These should correspond to each slot."""
@@ -13,14 +13,14 @@ class Estimator(base.Estimator, FirstSlotEstimator):
         if(len(p_logs) != len(p_preds) and len(p_logs) != len(r) and len(r) != len(p_preds)):
             raise('Error: p_logs, r and p_preds must be the same length, found {}, {} and {} respectively'.format(len(p_logs), len(r), len(p_preds)))
 
-        estimator.add_example(p_logs[0], r[0], p_preds[0])
+        self.estimator.add_example(p_logs[0], r[0], p_preds[0])
 
     def get(self):
 
-        return estimator.get()
+        return self.estimator.get()
 
-class Interval(base.Estimator, FirstSlotInterval):
-    def __init__(self):
+class Interval(base.Estimator):
+    def __init__(self, FirstSlotInterval):
         interval = FirstSlotInterval
 
     def add_example(self, p_logs, r, p_preds, count=1):
@@ -32,8 +32,8 @@ class Interval(base.Estimator, FirstSlotInterval):
         if(len(p_logs) != len(p_preds) and len(p_logs) != len(r) and len(r) != len(p_preds)):
             raise('Error: p_logs, r and p_preds must be the same length, found {}, {} and {} respectively'.format(len(p_logs), len(r), len(p_preds)))
 
-        interval.add_example(p_logs[0], r[0], p_preds[0])
+        self.interval.add_example(p_logs[0], r[0], p_preds[0])
 
     def get(self):
 
-        return interval.get()
+        return self.interval.get()
