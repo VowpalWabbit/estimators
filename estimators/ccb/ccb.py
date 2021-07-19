@@ -21,7 +21,7 @@ class Estimator(base.Estimator):
 
 class Interval(base.Estimator):
     def __init__(self, FirstSlotInterval):
-        interval = FirstSlotInterval
+        self.interval = FirstSlotInterval
 
     def add_example(self, p_logs, r, p_preds, count=1):
         """Expects lists for logged probabilities, rewards and predicted probabilities. These should correspond to each slot."""
