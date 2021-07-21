@@ -7,14 +7,14 @@ from estimators.bandits import mle
 from estimators.bandits import cressieread
 from estimators.bandits import gaussian
 from estimators.bandits import clopper_pearson
-from estimators.ccb import ccb
+from estimators.ccb import first_slot
 from estimators.test.utils import Helper
 
 def test_ccb_unit_test():
-    listofestimators = [(ccb.Estimator(ips.Estimator()), 2.0),
-                        (ccb.Estimator(snips.Estimator()), 1.0),
-                        (ccb.Estimator(mle.Estimator()), 1.0),
-                        (ccb.Estimator(cressieread.Estimator()), 1.0)]
+    listofestimators = [(first_slot.Estimator(ips.Estimator()), 2.0),
+                        (first_slot.Estimator(snips.Estimator()), 1.0),
+                        (first_slot.Estimator(mle.Estimator()), 1.0),
+                        (first_slot.Estimator(cressieread.Estimator()), 1.0)]
     
     p_log = [0.3]
     p_pred = [0.6]
@@ -28,10 +28,10 @@ def test_ccb():
     ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
 
     # The tuple (Estimator, expected value) for each estimator is stored in listofestimators
-    listofestimators = [(ccb.Estimator(ips.Estimator()), 1.0),
-                        (ccb.Estimator(snips.Estimator()), 1.0),
-                        (ccb.Estimator(mle.Estimator()), 1.0),
-                        (ccb.Estimator(cressieread.Estimator()), 1.0)]
+    listofestimators = [(first_slot.Estimator(ips.Estimator()), 1.0),
+                        (first_slot.Estimator(snips.Estimator()), 1.0),
+                        (first_slot.Estimator(mle.Estimator()), 1.0),
+                        (first_slot.Estimator(cressieread.Estimator()), 1.0)]
 
     def datagen_multiple_slot_values():
         return  {'p_log': [1, 0.5, 0.7],
@@ -54,7 +54,7 @@ def test_ccb():
 def test_narrowing_intervals():
     ''' To test for narrowing intervals; Number of examples increase => narrowing CI '''
 
-    listofintervals = [ccb.Interval(cressieread.Interval()), ccb.Interval(gaussian.Interval()), ccb.Interval(clopper_pearson.Interval())]
+    listofintervals = [first_slot.Interval(cressieread.Interval()), first_slot.Interval(gaussian.Interval()), first_slot.Interval(clopper_pearson.Interval())]
 
     def datagen(epsilon, delta=0.5):
         # Logged Policy
