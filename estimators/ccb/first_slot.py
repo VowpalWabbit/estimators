@@ -1,8 +1,8 @@
 from estimators.ccb import base
 
 class Estimator(base.Estimator):
-    def __init__(self, FirstSlotEstimator):
-        self.estimator = FirstSlotEstimator
+    def __init__(self, bandits_estimator):
+        self.estimator = bandits_estimator
 
     def add_example(self, p_logs, r, p_preds, count=1):
         """Expects lists for logged probabilities, rewards and predicted probabilities. These should correspond to each slot."""
@@ -20,8 +20,8 @@ class Estimator(base.Estimator):
         return self.estimator.get()
 
 class Interval(base.Estimator):
-    def __init__(self, FirstSlotInterval):
-        self.interval = FirstSlotInterval
+    def __init__(self, bandits_interval):
+        self.interval = bandits_interval
 
     def add_example(self, p_logs, r, p_preds, count=1):
         """Expects lists for logged probabilities, rewards and predicted probabilities. These should correspond to each slot."""
