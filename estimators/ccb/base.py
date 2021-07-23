@@ -20,7 +20,7 @@ class Estimator(ABC):
 	@abstractmethod
 	def get(self) -> float:
 		""" Calculates the selected estimator
-		
+
 		Returns:
 			The estimator value
 		"""
