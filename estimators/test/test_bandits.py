@@ -72,6 +72,36 @@ def test_narrowing_intervals():
         assert width_narrower < width_wider
 
 
+def test_different_alpha_run_intervals():
+    ''' To test that alpha value is not hard coded: get confidence intervals for randomly generated alpha values '''
+
+    intervals = [cressieread.Interval(), gaussian.Interval(), clopper_pearson.Interval()]
+
+    alphas = []
+    for i in range(0,10):
+        alphas.append(random.uniform(0,1))
+
+    def datagen(epsilon, delta=0.5):
+        # Logged Policy
+        # 0 - (1-epsilon) : Reward is Bernoulli(delta)
+        # 1 - epsilon : Reward is Bernoulli(1-delta)
+
+        # p_pred: 1 if action is chosen, 0 if action not chosen
+
+        # policy to estimate
+        # (delta), (1-delta) reward from a Bernoulli distribution - for probability p_pred
+
+        chosen = int(random.random() < epsilon)
+        return {'p_log': epsilon if chosen == 1 else 1 - epsilon,
+                'r': int(random.random() < 1-delta) if chosen == 1 else int(random.random() < delta),
+                'p_pred': int(chosen==1)}
+
+    for interval in intervals:
+        interval = Helper.run_add_example(lambda: datagen(epsilon=0.5), interval, num_examples=100)
+        for alpha in alphas:
+            assert interval.get(alpha=alpha)
+
+
 def test_cats_ips():
     ips_estimator = ips.Estimator()
     snips_estimator = snips.Estimator()
