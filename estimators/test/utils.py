@@ -21,9 +21,9 @@ class Helper():
         return Estimator
 
     @staticmethod
-    def get_estimate(datagen, listofestimators, num_examples):
+    def get_estimate(datagen, estimators, num_examples):
         estimates = []
-        for Estimator in listofestimators:
+        for Estimator in estimators:
             
             estimator = Helper.run_add_example(datagen, Estimator, num_examples)
             estimates.append(estimator.get())
