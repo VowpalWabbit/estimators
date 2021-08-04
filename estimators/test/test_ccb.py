@@ -73,12 +73,12 @@ def test_narrowing_intervals():
                 'r': [int(random.random() < 1-delta) if chosen == 1 else int(random.random() < delta)],
                 'p_pred': [int(chosen==1)]}
 
-    intervals_n1 = Helper.get_estimate(lambda: datagen(epsilon=0.5), intervals, num_examples=100)
-    intervals_n2 = Helper.get_estimate(lambda: datagen(epsilon=0.5), intervals, num_examples=10000)
+    intervals_less_data = Helper.get_estimate(lambda: datagen(epsilon=0.5), intervals, num_examples=100)
+    intervals_more_data = Helper.get_estimate(lambda: datagen(epsilon=0.5), intervals, num_examples=10000)
 
-    for interval_n1, interval_n2 in zip(intervals_n1, intervals_n2):
-        width_n1 = interval_n1[1] - interval_n1[0]
-        width_n2 = interval_n2[1] - interval_n2[0]
-        assert width_n1 > 0
-        assert width_n2 > 0
-        assert width_n2 < width_n1
+    for interval_less_data, interval_more_data in zip(intervals_less_data, intervals_more_data):
+        width_wider = interval_less_data[1] - interval_less_data[0]
+        width_narrower = interval_more_data[1] - interval_more_data[0]
+        assert width_wider > 0
+        assert width_narrower > 0
+        assert width_narrower < width_wider
