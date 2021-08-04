@@ -10,6 +10,8 @@ from estimators.bandits import gaussian
 from estimators.bandits import clopper_pearson
 from estimators.test.utils import Helper
 
+random.seed(0)
+
 def test_bandits_unit_test():
     listofestimators = [(ips.Estimator(), 2.0), (snips.Estimator(), 1.0), (mle.Estimator(), 1.0), (cressieread.Estimator(), 1.0)]
     

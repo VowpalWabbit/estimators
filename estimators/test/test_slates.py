@@ -6,6 +6,8 @@ from estimators.slates import gaussian
 from estimators.bandits import ips
 from estimators.test.utils import Helper
 
+random.seed(0)
+
 def test_single_slot_pi_equivalent_to_ips():
     ''' PI should be equivalent to IPS when there is only a single slot '''
 

@@ -10,6 +10,8 @@ from estimators.bandits import clopper_pearson
 from estimators.ccb import first_slot
 from estimators.test.utils import Helper
 
+random.seed(0)
+
 def test_ccb_unit_test():
     listofestimators = [(first_slot.Estimator(ips.Estimator()), 2.0),
                         (first_slot.Estimator(snips.Estimator()), 1.0),
