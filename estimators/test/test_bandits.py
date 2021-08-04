@@ -72,7 +72,7 @@ def test_narrowing_intervals():
         assert width_narrower < width_wider
 
 
-def test_different_alpha_run_intervals():
+def test_different_alpha_CI():
     ''' To test that alpha value is not hard coded: get confidence intervals for randomly generated alpha values '''
 
     intervals = [cressieread.Interval(), gaussian.Interval(), clopper_pearson.Interval()]
