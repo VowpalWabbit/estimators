@@ -12,7 +12,7 @@ from estimators.test.utils import Helper
 
 random.seed(0)
 
-def test_ccb_unit_test():
+def test_single_example():
     listofestimators = [(first_slot.Estimator(ips.Estimator()), 2.0),
                         (first_slot.Estimator(snips.Estimator()), 1.0),
                         (first_slot.Estimator(mle.Estimator()), 1.0),
@@ -26,7 +26,7 @@ def test_ccb_unit_test():
         Estimator[0].add_example(p_log, reward, p_pred)
         assert Estimator[0].get() == Estimator[1]
 
-def test_ccb():
+def test_multiple_examples():
     ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
 
     # The tuple (Estimator, expected value) for each estimator is stored in listofestimators

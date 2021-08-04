@@ -12,7 +12,7 @@ from estimators.test.utils import Helper
 
 random.seed(0)
 
-def test_bandits_unit_test():
+def test_single_example():
     listofestimators = [(ips.Estimator(), 2.0), (snips.Estimator(), 1.0), (mle.Estimator(), 1.0), (cressieread.Estimator(), 1.0)]
     
     p_log = 0.3
@@ -24,7 +24,7 @@ def test_bandits_unit_test():
         assert Estimator[0].get() == Estimator[1]
 
 
-def test_bandits():
+def test_multiple_examples():
     ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
 
     # The tuple (Estimator, expected value) for each estimator is stored in listofestimators

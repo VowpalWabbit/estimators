@@ -23,7 +23,7 @@ def test_single_slot_pi_equivalent_to_ips():
         ips_estimator.add_example(p_log, r, p_pred)
         Helper.assert_is_close(pi_estimator.get() , ips_estimator.get())
 
-def test_slates():
+def test_multiple_slots():
     ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
 
     # The tuple (Estimator, expected value) for each estimator is stored in listofestimators
