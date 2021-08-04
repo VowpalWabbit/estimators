@@ -1,5 +1,6 @@
 import math
 from estimators.slates import base
+from scipy import stats
 
 class Interval(base.Interval):
     def __init__(self):
@@ -35,14 +36,10 @@ class Interval(base.Interval):
         SoS = self.data['SoS']
 
         if SoS > 0.0:
-            zGaussianCdf = {
-                0.25: 1.15,
-                0.1: 1.645,
-                0.05: 1.96
-            }
+            zGaussianCdf = stats.norm.ppf(1-alpha/2)
 
             variance = (SoS - num * num / den) / (den - 1)
-            gaussDelta = zGaussianCdf[alpha] * math.sqrt(variance/den)
+            gaussDelta = zGaussianCdf * math.sqrt(variance/den)
             bounds.append(num / den - gaussDelta)
             bounds.append(num / den + gaussDelta)
 
