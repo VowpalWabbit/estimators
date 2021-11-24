@@ -19,7 +19,7 @@ class Estimator(base.Estimator):
 
         return self.estimator.get()
 
-class Interval(base.Estimator):
+class Interval(base.Interval):
     def __init__(self, bandits_interval):
         self.interval = bandits_interval
 
@@ -34,6 +34,6 @@ class Interval(base.Estimator):
 
         self.interval.add_example(p_logs[0], r[0], p_preds[0])
 
-    def get(self):
+    def get(self, alpha=0.05):
 
-        return self.interval.get()
+        return self.interval.get(alpha)
