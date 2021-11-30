@@ -37,14 +37,14 @@ class Estimator(base.Estimator):
         stepvhats = []
         for step in range(1, self.maxstep + 1):
             sumw = fsum(c * w for c, ws, _ in self.data
-                        for w in (prod(ws[:step]),))
+                        for w in (prod(ws[:min(step, len(ws))]),))
             sumwsq = fsum(c * w**2 for c, ws, _ in self.data
-                          for w in (prod(ws[:step]),))
-            sumwr = fsum(c * w * rs[step - 1] for c, ws, rs in self.data
-                         for w in (prod(ws[:step]),))
-            sumwsqr = fsum(c * w**2 * rs[step - 1] for c, ws, rs in self.data
-                           for w in (prod(ws[:step]),))
-            sumr = fsum(c * rs[step - 1] for c, _, rs in self.data)
+                          for w in (prod(ws[:min(step, len(ws))]),))
+            sumwr = fsum(c * w * (rs[step - 1] if step - 1 < len(rs) else 0) for c, ws, rs in self.data
+                         for w in (prod(ws[:min(step, len(ws))]),))
+            sumwsqr = fsum(c * w**2 * (rs[step - 1] if step - 1 < len(rs) else 0) for c, ws, rs in self.data
+                           for w in (prod(ws[:min(step, len(ws))]),))
+            sumr = fsum(c * (rs[step - 1] if step - 1 < len(rs) else 0) for c, _, rs in self.data)
             wfake = self.wmax**step if sumw < n else self.wmin**step
 
             if wfake == inf:
@@ -109,15 +109,15 @@ class Interval(base.Interval):
 
         for step in range(1, self.maxstep + 1):
             sumw = fsum(c * w for c, ws, _ in self.data
-                              for w in (prod(ws[:step]),))
+                              for w in (prod(ws[:min(step, len(ws))]),))
             sumwsq = fsum(c * w**2 for c, ws, _ in self.data
-                              for w in (prod(ws[:step]),))
-            sumwr = fsum(c * w * rs[step - 1] for c, ws, rs in self.data
-                                           for w in (prod(ws[:step]),))
-            sumwsqr = fsum(c * w**2 * rs[step - 1] for c, ws, rs in self.data
-                                                for w in (prod(ws[:step]),))
-            sumwsqrsq = fsum(c * w**2 * rs[step - 1]**2 for c, ws, rs in self.data
-                                                    for w in (prod(ws[:step]),))
+                              for w in (prod(ws[:min(step, len(ws))]),))
+            sumwr = fsum(c * w * (rs[step - 1] if step - 1 < len(rs) else 0) for c, ws, rs in self.data
+                                           for w in (prod(ws[:min(step, len(ws))]),))
+            sumwsqr = fsum(c * w**2 * (rs[step - 1] if step - 1 < len(rs) else 0) for c, ws, rs in self.data
+                                                for w in (prod(ws[:min(step, len(ws))]),))
+            sumwsqrsq = fsum(c * w**2 * (rs[step - 1] if step - 1 < len(rs) else 0)**2 for c, ws, rs in self.data
+                                                    for w in (prod(ws[:min(step, len(ws))]),))
 
             uncwfake = self.wmax**step if sumw < n else self.wmin**step
             if uncwfake == inf:
