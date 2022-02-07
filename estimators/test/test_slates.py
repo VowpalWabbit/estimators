@@ -6,6 +6,8 @@ from estimators.slates import gaussian
 from estimators.bandits import ips
 from estimators.test.utils import Helper
 
+random.seed(0)
+
 def test_single_slot_pi_equivalent_to_ips():
     ''' PI should be equivalent to IPS when there is only a single slot '''
 
@@ -21,11 +23,11 @@ def test_single_slot_pi_equivalent_to_ips():
         ips_estimator.add_example(p_log, r, p_pred)
         Helper.assert_is_close(pi_estimator.get() , ips_estimator.get())
 
-def test_slates():
+def test_multiple_slots():
     ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
 
-    # The tuple (Estimator, expected value) for each estimator is stored in listofestimators
-    listofestimators = [(pseudo_inverse.Estimator(), 1)]
+    # The tuple (Estimator, expected value) for each estimator is stored in estimators
+    estimators = [(pseudo_inverse.Estimator(), 1)]
 
     def datagen(num_slots):
         # num_slots represents the len(p_logs) or len(p_pred) for each example
@@ -40,15 +42,15 @@ def test_slates():
     # p_logs = [1,1,1,1]
     # p_pred = [1,1,1,1]
     # reward = 1
-    estimates = Helper.get_estimate(lambda: datagen(num_slots=4), listofestimators=[l[0] for l in listofestimators], num_examples=4)
+    estimates = Helper.get_estimate(lambda: datagen(num_slots=4), estimators=[l[0] for l in estimators], num_examples=4)
 
-    for Estimator, estimate in zip(listofestimators, estimates):
+    for Estimator, estimate in zip(estimators, estimates):
         Helper.assert_is_close(Estimator[1], estimate)
 
 def test_narrowing_intervals():
     ''' To test for narrowing intervals; Number of examples increase => narrowing CI '''
 
-    listofintervals = [gaussian.Interval()]
+    intervals = [gaussian.Interval()]
 
     def datagen(num_slots, epsilon, delta=0.5):
 
@@ -71,12 +73,12 @@ def test_narrowing_intervals():
 
         return data
 
-    intervals_n1 = Helper.get_estimate(lambda: datagen(num_slots=4, epsilon=0.5), listofintervals, num_examples=100)
-    intervals_n2 = Helper.get_estimate(lambda: datagen(num_slots=4, epsilon=0.5), listofintervals, num_examples=10000)
+    intervals_less_data = Helper.get_estimate(lambda: datagen(num_slots=4, epsilon=0.5), intervals, num_examples=100)
+    intervals_more_data = Helper.get_estimate(lambda: datagen(num_slots=4, epsilon=0.5), intervals, num_examples=10000)
 
-    for interval_n1, interval_n2 in zip(intervals_n1, intervals_n2):
-        width_n1 = interval_n1[1] - interval_n1[0]
-        width_n2 = interval_n2[1] - interval_n2[0]
-        assert width_n1 > 0
-        assert width_n2 > 0
-        assert width_n2 < width_n1
+    for interval_less_data, interval_more_data in zip(intervals_less_data, intervals_more_data):
+        width_wider = interval_less_data[1] - interval_less_data[0]
+        width_narrower = interval_more_data[1] - interval_more_data[0]
+        assert width_wider > 0
+        assert width_narrower > 0
+        assert width_narrower < width_wider

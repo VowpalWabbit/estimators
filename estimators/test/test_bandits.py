@@ -10,39 +10,41 @@ from estimators.bandits import gaussian
 from estimators.bandits import clopper_pearson
 from estimators.test.utils import Helper
 
-def test_bandits_unit_test():
-    listofestimators = [(ips.Estimator(), 2.0), (snips.Estimator(), 1.0), (mle.Estimator(), 1.0), (cressieread.Estimator(), 1.0)]
-    
+random.seed(0)
+
+def test_single_example():
+    estimators = [(ips.Estimator(), 2.0), (snips.Estimator(), 1.0), (mle.Estimator(), 1.0), (cressieread.Estimator(), 1.0)]
+
     p_log = 0.3
     p_pred = 0.6
     reward = 1
 
-    for Estimator in listofestimators:
+    for Estimator in estimators:
         Estimator[0].add_example(p_log, reward, p_pred)
         assert Estimator[0].get() == Estimator[1]
 
 
-def test_bandits():
+def test_multiple_examples():
     ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
 
-    # The tuple (Estimator, expected value) for each estimator is stored in listofestimators
-    listofestimators = [(ips.Estimator(), 1), (snips.Estimator(), 1), (mle.Estimator(), 1), (cressieread.Estimator(), 1)]
+    # The tuple (Estimator, expected value) for each estimator is stored in estimators
+    estimators = [(ips.Estimator(), 1), (snips.Estimator(), 1), (mle.Estimator(), 1), (cressieread.Estimator(), 1)]
 
     def datagen():
         return  {'p_log': 1,
                 'r': 1,
                 'p_pred': 1}
 
-    estimates = Helper.get_estimate(datagen, listofestimators=[l[0] for l in listofestimators], num_examples=4)
+    estimates = Helper.get_estimate(datagen, estimators=[l[0] for l in estimators], num_examples=4)
 
-    for Estimator, estimate in zip(listofestimators, estimates):
+    for Estimator, estimate in zip(estimators, estimates):
         Helper.assert_is_close(Estimator[1], estimate)
 
 
 def test_narrowing_intervals():
     ''' To test for narrowing intervals; Number of examples increase => narrowing CI '''
 
-    listofintervals = [cressieread.Interval(), gaussian.Interval(), clopper_pearson.Interval()]
+    intervals = [cressieread.Interval(), gaussian.Interval(), clopper_pearson.Interval()]
 
     def datagen(epsilon, delta=0.5):
         # Logged Policy
@@ -59,15 +61,45 @@ def test_narrowing_intervals():
                 'r': int(random.random() < 1-delta) if chosen == 1 else int(random.random() < delta),
                 'p_pred': int(chosen==1)}
 
-    intervals_n1 = Helper.get_estimate(lambda: datagen(epsilon=0.5), listofintervals, num_examples=100)
-    intervals_n2 = Helper.get_estimate(lambda: datagen(epsilon=0.5), listofintervals, num_examples=10000)
+    intervals_less_data = Helper.get_estimate(lambda: datagen(epsilon=0.5), intervals, num_examples=100)
+    intervals_more_data = Helper.get_estimate(lambda: datagen(epsilon=0.5), intervals, num_examples=10000)
 
-    for interval_n1, interval_n2 in zip(intervals_n1, intervals_n2):
-        width_n1 = interval_n1[1] - interval_n1[0]
-        width_n2 = interval_n2[1] - interval_n2[0]
-        assert width_n1 > 0
-        assert width_n2 > 0
-        assert width_n2 < width_n1
+    for interval_less_data, interval_more_data in zip(intervals_less_data, intervals_more_data):
+        width_wider = interval_less_data[1] - interval_less_data[0]
+        width_narrower = interval_more_data[1] - interval_more_data[0]
+        assert width_wider > 0
+        assert width_narrower > 0
+        assert width_narrower < width_wider
+
+
+def test_different_alpha_CI():
+    ''' To test that alpha value is not hard coded: get confidence intervals for randomly generated alpha values '''
+
+    intervals = [cressieread.Interval(), gaussian.Interval(), clopper_pearson.Interval()]
+
+    alphas = []
+    for i in range(0,10):
+        alphas.append(random.uniform(0,1))
+
+    def datagen(epsilon, delta=0.5):
+        # Logged Policy
+        # 0 - (1-epsilon) : Reward is Bernoulli(delta)
+        # 1 - epsilon : Reward is Bernoulli(1-delta)
+
+        # p_pred: 1 if action is chosen, 0 if action not chosen
+
+        # policy to estimate
+        # (delta), (1-delta) reward from a Bernoulli distribution - for probability p_pred
+
+        chosen = int(random.random() < epsilon)
+        return {'p_log': epsilon if chosen == 1 else 1 - epsilon,
+                'r': int(random.random() < 1-delta) if chosen == 1 else int(random.random() < delta),
+                'p_pred': int(chosen==1)}
+
+    for interval in intervals:
+        interval = Helper.run_add_example(lambda: datagen(epsilon=0.5), interval, num_examples=100)
+        for alpha in alphas:
+            assert interval.get(alpha=alpha)
 
 
 def test_cats_ips():
@@ -115,7 +147,7 @@ def test_cats_transformer_on_edges():
         data['a'] = logged_action
         data['cost'] = r
         data['p'] = logged_prob
-    
+
         pred_action = logged_action
         data = cats_transformer.transform(data, logged_action) # same action, so pred_p should be 1
         assert data['pred_p'] == 1.0 / (2 * bandwidth)
