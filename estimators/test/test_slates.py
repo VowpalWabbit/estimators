@@ -27,7 +27,9 @@ def test_multiple_slots():
     ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
 
     # The tuple (Estimator, expected value) for each estimator is stored in estimators
-    estimators = [(pseudo_inverse.Estimator(), 1)]
+    estimators = [
+        (pseudo_inverse.Estimator(), 1),
+        ]
 
     def datagen(num_slots):
         # num_slots represents the len(p_logs) or len(p_pred) for each example
@@ -50,7 +52,9 @@ def test_multiple_slots():
 def test_narrowing_intervals():
     ''' To test for narrowing intervals; Number of examples increase => narrowing CI '''
 
-    intervals = [gaussian.Interval()]
+    intervals = [
+        gaussian.Interval(),
+        ]
 
     def datagen(num_slots, epsilon, delta=0.5):
 
