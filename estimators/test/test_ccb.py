@@ -13,10 +13,12 @@ from estimators.test.utils import Helper
 random.seed(0)
 
 def test_single_example():
-    estimators = [(first_slot.Estimator(ips.Estimator()), 2.0),
-                        (first_slot.Estimator(snips.Estimator()), 1.0),
-                        (first_slot.Estimator(mle.Estimator()), 1.0),
-                        (first_slot.Estimator(cressieread.Estimator()), 1.0)]
+    estimators = [
+        (first_slot.Estimator(ips.Estimator()), 2.0),
+        (first_slot.Estimator(snips.Estimator()), 1.0),
+        (first_slot.Estimator(mle.Estimator()), 1.0),
+        (first_slot.Estimator(cressieread.Estimator()), 1.0),
+        ]
 
     p_log = [0.3]
     p_pred = [0.6]
@@ -30,10 +32,12 @@ def test_multiple_examples():
     ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
 
     # The tuple (Estimator, expected value) for each estimator is stored in estimators
-    estimators = [(first_slot.Estimator(ips.Estimator()), 1.0),
-                        (first_slot.Estimator(snips.Estimator()), 1.0),
-                        (first_slot.Estimator(mle.Estimator()), 1.0),
-                        (first_slot.Estimator(cressieread.Estimator()), 1.0)]
+    estimators = [
+        (first_slot.Estimator(ips.Estimator()), 1.0),
+        (first_slot.Estimator(snips.Estimator()), 1.0),
+        (first_slot.Estimator(mle.Estimator()), 1.0),
+        (first_slot.Estimator(cressieread.Estimator()), 1.0)
+        ]
 
     def datagen_multiple_slot_values():
         return  {'p_log': [1, 0.5, 0.7],
@@ -54,9 +58,13 @@ def test_multiple_examples():
         assert estimate_single == estimate_multiple
 
 def test_narrowing_intervals():
-    ''' To test for narrowing intervals; Number of examples increase => narrowing CI '''
+    ''' To test if confidence intervals are getting tighter with more data points '''
 
-    intervals = [first_slot.Interval(cressieread.Interval()), first_slot.Interval(gaussian.Interval()), first_slot.Interval(clopper_pearson.Interval())]
+    intervals = [
+        first_slot.Interval(cressieread.Interval()),
+        first_slot.Interval(gaussian.Interval()),
+        first_slot.Interval(clopper_pearson.Interval()),
+        ]
 
     def datagen(epsilon, delta=0.5):
         # Logged Policy

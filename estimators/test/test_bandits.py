@@ -1,4 +1,6 @@
 import os, sys, random, copy
+import numpy as np
+import pytest
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from estimators.bandits import ips
@@ -10,7 +12,10 @@ from estimators.bandits import gaussian
 from estimators.bandits import clopper_pearson
 from estimators.test.utils import Helper
 
-random.seed(0)
+@pytest.fixture
+def random_fixture():
+    random.seed(0)
+    np.random.seed(0)
 
 def test_single_example():
     estimators = [(ips.Estimator(), 2.0), (snips.Estimator(), 1.0), (mle.Estimator(), 1.0), (cressieread.Estimator(), 1.0)]
@@ -28,7 +33,12 @@ def test_multiple_examples():
     ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
 
     # The tuple (Estimator, expected value) for each estimator is stored in estimators
-    estimators = [(ips.Estimator(), 1), (snips.Estimator(), 1), (mle.Estimator(), 1), (cressieread.Estimator(), 1)]
+    estimators = [
+        (ips.Estimator(), 1),
+        (snips.Estimator(), 1),
+        (mle.Estimator(), 1),
+        (cressieread.Estimator(), 1),
+        ]
 
     def datagen():
         return  {'p_log': 1,
@@ -42,9 +52,13 @@ def test_multiple_examples():
 
 
 def test_narrowing_intervals():
-    ''' To test for narrowing intervals; Number of examples increase => narrowing CI '''
+    ''' To test if confidence intervals are getting tighter with more data points '''
 
-    intervals = [cressieread.Interval(), gaussian.Interval(), clopper_pearson.Interval()]
+    intervals = [
+        cressieread.Interval(),
+        gaussian.Interval(),
+        clopper_pearson.Interval(),
+        ]
 
     def datagen(epsilon, delta=0.5):
         # Logged Policy
@@ -75,11 +89,12 @@ def test_narrowing_intervals():
 def test_different_alpha_CI():
     ''' To test that alpha value is not hard coded: get confidence intervals for randomly generated alpha values '''
 
-    intervals = [cressieread.Interval(), gaussian.Interval(), clopper_pearson.Interval()]
-
-    alphas = []
-    for i in range(0,10):
-        alphas.append(random.uniform(0,1))
+    intervals = [
+        cressieread.Interval(),
+        gaussian.Interval(),
+        clopper_pearson.Interval(),
+        ]
+    alphas = np.arange(0.1, 1, 0.1)
 
     def datagen(epsilon, delta=0.5):
         # Logged Policy
