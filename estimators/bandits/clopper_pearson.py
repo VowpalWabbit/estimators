@@ -28,11 +28,11 @@ class Interval(base.Interval):
         bounds = []
         num = self.data['n']
         den = self.data['N']
-        maxWeightedCost = self.data['c']
+        max_weighted_cost = self.data['c']
 
-        if maxWeightedCost > 0.0:
-            successes = num / maxWeightedCost
-            n = den / maxWeightedCost
+        if max_weighted_cost > 0.0:
+            successes = num / max_weighted_cost
+            n = den / max_weighted_cost
             bounds.append(beta.ppf(alpha / 2, successes, n - successes + 1))
             bounds.append(beta.ppf(1 - alpha / 2, successes + 1, n - successes))
 
