@@ -28,15 +28,15 @@ class Interval(base.Interval):
         bounds = []
         num = self.data['n']
         den = self.data['N']
-        SoS = self.data['SoS']
+        sum_of_sq = self.data['SoS']
 
-        if SoS > 0.0 and den > 1:
-            zGaussianCdf = stats.norm.ppf(1-alpha/2)
+        if sum_of_sq > 0.0 and den > 1:
+            z_gaussian_cdf = stats.norm.ppf(1-alpha/2)
 
-            variance = (SoS - num * num / den) / (den - 1)
-            gaussDelta = zGaussianCdf * math.sqrt(variance/den)
-            bounds.append(num / den - gaussDelta)
-            bounds.append(num / den + gaussDelta)
+            variance = (sum_of_sq - num * num / den) / (den - 1)
+            gauss_delta = z_gaussian_cdf * math.sqrt(variance/den)
+            bounds.append(num / den - gauss_delta)
+            bounds.append(num / den + gauss_delta)
 
         if not bounds:
             bounds = [0, 0]
