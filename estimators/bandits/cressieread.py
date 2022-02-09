@@ -2,12 +2,13 @@
 
 from math import fsum, inf
 from estimators.bandits import base
+from typing import List
 
 class Estimator(base.Estimator):
     # NB: This works better you use the true wmin and wmax
     #     which is _not_ the empirical minimum and maximum
     #     but rather the actual smallest and largest possible values
-    def __init__(self, wmin=0, wmax=inf):
+    def __init__(self, wmin: float = 0, wmax: float = inf):
         assert wmin < 1
         assert wmax > 1
 
@@ -16,7 +17,7 @@ class Estimator(base.Estimator):
 
         self.data = []
 
-    def add_example(self, p_log, r, p_pred, count=1):
+    def add_example(self, p_log: float, r: float, p_pred: float, count: float = 1.0) -> None:
         if count > 0:
             w = p_pred / p_log
             assert w >= 0, 'Error: negative importance weight'
@@ -25,7 +26,7 @@ class Estimator(base.Estimator):
             self.wmax = max(self.wmax, w)
             self.wmin = min(self.wmin, w)
 
-    def get(self):
+    def get(self) -> float:
         n = fsum(c for c, _, _ in self.data)
         assert n > 0, 'Error: No data point added'
 
@@ -58,7 +59,7 @@ class Interval(base.Interval):
     # NB: This works better you use the true wmin and wmax
     #     which is _not_ the empirical minimum and maximum
     #     but rather the actual smallest and largest possible values
-    def __init__(self, wmin=0, wmax=inf, rmin=0, rmax=1):
+    def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1):
         assert wmin < 1
         assert wmax > 1
 
@@ -70,7 +71,7 @@ class Interval(base.Interval):
 
         self.data = []
 
-    def add_example(self, p_log, r, p_pred, count=1):
+    def add_example(self, p_log: float, r: float, p_pred: float, count: float = 1.0) -> None:
         if count > 0:
             w = p_pred / p_log
             assert w >= 0, 'Error: negative importance weight'
@@ -79,7 +80,7 @@ class Interval(base.Interval):
             self.wmax = max(self.wmax, w)
             self.wmin = min(self.wmin, w)
 
-    def get(self, alpha=0.05):
+    def get(self, alpha: float = 0.05) -> List[float]:
         from math import isclose, sqrt
         from scipy.stats import f
 

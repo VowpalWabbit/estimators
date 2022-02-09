@@ -1,5 +1,6 @@
 import math
 from estimators.slates import base
+from typing import List
 
 # PseudoInverse estimator for slate recommendation. The following implements the
 # case for a Cartesian product when mu is a product distribution. This can be
@@ -10,7 +11,7 @@ class Estimator(base.Estimator):
     def __init__(self):
         self.data = {'n':0.,'N':0}
 
-    def add_example(self, p_logs, r, p_preds, count=1):
+    def add_example(self, p_logs: List[float], r: float, p_preds: List[float], count: float = 1.0) -> None:
         """Expects lists for logged probabilities and predicted probabilities. These should correspond to each slot.
         This function is implemented under the simplifying assumptions of
         example 4 in the paper 'Off-policy evaluation for slate recommendation'
@@ -32,7 +33,7 @@ class Estimator(base.Estimator):
         if r != 0:
             self.data['n'] += r*p_over_ps*count
 
-    def get(self):
+    def get(self) -> float:
         if self.data['N'] == 0:
             raise('Error: No data point added')
 

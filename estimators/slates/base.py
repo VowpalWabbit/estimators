@@ -7,7 +7,7 @@ class Estimator(ABC):
 	""" Interface for implementation of slates estimator """
 
 	@abstractmethod
-	def add_example(self, p_logs: List, r: float, p_preds: List, count: float) -> None:
+	def add_example(self, p_logs: List[float], r: float, p_preds: List[float], count: float) -> None:
 		""" 
 		Args:
 			p_logs: List of probabilities of the logging policy
@@ -29,7 +29,7 @@ class Interval(ABC):
 	""" Interface for implementation of slates estimator interval """
 
 	@abstractmethod
-	def add_example(self, p_logs: List, r: float, p_preds: List, count: float) -> None:
+	def add_example(self, p_logs: List[float], r: float, p_preds: List[float], count: float) -> None:
 		""" 
 		Args:
 			p_logs: List of probabilities of the logging policy
@@ -40,7 +40,7 @@ class Interval(ABC):
 		...
 
 	@abstractmethod
-	def get(self, alpha: float) -> List:
+	def get(self, alpha: float) -> List[float]:
 		""" Calculates the CI
 		Args:
 			alpha: alpha value

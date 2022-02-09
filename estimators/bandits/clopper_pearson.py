@@ -1,6 +1,7 @@
 import math
 from scipy.stats import beta
 from estimators.bandits import base
+from typing import List
 
 class Interval(base.Interval):
 
@@ -15,7 +16,7 @@ class Interval(base.Interval):
 
         self.data = {'n':0.,'N':0,'c':0.}
 
-    def add_example(self, p_log, r, p_pred, count=1):
+    def add_example(self, p_log: float, r: float, p_pred: float, count: float = 1.0) -> None:
         self.data['N'] += count
         if p_pred > 0:
             p_over_p = p_pred/p_log
@@ -23,7 +24,7 @@ class Interval(base.Interval):
                 self.data['n'] += r*p_over_p*count
                 self.data['c'] = max(self.data['c'], r*p_over_p)
 
-    def get(self, alpha=0.05):
+    def get(self, alpha: float = 0.05) -> List[float]:
         bounds = []
         num = self.data['n']
         den = self.data['N']

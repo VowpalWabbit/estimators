@@ -1,10 +1,11 @@
 from estimators.ccb import base
+from typing import List
 
 class Estimator(base.Estimator):
     def __init__(self, bandits_estimator):
         self.estimator = bandits_estimator
 
-    def add_example(self, p_logs, r, p_preds, count=1):
+    def add_example(self, p_logs: List[float], r: List[float], p_preds: List[float], count: float = 1.0) -> None:
         """Expects lists for logged probabilities, rewards and predicted probabilities. These should correspond to each slot."""
 
         if not isinstance(p_logs, list) and not isinstance(r, list) and not isinstance(p_preds, list):
@@ -15,15 +16,14 @@ class Estimator(base.Estimator):
 
         self.estimator.add_example(p_logs[0], r[0], p_preds[0])
 
-    def get(self):
-
+    def get(self) -> List[float]:
         return self.estimator.get()
 
 class Interval(base.Estimator):
     def __init__(self, bandits_interval):
         self.interval = bandits_interval
 
-    def add_example(self, p_logs, r, p_preds, count=1):
+    def add_example(self, p_logs: List[float], r: List[float], p_preds: List[float], count: float = 1.0) -> None:
         """Expects lists for logged probabilities, rewards and predicted probabilities. These should correspond to each slot."""
 
         if not isinstance(p_logs, list) and not isinstance(r, list) and not isinstance(p_preds, list):
@@ -34,6 +34,5 @@ class Interval(base.Estimator):
 
         self.interval.add_example(p_logs[0], r[0], p_preds[0])
 
-    def get(self):
-
-        return self.interval.get()
+    def get(self, alpha: float = 0.05) -> List[float]:
+        return self.interval.get(alpha)

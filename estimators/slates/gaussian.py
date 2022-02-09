@@ -1,12 +1,13 @@
 import math
 from estimators.slates import base
 from scipy import stats
+from typing import List
 
 class Interval(base.Interval):
     def __init__(self):
         self.data = {'n':0.,'N':0, 'SoS':0}
 
-    def add_example(self, p_logs, r, p_preds, count=1):
+    def add_example(self, p_logs: List[float], r: float, p_preds: List[float], count: float = 1.0) -> None:
         """Expects lists for logged probabilities and predicted probabilities. These should correspond to each slot.
         This function is implemented under the simplifying assumptions of
         example 4 in the paper 'Off-policy evaluation for slate recommendation'
@@ -29,7 +30,7 @@ class Interval(base.Interval):
             self.data['n'] += r*p_over_ps*count
             self.data['SoS'] += ((r*p_over_ps)**2)*count
 
-    def get(self, alpha=0.05):
+    def get(self, alpha: float = 0.05) -> List[float]:
         bounds = []
         num = self.data['n']
         den = self.data['N']

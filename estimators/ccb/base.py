@@ -30,7 +30,7 @@ class Interval(ABC):
 	""" Interface for implementation of conditional contextual bandits estimators interval """
 
 	@abstractmethod
-	def add_example(self, p_log: List, r: List, p_pred: List, count: float) -> None:
+	def add_example(self, p_log: List[float], r: List[float], p_pred: List[float], count: float) -> None:
 		""" 
 		Args:
 			p_log: List of probability of the logging policy
@@ -41,7 +41,7 @@ class Interval(ABC):
 		...
 
 	@abstractmethod
-	def get(self, alpha: float) -> List:
+	def get(self, alpha: float) -> List[float]:
 		""" Calculates the CI
 		Args:
 			alpha: alpha value

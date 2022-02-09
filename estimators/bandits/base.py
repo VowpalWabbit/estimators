@@ -41,7 +41,7 @@ class Interval(ABC):
 		...
 
 	@abstractmethod
-	def get(self, alpha: float) -> List:
+	def get(self, alpha: float) -> List[float]:
 		""" Calculates the CI
 		Args:
 			alpha: alpha value

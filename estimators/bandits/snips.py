@@ -13,7 +13,7 @@ class Estimator(base.Estimator):
 
         self.data = {'n':0.,'N':0,'d':0.}
 
-    def add_example(self, p_log, r, p_pred, count=1):
+    def add_example(self, p_log: float, r: float, p_pred: float, count: float = 1.0) -> None:
         self.data['N'] += count
         if p_pred > 0:
             p_over_p = p_pred/p_log
@@ -21,7 +21,7 @@ class Estimator(base.Estimator):
             if r != 0:
                 self.data['n'] += r*p_over_p*count
 
-    def get(self):
+    def get(self) -> float:
         if self.data['N'] == 0:
             raise('Error: No data point added')
 
