@@ -21,6 +21,6 @@ class Estimator(base.Estimator):
 
     def get(self) -> float:
         if self.data['N'] == 0:
-            raise('Error: No data point added')
+            raise ValueError('Error: No data point added')
 
         return self.data['n']/self.data['N']

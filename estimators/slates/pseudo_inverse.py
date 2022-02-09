@@ -18,10 +18,10 @@ class Estimator(base.Estimator):
         where the slate space is a cartesian product and the logging policy is a
         product distribution"""
         if not isinstance(p_logs, list) or not isinstance(p_preds, list):
-            raise('Error: p_logs and p_preds must be lists')
+            raise ValueError('Error: p_logs and p_preds must be lists')
 
         if(len(p_logs) != len(p_preds)):
-            raise('Error: p_logs and p_preds must be the same length, found {} and {} respectively'.format(len(p_logs), len(p_preds)))
+            raise ValueError('Error: p_logs and p_preds must be the same length, found {} and {} respectively'.format(len(p_logs), len(p_preds)))
 
         self.data['N'] += count
         p_over_ps = 0
@@ -35,6 +35,6 @@ class Estimator(base.Estimator):
 
     def get(self) -> float:
         if self.data['N'] == 0:
-            raise('Error: No data point added')
+            raise ValueError('Error: No data point added')
 
         return self.data['n']/self.data['N']
