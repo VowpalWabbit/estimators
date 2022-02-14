@@ -1,4 +1,4 @@
-import os, sys, random, copy
+import os, sys, random
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from estimators.slates import pseudo_inverse

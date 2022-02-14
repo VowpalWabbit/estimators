@@ -1,7 +1,6 @@
-import os, sys, random, copy
+import random
 import numpy as np
 import pytest
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from estimators.bandits import ips
 from estimators.bandits import snips

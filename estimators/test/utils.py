@@ -1,4 +1,4 @@
-import random, copy
+import copy
 
 class Helper():
     ''' Helper Class for tests '''
