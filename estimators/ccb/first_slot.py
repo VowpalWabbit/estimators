@@ -17,7 +17,7 @@ class Estimator(base.Estimator):
         self.estimator.add_example(p_logs[0], r[0], p_preds[0])
 
     def get(self) -> List[float]:
-        return self.estimator.get()
+        return [self.estimator.get()]
 
 class Interval(base.Estimator):
     def __init__(self, bandits_interval):
@@ -34,5 +34,5 @@ class Interval(base.Estimator):
 
         self.interval.add_example(p_logs[0], r[0], p_preds[0])
 
-    def get(self, alpha: float = 0.05) -> List[float]:
-        return self.interval.get(alpha)
+    def get(self, alpha: float = 0.05) -> List[List[float]]:
+        return [self.interval.get(alpha)]

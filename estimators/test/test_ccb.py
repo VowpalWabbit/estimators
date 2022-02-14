@@ -11,7 +11,7 @@ from estimators.ccb import first_slot
 from estimators.test.utils import Helper
 
 random.seed(0)
-
+# TBD: rethink tests given proper estimator (with estimations from all slots added)
 def test_single_example():
     estimators = [
         (first_slot.Estimator(ips.Estimator()), 2.0),
@@ -26,7 +26,7 @@ def test_single_example():
 
     for Estimator in estimators:
         Estimator[0].add_example(p_log, reward, p_pred)
-        assert Estimator[0].get() == Estimator[1]
+        assert Estimator[0].get()[0] == Estimator[1]
 
 def test_multiple_examples():
     ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
@@ -53,9 +53,9 @@ def test_multiple_examples():
     estimates_single = Helper.get_estimate(datagen_single_slot_value, estimators=[l[0] for l in estimators], num_examples=4)
 
     for Estimator, estimate_multiple, estimate_single in zip(estimators, estimates_multiple, estimates_single):
-        Helper.assert_is_close(Estimator[1], estimate_multiple)
-        Helper.assert_is_close(Estimator[1], estimate_single)
-        assert estimate_single == estimate_multiple
+        Helper.assert_is_close(Estimator[1], estimate_multiple[0])
+        Helper.assert_is_close(Estimator[1], estimate_single[0])
+        assert estimate_single[0] == estimate_multiple[0]
 
 def test_narrowing_intervals():
     ''' To test if confidence intervals are getting tighter with more data points '''
@@ -85,8 +85,8 @@ def test_narrowing_intervals():
     intervals_more_data = Helper.get_estimate(lambda: datagen(epsilon=0.5), intervals, num_examples=10000)
 
     for interval_less_data, interval_more_data in zip(intervals_less_data, intervals_more_data):
-        width_wider = interval_less_data[1] - interval_less_data[0]
-        width_narrower = interval_more_data[1] - interval_more_data[0]
+        width_wider = interval_less_data[0][1] - interval_less_data[0][0]
+        width_narrower = interval_more_data[0][1] - interval_more_data[0][0]
         assert width_wider > 0
         assert width_narrower > 0
         assert width_narrower < width_wider
