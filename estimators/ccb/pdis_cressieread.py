@@ -26,11 +26,8 @@ class Estimator(base.Estimator):
     def get(self) -> List[float]:
         def prod(vs):
             import operator
-            try:
-                return reduce(operator.mul, vs, 1)
-            except:
-                from functools import reduce
-                return reduce(operator.mul, vs, 1)
+            from functools import reduce
+            return reduce(operator.mul, vs, 1)
 
         n = fsum(c for c, _, _ in self.data)
         assert n > 0, 'Error: No data point added'
@@ -97,11 +94,8 @@ class Interval(base.Interval):
 
         def prod(vs):
             import operator
-            try:
-                return reduce(operator.mul, vs, 1)
-            except:
-                from functools import reduce
-                return reduce(operator.mul, vs, 1)
+            from functools import reduce
+            return reduce(operator.mul, vs, 1)
 
         n = fsum(c for c, _, _ in self.data)
         assert n > 0, 'Error: No data point added'
