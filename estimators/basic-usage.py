@@ -1,22 +1,36 @@
 import argparse, os, gzip
-import cressieread
-import ips_snips
-import mle
-import ds_parse
-import cats_utils
+from bandits import cressieread
+from bandits import ips
+from bandits import snips
+from bandits import mle
+from bandits import gaussian
+from bandits import clopper_pearson
+from bandits import cats_utils
+from utils import ds_parse
 
 
 def compute_estimates(log_fp, cats_transformer=None):
     # Init estimators
-    online = ips_snips.Estimator()
-    baseline1 = ips_snips.Estimator()
-    baselineR = ips_snips.Estimator()
+    online_ips = ips.Estimator()
+    online_snips = snips.Estimator()
     online_mle = mle.Estimator()
-    baseline1_mle = mle.Estimator()
-    baselineR_mle = mle.Estimator()
     online_cressieread = cressieread.Estimator()
+
+    baseline1_ips = ips.Estimator()
+    baseline1_snips = snips.Estimator()
+    baseline1_mle = mle.Estimator()
     baseline1_cressieread = cressieread.Estimator()
+
+    baselineR_ips = ips.Estimator()
+    baselineR_snips = snips.Estimator()
+    baselineR_mle = mle.Estimator()
     baselineR_cressieread = cressieread.Estimator()
+
+    baseline1_gaussian = gaussian.Interval()
+    baseline1_clopper_pearson = clopper_pearson.Interval()
+
+    baselineR_gaussian = gaussian.Interval()
+    baselineR_clopper_pearson = clopper_pearson.Interval()
 
     print('Processing: {}'.format(log_fp))
     bytes_count = 0
@@ -41,9 +55,13 @@ def compute_estimates(log_fp, cats_transformer=None):
             r = 0 if data['cost'] == b'0' else -float(data['cost'])
 
             # Update estimators with tuple (p_log, r, p_pred)
-            online.add_example(data['p'], r, data['p'])
-            baseline1.add_example(data['p'], r, 1 if data['a'] == 1 else 0)
-            baselineR.add_example(data['p'], r, 1/data['num_a'])
+            online_ips.add_example(data['p'], r, data['p'])
+            baseline1_ips.add_example(data['p'], r, 1 if data['a'] == 1 else 0)
+            baselineR_ips.add_example(data['p'], r, 1/data['num_a'])
+
+            online_snips.add_example(data['p'], r, data['p'])
+            baseline1_snips.add_example(data['p'], r, 1 if data['a'] == 1 else 0)
+            baselineR_snips.add_example(data['p'], r, 1/data['num_a'])
 
             online_mle.add_example(data['p'], r, data['p'])
             baseline1_mle.add_example(data['p'], r, 1 if data['a'] == 1 else 0)
@@ -52,6 +70,12 @@ def compute_estimates(log_fp, cats_transformer=None):
             online_cressieread.add_example(data['p'], r, data['p'])
             baseline1_cressieread.add_example(data['p'], r, 1 if data['a'] == 1 else 0)
             baselineR_cressieread.add_example(data['p'], r, 1/data['num_a'])
+
+            baseline1_gaussian.add_example(data['p'], r, 1 if data['a'] == 1 else 0)
+            baseline1_clopper_pearson.add_example(data['p'], r, 1 if data['a'] == 1 else 0)
+
+            baselineR_gaussian.add_example(data['p'], r, 1/data['num_a'])
+            baselineR_clopper_pearson.add_example(data['p'], r, 1/data['num_a'])
 
             evts += 1
 
@@ -70,9 +94,13 @@ def compute_estimates(log_fp, cats_transformer=None):
             r = 0 if data['cost'] == b'0' else -float(data['cost'])
 
             # Update estimators with tuple (p_log, r, p_pred)
-            online.add_example(data['p'], r, data['p'])
-            baseline1.add_example(data['p'], r, data_baseline1['pred_p'])
-            baselineR.add_example(data['p'], r, 1.0 / cats_transformer.continuous_range)
+            online_ips.add_example(data['p'], r, data['p'])
+            baseline1_ips.add_example(data['p'], r, data_baseline1['pred_p'])
+            baselineR_ips.add_example(data['p'], r, 1.0 / cats_transformer.continuous_range)
+
+            online_snips.add_example(data['p'], r, data['p'])
+            baseline1_snips.add_example(data['p'], r, data_baseline1['pred_p'])
+            baselineR_snips.add_example(data['p'], r, 1.0 / cats_transformer.continuous_range)
 
             online_mle.add_example(data['p'], r, data['p'])
             baseline1_mle.add_example(data['p'], r, data_baseline1['pred_p'])
@@ -82,6 +110,12 @@ def compute_estimates(log_fp, cats_transformer=None):
             baseline1_cressieread.add_example(data['p'], r, data_baseline1['pred_p'])
             baselineR_cressieread.add_example(data['p'], r, 1.0 / cats_transformer.continuous_range)
 
+            baseline1_gaussian.add_example(data['p'], r, data_baseline1['pred_p'])
+            baseline1_clopper_pearson.add_example(data['p'], r, data_baseline1['pred_p'])
+
+            baselineR_gaussian.add_example(data['p'], r, 1.0 / cats_transformer.continuous_range)
+            baselineR_clopper_pearson.add_example(data['p'], r, 1.0 / cats_transformer.continuous_range)
+            
             evts += 1
 
 
@@ -92,28 +126,28 @@ def compute_estimates(log_fp, cats_transformer=None):
 
     print('\nProcessed {} events out of {} lines'.format(evts,i+1))
 
-    print('online_ips:',online.get_estimate('ips'))
+    print('online_ips:',online_ips.get())
 
-    print('baseline1_ips:', baseline1.get_estimate('ips'))
-    print('baseline1 gaussian ci:', baseline1.get_interval('gaussian'))
-    print('baseline1 clopper pearson ci:', baseline1.get_interval('clopper-pearson'))
+    print('baseline1_ips:', baseline1_ips.get())
+    print('baseline1 gaussian ci:', baseline1_gaussian.get())
+    print('baseline1 clopper pearson ci:', baseline1_clopper_pearson.get())
 
-    print('baselineR_ips:',baselineR.get_estimate('ips'))
-    print('baselineR gaussian ci:', baselineR.get_interval('gaussian'))
-    print('baselineR clopper pearson ci:', baselineR.get_interval('clopper-pearson'))
+    print('baselineR_ips:',baselineR_ips.get())
+    print('baselineR gaussian ci:', baselineR_gaussian.get())
+    print('baselineR clopper pearson ci:', baselineR_clopper_pearson.get())
 
 
-    print('online_snips:',online.get_estimate('snips'))
-    print('baseline1_snips:',baseline1.get_estimate('snips'))
-    print('baselineR_snips:',baselineR.get_estimate('snips'))
+    print('online_snips:',online_snips.get())
+    print('baseline1_snips:',baseline1_snips.get())
+    print('baselineR_snips:',baselineR_snips.get())
 
-    print('online_mle:',online_mle.get_estimate())
-    print('baseline1_mle:',baseline1_mle.get_estimate())
-    print('baselineR_mle:',baselineR_mle.get_estimate())
+    print('online_mle:',online_mle.get())
+    print('baseline1_mle:',baseline1_mle.get())
+    print('baselineR_mle:',baselineR_mle.get())
 
-    print('online_cressieread:',online_cressieread.get_estimate())
-    print('baseline1_cressieread:',baseline1_cressieread.get_estimate())
-    print('baselineR_cressieread:',baselineR_cressieread.get_estimate())
+    print('online_cressieread:',online_cressieread.get())
+    print('baseline1_cressieread:',baseline1_cressieread.get())
+    print('baselineR_cressieread:',baselineR_cressieread.get())
 
 if __name__ == '__main__':
 
