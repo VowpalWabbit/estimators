@@ -16,17 +16,6 @@ def random_fixture():
     random.seed(0)
     np.random.seed(0)
 
-def test_single_example():
-    estimators = [(ips.Estimator(), 2.0), (snips.Estimator(), 1.0), (mle.Estimator(), 1.0), (cressieread.Estimator(), 1.0)]
-
-    p_log = 0.3
-    p_pred = 0.6
-    reward = 1
-
-    for Estimator in estimators:
-        Estimator[0].add_example(p_log, reward, p_pred)
-        assert Estimator[0].get() == Estimator[1]
-
 
 def test_multiple_examples():
     ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
