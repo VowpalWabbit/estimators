@@ -12,7 +12,7 @@ class Estimator(base.Estimator):
             raise ValueError('Error: p_logs, r and p_preds must be lists')
 
         if(len(p_logs) != len(p_preds) and len(p_logs) != len(rs) and len(rs) != len(p_preds)):
-            raise ValueError('Error: p_logs, r and p_preds must be the same length, found {}, {} and {} respectively'.format(len(p_logs), len(r), len(p_preds)))
+            raise ValueError('Error: p_logs, r and p_preds must be the same length, found {}, {} and {} respectively'.format(len(p_logs), len(rs), len(p_preds)))
 
         self.estimator.add_example(p_logs[0], rs[0], p_preds[0])
 
@@ -30,7 +30,7 @@ class Interval(base.Estimator):
             raise ValueError('Error: p_logs, r and p_preds must be lists')
 
         if(len(p_logs) != len(p_preds) and len(p_logs) != len(rs) and len(rs) != len(p_preds)):
-            raise ValueError('Error: p_logs, r and p_preds must be the same length, found {}, {} and {} respectively'.format(len(p_logs), len(r), len(p_preds)))
+            raise ValueError('Error: p_logs, r and p_preds must be the same length, found {}, {} and {} respectively'.format(len(p_logs), len(rs), len(p_preds)))
 
         self.interval.add_example(p_logs[0], rs[0], p_preds[0])
 
