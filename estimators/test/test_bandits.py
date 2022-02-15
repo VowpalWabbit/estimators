@@ -10,32 +10,25 @@ from estimators.bandits import clopper_pearson
 from estimators.test.utils import Helper, Scenario, get_intervals
 
 
-def assert_estimate_1_from_1s(estimator):
-    def simulator():
-        for _ in range(10):
-            yield  {'p_log': 1,
-                    'r': 1,
-                    'p_pred': 1}
-
+def assert_estimation_is_close(estimator, simulator, value):
     scenario = Scenario(simulator, estimator())
     scenario.get_estimate()
     Helper.assert_is_close(scenario.result, 1)
     
 def test_estimate_1_from_1s():
     ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
-    assert_estimate_1_from_1s(ips.Estimator)
-    assert_estimate_1_from_1s(snips.Estimator)
-    assert_estimate_1_from_1s(mle.Estimator)
-    assert_estimate_1_from_1s(cressieread.Estimator)
+    def simulator():
+        for _ in range(10):
+            yield  {'p_log': 1,
+                    'r': 1,
+                    'p_pred': 1}
 
-def assert_more_examples_tighter_intervals(estimator):
-    def simulator(n):
-        for i in range(n):
-            chosen = i % 2
-            yield  {'p_log': 0.5,
-                    'r': 1 if chosen == 0 else 0,
-                    'p_pred': 0.2 if chosen == 0 else 0.8}
+    assert_estimation_is_close(ips.Estimator, simulator, 1)
+    assert_estimation_is_close(snips.Estimator, simulator, 1)
+    assert_estimation_is_close(mle.Estimator, simulator, 1)
+    assert_estimation_is_close(cressieread.Estimator, simulator, 1)
 
+def assert_more_examples_tighter_intervals(estimator, simulator):
     less_data = Scenario(lambda: simulator(100), estimator())
     more_data = Scenario(lambda: simulator(10000), estimator())
 
@@ -47,18 +40,18 @@ def assert_more_examples_tighter_intervals(estimator):
 
 def test_more_examples_tighter_intervals():
     ''' To test if confidence intervals are getting tighter with more data points '''
-    assert_more_examples_tighter_intervals(cressieread.Interval)
-    assert_more_examples_tighter_intervals(gaussian.Interval)
-    assert_more_examples_tighter_intervals(clopper_pearson.Interval)        
-
-def assert_higher_alpha_tighter_intervals(estimator):
-    def simulator():
-        for i in range(1000):
+    def simulator(n):
+        for i in range(n):
             chosen = i % 2
             yield  {'p_log': 0.5,
                     'r': 1 if chosen == 0 else 0,
                     'p_pred': 0.2 if chosen == 0 else 0.8}
-    
+
+    assert_more_examples_tighter_intervals(cressieread.Interval, simulator)
+    assert_more_examples_tighter_intervals(gaussian.Interval, simulator)
+    assert_more_examples_tighter_intervals(clopper_pearson.Interval, simulator)        
+
+def assert_higher_alpha_tighter_intervals(estimator, simulator):
     alphas = np.arange(0.1, 1, 0.1)
 
     scenarios = [Scenario(simulator, estimator(), alpha=alpha) for alpha in alphas]
@@ -70,9 +63,16 @@ def assert_higher_alpha_tighter_intervals(estimator):
 
 def test_higher_alpha_tighter_intervals():
     ''' Get confidence intervals for various alpha levels and assert that they are shrinking as alpha increases'''
-    assert_higher_alpha_tighter_intervals(cressieread.Interval)
-    assert_higher_alpha_tighter_intervals(gaussian.Interval)
-    assert_higher_alpha_tighter_intervals(clopper_pearson.Interval)       
+    def simulator():
+        for i in range(1000):
+            chosen = i % 2
+            yield  {'p_log': 0.5,
+                    'r': 1 if chosen == 0 else 0,
+                    'p_pred': 0.2 if chosen == 0 else 0.8}
+
+    assert_higher_alpha_tighter_intervals(cressieread.Interval, simulator)
+    assert_higher_alpha_tighter_intervals(gaussian.Interval, simulator)
+    assert_higher_alpha_tighter_intervals(clopper_pearson.Interval, simulator)       
 
 
 def test_cats_ips():
