@@ -13,7 +13,7 @@ from estimators.test.utils import Helper, Scenario, get_intervals
 def assert_estimation_is_close(estimator, simulator, value):
     scenario = Scenario(simulator, estimator())
     scenario.get_estimate()
-    Helper.assert_is_close(scenario.result, 1)
+    Helper.assert_is_close(scenario.result, value)
     
 def test_estimate_1_from_1s():
     ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''

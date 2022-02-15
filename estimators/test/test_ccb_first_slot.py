@@ -5,6 +5,8 @@ from estimators.bandits import cressieread
 from estimators.ccb import first_slot
 from estimators.test.utils import Helper
 
+# TODO: add test that first slot estimator is equivalent to corresponding cb estimator and remove it from all tests in test_ccb
+
 def test_single_example():
     estimators = [
         (first_slot.Estimator(ips.Estimator()), 2.0),
