@@ -1,6 +1,4 @@
-import random
 import numpy as np
-import pytest
 
 from estimators.bandits import ips
 from estimators.bandits import snips
@@ -9,100 +7,72 @@ from estimators.bandits import cressieread
 from estimators.bandits import cats_utils
 from estimators.bandits import gaussian
 from estimators.bandits import clopper_pearson
-from estimators.test.utils import Helper
-
-@pytest.fixture
-def random_fixture():
-    random.seed(0)
-    np.random.seed(0)
+from estimators.test.utils import Helper, Scenario, get_intervals
 
 
-def test_multiple_examples():
+def assert_estimate_1_from_1s(estimator):
+    def simulator():
+        for _ in range(10):
+            yield  {'p_log': 1,
+                    'r': 1,
+                    'p_pred': 1}
+
+    scenario = Scenario(simulator, estimator())
+    scenario.get_estimate()
+    Helper.assert_is_close(scenario.result, 1)
+    
+def test_estimate_1_from_1s():
     ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
+    assert_estimate_1_from_1s(ips.Estimator)
+    assert_estimate_1_from_1s(snips.Estimator)
+    assert_estimate_1_from_1s(mle.Estimator)
+    assert_estimate_1_from_1s(cressieread.Estimator)
 
-    # The tuple (Estimator, expected value) for each estimator is stored in estimators
-    estimators = [
-        (ips.Estimator(), 1),
-        (snips.Estimator(), 1),
-        (mle.Estimator(), 1),
-        (cressieread.Estimator(), 1),
-        ]
+def assert_more_examples_tighter_intervals(estimator):
+    def simulator(n):
+        for i in range(n):
+            chosen = i % 2
+            yield  {'p_log': 0.5,
+                    'r': 1 if chosen == 0 else 0,
+                    'p_pred': 0.2 if chosen == 0 else 0.8}
 
-    def datagen():
-        return  {'p_log': 1,
-                'r': 1,
-                'p_pred': 1}
+    less_data = Scenario(lambda: simulator(100), estimator())
+    more_data = Scenario(lambda: simulator(10000), estimator())
 
-    estimates = Helper.get_estimate(datagen, estimators=[l[0] for l in estimators], num_examples=4)
+    less_data.get_interval()
+    more_data.get_interval()
 
-    for Estimator, estimate in zip(estimators, estimates):
-        Helper.assert_is_close(Estimator[1], estimate)
+    assert less_data.result[0] <= more_data.result[0]
+    assert less_data.result[1] >= more_data.result[1]    
 
-
-def test_narrowing_intervals():
+def test_more_examples_tighter_intervals():
     ''' To test if confidence intervals are getting tighter with more data points '''
+    assert_more_examples_tighter_intervals(cressieread.Interval)
+    assert_more_examples_tighter_intervals(gaussian.Interval)
+    assert_more_examples_tighter_intervals(clopper_pearson.Interval)        
 
-    intervals = [
-        cressieread.Interval(),
-        gaussian.Interval(),
-        clopper_pearson.Interval(),
-        ]
-
-    def datagen(epsilon, delta=0.5):
-        # Logged Policy
-        # 0 - (1-epsilon) : Reward is Bernoulli(delta)
-        # 1 - epsilon : Reward is Bernoulli(1-delta)
-
-        # p_pred: 1 if action is chosen, 0 if action not chosen
-
-        # policy to estimate
-        # (delta), (1-delta) reward from a Bernoulli distribution - for probability p_pred
-
-        chosen = int(random.random() < epsilon)
-        return {'p_log': epsilon if chosen == 1 else 1 - epsilon,
-                'r': int(random.random() < 1-delta) if chosen == 1 else int(random.random() < delta),
-                'p_pred': int(chosen==1)}
-
-    intervals_less_data = Helper.get_estimate(lambda: datagen(epsilon=0.5), intervals, num_examples=100)
-    intervals_more_data = Helper.get_estimate(lambda: datagen(epsilon=0.5), intervals, num_examples=10000)
-
-    for interval_less_data, interval_more_data in zip(intervals_less_data, intervals_more_data):
-        width_wider = interval_less_data[1] - interval_less_data[0]
-        width_narrower = interval_more_data[1] - interval_more_data[0]
-        assert width_wider > 0
-        assert width_narrower > 0
-        assert width_narrower < width_wider
-
-
-def test_different_alpha_CI():
-    ''' To test that alpha value is not hard coded: get confidence intervals for randomly generated alpha values '''
-
-    intervals = [
-        cressieread.Interval(),
-        gaussian.Interval(),
-        clopper_pearson.Interval(),
-        ]
+def assert_higher_alpha_tighter_intervals(estimator):
+    def simulator():
+        for i in range(1000):
+            chosen = i % 2
+            yield  {'p_log': 0.5,
+                    'r': 1 if chosen == 0 else 0,
+                    'p_pred': 0.2 if chosen == 0 else 0.8}
+    
     alphas = np.arange(0.1, 1, 0.1)
 
-    def datagen(epsilon, delta=0.5):
-        # Logged Policy
-        # 0 - (1-epsilon) : Reward is Bernoulli(delta)
-        # 1 - epsilon : Reward is Bernoulli(1-delta)
+    scenarios = [Scenario(simulator, estimator(), alpha=alpha) for alpha in alphas]
+    get_intervals(scenarios)
 
-        # p_pred: 1 if action is chosen, 0 if action not chosen
+    for i in range(len(scenarios) - 1):
+        assert scenarios[i].result[0] <= scenarios[i + 1].result[0]
+        assert scenarios[i].result[1] >= scenarios[i + 1].result[1]
 
-        # policy to estimate
-        # (delta), (1-delta) reward from a Bernoulli distribution - for probability p_pred
-
-        chosen = int(random.random() < epsilon)
-        return {'p_log': epsilon if chosen == 1 else 1 - epsilon,
-                'r': int(random.random() < 1-delta) if chosen == 1 else int(random.random() < delta),
-                'p_pred': int(chosen==1)}
-
-    for interval in intervals:
-        interval = Helper.run_add_example(lambda: datagen(epsilon=0.5), interval, num_examples=100)
-        for alpha in alphas:
-            assert interval.get(alpha=alpha)
+def test_higher_alpha_tighter_intervals():
+    ''' Get confidence intervals for various alpha levels and assert that they are shrinking as alpha increases'''
+    assert_higher_alpha_tighter_intervals(cressieread.Interval)
+    assert_higher_alpha_tighter_intervals(gaussian.Interval)
+    assert_higher_alpha_tighter_intervals(clopper_pearson.Interval)       
 
 
 def test_cats_ips():
