@@ -31,15 +31,15 @@ def test_more_examples_tighter_intervals():
     assert_more_examples_tighter_intervals(lambda: first_slot.Interval(gaussian.Interval()), simulator)
     assert_more_examples_tighter_intervals(lambda: first_slot.Interval(clopper_pearson.Interval()), simulator)
 
-def assert_intervals_are_within(estimator, simulator, expected):
+def assert_estimations_within(estimator, simulator, expected):
     scenario = Scenario(simulator, estimator())
     scenario.get_estimate()
     assert len(scenario.result) == len(expected)
     for i in range(len(expected)):
-        assert scenario.result[i][0] >= expected[i][0]
-        assert scenario.result[i][1] <= expected[i][1] 
+        assert scenario.result[i] >= expected[i][0]
+        assert scenario.result[i] <= expected[i][1]
 
-def test_convergence_simple():
+def test_estimations_convergence_simple():
     def simulator():
         for i in range(1000):
             chosen = i % 2   
@@ -49,7 +49,27 @@ def test_convergence_simple():
 
     expected = [(0.15, 0.25), (0.15, 0.25)]
 
-    assert_intervals_are_within(pdis_cressieread.Interval, simulator, expected)
+    assert_estimations_within(pdis_cressieread.Estimator, simulator, expected)
+
+def assert_intervals_within(estimator, simulator, expected):
+    scenario = Scenario(simulator, estimator())
+    scenario.get_interval()
+    assert len(scenario.result) == len(expected)
+    for i in range(len(expected)):
+        assert scenario.result[i][0] >= expected[i][0]
+        assert scenario.result[i][1] <= expected[i][1] 
+
+def test_interval_convergence_simple():
+    def simulator():
+        for i in range(1000):
+            chosen = i % 2   
+            yield  {'p_logs': [0.5, 1],
+                    'rs': [chosen, chosen], 
+                    'p_preds': [0.2 if chosen == 1 else 0, 1]}
+
+    expected = [(0.15, 0.25), (0.15, 0.25)]
+
+    assert_intervals_within(pdis_cressieread.Interval, simulator, expected)
 
 
 def assert_higher_alpha_tighter_intervals(estimator, simulator):
