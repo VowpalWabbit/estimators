@@ -1,4 +1,30 @@
-import random, copy
+import copy
+
+class Scenario:
+    def __init__(self, simulator, estimator, alpha = 0.05):
+        self.simulator = simulator
+        self.estimator = estimator
+        self.result = None
+        self.alpha = alpha
+
+    def get_estimate(self):
+        for example in self.simulator():
+            self.estimator.add_example(**example)
+        self.result = self.estimator.get()
+
+    def get_interval(self):
+        for example in self.simulator():
+            self.estimator.add_example(**example)
+        self.result = self.estimator.get(self.alpha)
+
+
+def get_estimates(scenarios):
+    for scenario in scenarios:
+        scenario.get_estimate()
+
+def get_intervals(scenarios):
+    for scenario in scenarios:
+        scenario.get_interval()
 
 class Helper():
     ''' Helper Class for tests '''
