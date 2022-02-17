@@ -80,7 +80,7 @@ class Interval(base.Interval):
             self.wmax = max(self.wmax, w)
             self.wmin = min(self.wmin, w)
 
-    def get(self, alpha: float = 0.05) -> List[float]:
+    def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[float]:
         from math import isclose, sqrt
         from scipy.stats import f
 
@@ -117,14 +117,12 @@ class Interval(base.Interval):
                     if isclose(y*z, 0, abs_tol=1e-9):
                         y = 0
 
-                    if z <= 0 and y * z >= 0:
-                        kappa = sqrt(y / (2 * z))
-                        if isclose(kappa, 0):
-                            candidates.append(sign * r)
-                        else:
-                            gstar = x - sqrt(2 * y * z)
-
-                            candidates.append(gstar)
+                    if isclose(y*z, 0, abs_tol=atol*atol):
+                        gstar = x - sqrt(2) * atol
+                        candidates.append(gstar)
+                    elif z <= 0 and y * z >= 0:
+                        gstar = x - sqrt(2 * y * z)
+                        candidates.append(gstar)
                 else:
                     barw = (wfake + sumw) / (1 + n)
                     barwsq = (wfake*wfake + sumwsq) / (1 + n)
@@ -137,16 +135,12 @@ class Interval(base.Interval):
                         y = (barwsqr - barw * barwr)**2 / (barwsq - barw**2) - (barwsqrsq - barwr**2)
                         z = phi + (1/2) * (1 - barw)**2 / (barwsq - barw**2)
 
-                        if isclose(y*z, 0, abs_tol=1e-9):
-                            y = 0
-
-                        if z <= 0 and y * z >= 0:
-                            kappa = sqrt(y / (2 * z)) if y * z > 0 else 0
-                            if isclose(kappa, 0):
-                                candidates.append(sign * r)
-                            else:
-                                gstar = x - sqrt(2 * y * z)
-                                candidates.append(gstar)
+                        if isclose(y*z, 0, abs_tol=atol*atol):
+                            gstar = x - sqrt(2) * atol
+                            candidates.append(gstar)
+                        elif z <= 0 and y * z >= 0:
+                            gstar = x - sqrt(2 * y * z)
+                            candidates.append(gstar)
 
             best = min(candidates)
             vbound = min(self.rmax, max(self.rmin, sign*best))
