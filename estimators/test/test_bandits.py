@@ -74,24 +74,23 @@ def test_higher_alpha_tighter_intervals():
     assert_higher_alpha_tighter_intervals(gaussian.Interval, simulator)
     assert_higher_alpha_tighter_intervals(clopper_pearson.Interval, simulator)   
 
-def assert_convergence_with_no_overflow(estimator):
-    def simulator(n):
-        for i in range(n):
+def assert_interval_is_close(estimator, simulator, expected):
+    scenario = Scenario(simulator, estimator())
+    scenario.get_estimate()
+    assert scenario.result[0] >= expected[0]
+    assert scenario.result[1] <= expected[1] 
+
+def test_convergence_with_no_overflow():
+    def simulator():
+        for i in range(1000000):
             chosen = i % 2
             yield  {'p_log': 0.5,
                     'r': 1 if chosen == 0 else 0,
                     'p_pred': 0.2 if chosen == 0 else 0.8}
-
-    scenario = Scenario(lambda: simulator(1000000), estimator(), alpha=0.05)
-    scenario.get_interval()
-
-    assert scenario.result[0] >= 0.15
-    assert scenario.result[1] <= 0.25     
-
-def test_convergence_with_no_overflow():
-    assert_convergence_with_no_overflow(gaussian.Interval)
-    assert_convergence_with_no_overflow(clopper_pearson.Interval)
-    assert_convergence_with_no_overflow(cressieread.Interval)
+    expected = (0.15, 0.25)
+    assert_interval_is_close(gaussian.Interval, simulator, expected)
+    assert_interval_is_close(clopper_pearson.Interval, simulator, expected)
+    assert_interval_is_close(cressieread.Interval, simulator, expected)
 
 def test_cats_ips():
     ips_estimator = ips.Estimator()
