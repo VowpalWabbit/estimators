@@ -3,7 +3,7 @@ import numpy as np
 from estimators.bandits import clopper_pearson
 from estimators.bandits import gaussian
 from estimators.bandits import cressieread
-from estimators.ccb import first_slot
+from estimators.ccb import first_slot, pdis_cressieread
 from estimators.test.utils import Helper, Scenario, get_intervals
 
 def assert_more_examples_tighter_intervals(estimator, simulator):
@@ -30,6 +30,46 @@ def test_more_examples_tighter_intervals():
     assert_more_examples_tighter_intervals(lambda: first_slot.Interval(cressieread.Interval()), simulator)
     assert_more_examples_tighter_intervals(lambda: first_slot.Interval(gaussian.Interval()), simulator)
     assert_more_examples_tighter_intervals(lambda: first_slot.Interval(clopper_pearson.Interval()), simulator)
+
+def assert_estimations_within(estimator, simulator, expected):
+    scenario = Scenario(simulator, estimator())
+    scenario.get_estimate()
+    assert len(scenario.result) == len(expected)
+    for i in range(len(expected)):
+        assert scenario.result[i] >= expected[i][0]
+        assert scenario.result[i] <= expected[i][1]
+
+def test_estimations_convergence_simple():
+    def simulator():
+        for i in range(1000):
+            chosen0 = i % 2   
+            yield  {'p_logs': [0.5, 1],
+                    'rs': [chosen0, chosen0], 
+                    'p_preds': [0.2 if chosen0 == 1 else 0.8, 1]}
+
+    expected = [(0.15, 0.25), (0.15, 0.25)]
+
+    assert_estimations_within(pdis_cressieread.Estimator, simulator, expected)
+
+def assert_intervals_within(estimator, simulator, expected):
+    scenario = Scenario(simulator, estimator())
+    scenario.get_interval()
+    assert len(scenario.result) == len(expected)
+    for i in range(len(expected)):
+        assert scenario.result[i][0] >= expected[i][0]
+        assert scenario.result[i][1] <= expected[i][1] 
+
+def test_interval_convergence_simple():
+    def simulator():
+        for i in range(1000):
+            chosen0 = i % 2   
+            yield  {'p_logs': [0.5, 1],
+                    'rs': [chosen0, chosen0], 
+                    'p_preds': [0.2 if chosen0 == 1 else 0.8, 1]}
+
+    expected = [(0.15, 0.25), (0.15, 0.25)]
+
+    assert_intervals_within(pdis_cressieread.Interval, simulator, expected)
 
 
 def assert_higher_alpha_tighter_intervals(estimator, simulator):
