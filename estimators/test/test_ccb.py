@@ -45,7 +45,7 @@ def test_estimations_convergence_simple():
             chosen = i % 2   
             yield  {'p_logs': [0.5, 1],
                     'rs': [chosen, chosen], 
-                    'p_preds': [0.2 if chosen == 1 else 0, 1]}
+                    'p_preds': [0.2 if chosen == 1 else 0.8, 1]}
 
     expected = [(0.15, 0.25), (0.15, 0.25)]
 
@@ -65,7 +65,7 @@ def test_interval_convergence_simple():
             chosen = i % 2   
             yield  {'p_logs': [0.5, 1],
                     'rs': [chosen, chosen], 
-                    'p_preds': [0.2 if chosen == 1 else 0, 1]}
+                    'p_preds': [0.2 if chosen == 1 else 0.8, 1]}
 
     expected = [(0.15, 0.25), (0.15, 0.25)]
 
