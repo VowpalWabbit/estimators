@@ -76,7 +76,7 @@ def test_higher_alpha_tighter_intervals():
 
 def assert_interval_is_within(estimator, simulator, expected):
     scenario = Scenario(simulator, estimator())
-    scenario.get_estimate()
+    scenario.get_interval()
     assert scenario.result[0] >= expected[0]
     assert scenario.result[1] <= expected[1] 
 
