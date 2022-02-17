@@ -42,10 +42,10 @@ def assert_estimations_within(estimator, simulator, expected):
 def test_estimations_convergence_simple():
     def simulator():
         for i in range(1000):
-            chosen = i % 2   
+            chosen0 = i % 2   
             yield  {'p_logs': [0.5, 1],
-                    'rs': [chosen, chosen], 
-                    'p_preds': [0.2 if chosen == 1 else 0.8, 1]}
+                    'rs': [chosen0, chosen0], 
+                    'p_preds': [0.2 if chosen0 == 1 else 0.8, 1]}
 
     expected = [(0.15, 0.25), (0.15, 0.25)]
 
@@ -62,10 +62,10 @@ def assert_intervals_within(estimator, simulator, expected):
 def test_interval_convergence_simple():
     def simulator():
         for i in range(1000):
-            chosen = i % 2   
+            chosen0 = i % 2   
             yield  {'p_logs': [0.5, 1],
-                    'rs': [chosen, chosen], 
-                    'p_preds': [0.2 if chosen == 1 else 0.8, 1]}
+                    'rs': [chosen0, chosen0], 
+                    'p_preds': [0.2 if chosen0 == 1 else 0.8, 1]}
 
     expected = [(0.15, 0.25), (0.15, 0.25)]
 
