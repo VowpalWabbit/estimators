@@ -78,7 +78,23 @@ def assert_interval_within(estimator, simulator, expected):
     scenario = Scenario(simulator, estimator())
     scenario.get_interval()
     assert scenario.result[0] >= expected[0]
-    assert scenario.result[1] <= expected[1] 
+    assert scenario.result[1] <= expected[1]
+
+def assert_estimation_is_none(estimator):
+    assert estimator().get() is None
+
+def assert_interval_is_none(estimator):
+    assert estimator().get()[0] is None
+    assert estimator().get()[1] is None
+
+def test_no_data_estimation_is_none():
+    assert_estimation_is_none(ips.Estimator)
+    assert_estimation_is_none(snips.Estimator)
+    assert_estimation_is_none(mle.Estimator)
+    assert_estimation_is_none(cressieread.Estimator)
+    assert_interval_is_none(cressieread.Interval)
+    assert_interval_is_none(gaussian.Interval)
+    assert_interval_is_none(clopper_pearson.Interval)
 
 def test_convergence_with_no_overflow():
     def simulator():
