@@ -29,7 +29,8 @@ class Estimator(base.Estimator):
 
     def get(self) -> float:
         n = fsum(c for c, _, _ in self.data)
-        assert n > 0, 'Error: No data point added'
+        if n == 0:
+            return None
 
         sumw = fsum(c * w for c, w, _ in self.data)
         sumwsq = fsum(c * w**2 for c, w, _ in self.data)
@@ -87,7 +88,8 @@ class Interval(base.Interval):
         from scipy.stats import f
 
         n = fsum(c for c, _, _ in self.data)
-        assert n > 0, 'Error: No data point added'
+        if n == 0:
+            return [None, None]
 
         sumw = fsum(c * w for c, w, _ in self.data)
         sumwsq = fsum(c * w**2 for c, w, _ in self.data)

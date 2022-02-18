@@ -25,4 +25,4 @@ class Interval(base.Interval):
             n = self.examples_count / self.max_weighted_reward
             return [beta.ppf(alpha / 2, successes, n - successes + 1),
                     beta.ppf(1 - alpha / 2, successes + 1, n - successes)]
-        return [0, 0]
+        return [None, None]

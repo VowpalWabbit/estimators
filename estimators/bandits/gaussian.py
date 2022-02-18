@@ -28,4 +28,4 @@ class Interval(base.Interval):
             gauss_delta = z_gaussian_cdf * math.sqrt(variance / self.examples_count)
             ips = self.weighted_reward / self.examples_count
             return [ips - gauss_delta, ips + gauss_delta]
-        return [0, 0]
+        return [None, None]

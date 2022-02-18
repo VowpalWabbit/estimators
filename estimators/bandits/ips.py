@@ -15,7 +15,4 @@ class Estimator(base.Estimator):
         self.weighted_reward += r * w * count
 
     def get(self) -> float:
-        if self.examples_count == 0:
-            raise ValueError('Error: No data point added')
-
-        return self.weighted_reward/self.examples_count
+        return self.weighted_reward/self.examples_count if self.examples_count > 0 else None

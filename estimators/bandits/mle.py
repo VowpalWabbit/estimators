@@ -34,7 +34,8 @@ class Estimator(base.Estimator):
         from scipy.optimize import brentq
 
         n = fsum(c for c, _, _ in self.data)
-        assert n > 0, 'Error: No data point added'
+        if n == 0:
+            return None
 
         betaub = n / (1 - self.wmin)
         betamax = min(betaub,
