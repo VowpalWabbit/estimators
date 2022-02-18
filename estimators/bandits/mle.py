@@ -3,6 +3,7 @@
 from math import fsum, inf
 from estimators.bandits import base
 
+
 class Estimator(base.Estimator):
     # NB: This works better you use the true wmin and wmax
     #     which is _not_ the empirical minimum and maximum
@@ -26,8 +27,8 @@ class Estimator(base.Estimator):
             self.wmin = min(self.wmin, w)
 
     def graddualobjective(self, n, beta):
-       return fsum(c * (w - 1)/((w - 1) * beta + n)
-                  for c, w, _ in self.data)
+        return fsum(c * (w - 1) / ((w - 1) * beta + n)
+                    for c, w, _ in self.data)
 
     def get(self) -> float:
         from scipy.optimize import brentq
@@ -37,18 +38,18 @@ class Estimator(base.Estimator):
 
         betaub = n / (1 - self.wmin)
         betamax = min(betaub,
-                      min(( (n - c) / (1 - w)
-                            for c, w, _ in self.data
-                            if w < 1
-                          ),
+                      min(((n - c) / (1 - w)
+                           for c, w, _ in self.data
+                           if w < 1
+                           ),
                           default=betaub))
 
         betalb = 0 if self.wmax == inf else n / (1 - self.wmax)
         betamin = max(betalb,
-                      max(( (n - c) / (1 - w)
-                            for c, w, _ in self.data
-                            if w > 1
-                          ),
+                      max(((n - c) / (1 - w)
+                           for c, w, _ in self.data
+                           if w > 1
+                           ),
                           default=betalb))
 
         gradmin = self.graddualobjective(n, betamin)
@@ -64,11 +65,11 @@ class Estimator(base.Estimator):
             betastar = betamax
 
         sumofw = fsum(c * w / ((w - 1) * betastar + n)
-                     for c, w, _ in self.data)
+                      for c, w, _ in self.data)
         missing = max(0.0, 1.0 - sumofw)
 
         vhat = fsum(c * w * r / ((w - 1) * betastar + n)
-                   for c, w, r in self.data)
+                    for c, w, r in self.data)
         rhatmissing = fsum(c * r for c, _, r in self.data) / n
         vhat += missing * rhatmissing
 

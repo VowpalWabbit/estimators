@@ -2,6 +2,7 @@ from estimators.ccb import base
 from math import fsum, inf
 from typing import List
 
+
 class Estimator(base.Estimator):
     def __init__(self, wmin: float = 0, wmax: float = inf):
         assert wmin < 1
@@ -63,6 +64,7 @@ class Estimator(base.Estimator):
             stepvhats.append(vhat)
 
         return stepvhats
+
 
 class Interval(base.Interval):
     def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1):
