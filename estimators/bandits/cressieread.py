@@ -4,6 +4,7 @@ from math import fsum, inf
 from estimators.bandits import base
 from typing import List
 
+
 class Estimator(base.Estimator):
     # NB: This works better you use the true wmin and wmax
     #     which is _not_ the empirical minimum and maximum
@@ -54,6 +55,7 @@ class Estimator(base.Estimator):
         vhat += missing * rhatmissing
 
         return vhat
+
 
 class Interval(base.Interval):
     # NB: This works better you use the true wmin and wmax

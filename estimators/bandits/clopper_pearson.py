@@ -1,7 +1,7 @@
-import math
 from scipy.stats import beta
 from estimators.bandits import base
 from typing import List
+
 
 class Interval(base.Interval):
 

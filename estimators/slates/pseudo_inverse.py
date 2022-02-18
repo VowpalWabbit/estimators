@@ -1,4 +1,3 @@
-import math
 from estimators.slates import base
 from typing import List
 
@@ -6,6 +5,7 @@ from typing import List
 # case for a Cartesian product when mu is a product distribution. This can be
 # seen in example 4 of the paper.
 # https://arxiv.org/abs/1605.04812
+
 
 class Estimator(base.Estimator):
     def __init__(self):

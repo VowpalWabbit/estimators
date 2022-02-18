@@ -3,6 +3,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
+
 class Estimator(ABC):
 	""" Interface for implementation of contextual bandit estimators """
 
@@ -25,6 +26,7 @@ class Estimator(ABC):
 			The estimator value
 		"""
 		...
+
 
 class Interval(ABC):
 	""" Interface for implementation of contextual bandit estimators interval """

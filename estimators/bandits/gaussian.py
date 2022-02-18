@@ -3,8 +3,8 @@ from estimators.bandits import base
 from scipy import stats
 from typing import List
 
-class Interval(base.Interval):
 
+class Interval(base.Interval):
     def __init__(self):
         ################################# Aggregates quantities #########################################
         #

@@ -1,6 +1,7 @@
 from estimators.ccb import base
 from typing import List
 
+
 class Estimator(base.Estimator):
     def __init__(self, bandits_estimator):
         self.estimator = bandits_estimator
@@ -18,6 +19,7 @@ class Estimator(base.Estimator):
 
     def get(self) -> List[float]:
         return [self.estimator.get()]
+
 
 class Interval(base.Estimator):
     def __init__(self, bandits_interval):

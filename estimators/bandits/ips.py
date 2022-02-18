@@ -1,7 +1,7 @@
 from estimators.bandits import base
 
-class Estimator(base.Estimator):
 
+class Estimator(base.Estimator):
     def __init__(self):
         ################################# Aggregates quantities #########################################
         #
