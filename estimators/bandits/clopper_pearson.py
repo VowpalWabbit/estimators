@@ -4,38 +4,25 @@ from typing import List
 
 
 class Interval(base.Interval):
+    examples_count: float
+    weighted_reward: float
+    max_weighted_reward: float
 
     def __init__(self):
-        ################################# Aggregates quantities #########################################
-        #
-        # 'n':   IPS of numerator
-        # 'N':   total number of samples in bin from log (IPS = n/N)
-        # 'c':   max abs. value of numerator's items (needed for Clopper-Pearson confidence intervals)
-        #
-        #################################################################################################
-
-        self.data = {'n':0.,'N':0,'c':0.}
+        self.examples_count = 0
+        self.weighted_reward = 0
+        self.max_weighted_reward = 0
 
     def add_example(self, p_log: float, r: float, p_pred: float, count: float = 1.0) -> None:
-        self.data['N'] += count
-        if p_pred > 0:
-            p_over_p = p_pred/p_log
-            if r != 0:
-                self.data['n'] += r*p_over_p*count
-                self.data['c'] = max(self.data['c'], r*p_over_p)
+        self.examples_count += count
+        w = p_pred / p_log
+        self.weighted_reward += r * w * count
+        self.max_weighted_reward = max(self.max_weighted_reward, r * w)
 
     def get(self, alpha: float = 0.05) -> List[float]:
-        bounds = []
-        num = self.data['n']
-        den = self.data['N']
-        max_weighted_cost = self.data['c']
-
-        if max_weighted_cost > 0.0:
-            successes = num / max_weighted_cost
-            n = den / max_weighted_cost
-            bounds.append(beta.ppf(alpha / 2, successes, n - successes + 1))
-            bounds.append(beta.ppf(1 - alpha / 2, successes + 1, n - successes))
-
-        if not bounds:
-            bounds = [0, 0]
-        return bounds
+        if self.max_weighted_reward > 0.0:
+            successes = self.weighted_reward / self.max_weighted_reward
+            n = self.examples_count / self.max_weighted_reward
+            return [beta.ppf(alpha / 2, successes, n - successes + 1),
+                    beta.ppf(1 - alpha / 2, successes + 1, n - successes)]
+        return [0, 0]
