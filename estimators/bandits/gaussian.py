@@ -23,12 +23,9 @@ class Interval(base.Interval):
     def get(self, alpha: float = 0.05) -> List[float]:
         if self.weighted_reward_sq > 0.0 and self.examples_count > 1:
             z_gaussian_cdf = stats.norm.ppf(1 - alpha / 2)
-
             variance = (self.weighted_reward_sq - self.weighted_reward**2 / self.examples_count) / \
                        (self.examples_count - 1)
             gauss_delta = z_gaussian_cdf * math.sqrt(variance / self.examples_count)
             ips = self.weighted_reward / self.examples_count
-            bounds = [ips - gauss_delta, ips + gauss_delta]
-        else:
-            bounds = [0, 0]
-        return bounds
+            return [ips - gauss_delta, ips + gauss_delta]
+        return [0, 0]
