@@ -14,7 +14,8 @@ def assert_estimation_is_close(estimator, simulator, value):
     scenario = Scenario(simulator, estimator())
     scenario.get_estimate()
     Helper.assert_is_close(scenario.result, value)
-    
+
+
 def test_estimate_1_from_1s():
     ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
     def simulator():
@@ -28,6 +29,7 @@ def test_estimate_1_from_1s():
     assert_estimation_is_close(mle.Estimator, simulator, 1)
     assert_estimation_is_close(cressieread.Estimator, simulator, 1)
 
+
 def assert_more_examples_tighter_intervals(estimator, simulator):
     less_data = Scenario(lambda: simulator(100), estimator())
     more_data = Scenario(lambda: simulator(10000), estimator())
@@ -37,6 +39,7 @@ def assert_more_examples_tighter_intervals(estimator, simulator):
 
     assert less_data.result[0] <= more_data.result[0]
     assert less_data.result[1] >= more_data.result[1]    
+
 
 def test_more_examples_tighter_intervals():
     ''' To test if confidence intervals are getting tighter with more data points '''
@@ -51,6 +54,7 @@ def test_more_examples_tighter_intervals():
     assert_more_examples_tighter_intervals(gaussian.Interval, simulator)
     assert_more_examples_tighter_intervals(clopper_pearson.Interval, simulator)        
 
+
 def assert_higher_alpha_tighter_intervals(estimator, simulator):
     alphas = np.arange(0.1, 1, 0.1)
 
@@ -60,6 +64,7 @@ def assert_higher_alpha_tighter_intervals(estimator, simulator):
     for i in range(len(scenarios) - 1):
         assert scenarios[i].result[0] <= scenarios[i + 1].result[0]
         assert scenarios[i].result[1] >= scenarios[i + 1].result[1]
+
 
 def test_higher_alpha_tighter_intervals():
     ''' Get confidence intervals for various alpha levels and assert that they are shrinking as alpha increases'''
@@ -74,18 +79,22 @@ def test_higher_alpha_tighter_intervals():
     assert_higher_alpha_tighter_intervals(gaussian.Interval, simulator)
     assert_higher_alpha_tighter_intervals(clopper_pearson.Interval, simulator)   
 
+
 def assert_interval_within(estimator, simulator, expected):
     scenario = Scenario(simulator, estimator())
     scenario.get_interval()
     assert scenario.result[0] >= expected[0]
     assert scenario.result[1] <= expected[1]
 
+
 def assert_estimation_is_none(estimator):
     assert estimator().get() is None
+
 
 def assert_interval_is_none(estimator):
     assert estimator().get()[0] is None
     assert estimator().get()[1] is None
+
 
 def test_no_data_estimation_is_none():
     assert_estimation_is_none(ips.Estimator)
@@ -95,6 +104,7 @@ def test_no_data_estimation_is_none():
     assert_interval_is_none(cressieread.Interval)
     assert_interval_is_none(gaussian.Interval)
     assert_interval_is_none(clopper_pearson.Interval)
+
 
 def test_convergence_with_no_overflow():
     def simulator():
@@ -107,6 +117,38 @@ def test_convergence_with_no_overflow():
     assert_interval_within(gaussian.Interval, simulator, expected)
     assert_interval_within(clopper_pearson.Interval, simulator, expected)
     assert_interval_within(cressieread.Interval, simulator, expected)
+
+
+def assert_summation_works(estimator, simulator):
+    scenario1000 = Scenario(lambda: simulator(1000), estimator())
+    scenario2000 = Scenario(lambda: simulator(2000), estimator())
+    scenario3000 = Scenario(lambda: simulator(3000), estimator())
+
+    scenario1000.aggregate()
+    scenario2000.aggregate()
+
+    result_1000_plus_2000 = (scenario1000.estimator + scenario2000.estimator).get()
+    scenario3000.aggregate()
+    result_3000 = scenario3000.estimator.get()
+
+    if isinstance(result_1000_plus_2000, float):
+        Helper.assert_is_close(result_3000, result_1000_plus_2000)
+    else:
+        Helper.assert_is_close(result_3000[0], result_1000_plus_2000[0])     
+        Helper.assert_is_close(result_3000[1], result_1000_plus_2000[1])    
+
+def test_summation_works():
+    def simulator(n):
+        for i in range(n):
+            chosen = i % 2
+            yield  {'p_log': 0.5,
+                    'r': 1 if chosen == 0 else 0,
+                    'p_pred': 0.2 if chosen == 0 else 0.8}
+
+    assert_summation_works(ips.Estimator, simulator)
+    assert_summation_works(snips.Estimator, simulator)
+    assert_summation_works(gaussian.Interval, simulator)
+    assert_summation_works(clopper_pearson.Interval, simulator)
 
 def test_cats_ips():
     ips_estimator = ips.Estimator()

@@ -7,14 +7,16 @@ class Scenario:
         self.result = None
         self.alpha = alpha
 
-    def get_estimate(self):
+    def aggregate(self):
         for example in self.simulator():
             self.estimator.add_example(**example)
+
+    def get_estimate(self):
+        self.aggregate()
         self.result = self.estimator.get()
 
     def get_interval(self):
-        for example in self.simulator():
-            self.estimator.add_example(**example)
+        self.aggregate()
         self.result = self.estimator.get(self.alpha)
 
 

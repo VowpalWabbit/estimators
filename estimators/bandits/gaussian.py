@@ -30,3 +30,10 @@ class Interval(base.Interval):
         gauss_delta = z_gaussian_cdf * math.sqrt(variance / self.examples_count)
         ips = self.weighted_reward / self.examples_count
         return [ips - gauss_delta, ips + gauss_delta]
+
+    def __add__(self, other: 'Interval') -> 'Interval':
+        result = Interval()
+        result.examples_count = self.examples_count + other.examples_count
+        result.weighted_reward = self.weighted_reward + other.weighted_reward
+        result.weighted_reward_sq = self.weighted_reward_sq + other.weighted_reward_sq
+        return result

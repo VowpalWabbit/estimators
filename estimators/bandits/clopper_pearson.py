@@ -26,3 +26,11 @@ class Interval(base.Interval):
             return [beta.ppf(alpha / 2, successes, n - successes + 1),
                     beta.ppf(1 - alpha / 2, successes + 1, n - successes)]
         return [None, None]
+
+    def __add__(self, other: 'Interval') -> 'Interval':
+        result = Interval()
+        result.examples_count = self.examples_count + other.examples_count
+        result.weighted_reward = self.weighted_reward + other.weighted_reward
+        result.max_weighted_reward = max(self.max_weighted_reward, other.max_weighted_reward)
+        return result
+
