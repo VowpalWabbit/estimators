@@ -112,3 +112,17 @@ def test_various_slots_count():
     assert_estimations_within(pdis_cressieread.Estimator, simulator, expected)
     assert_intervals_within(pdis_cressieread.Interval, simulator, expected)
 
+def test_convergence_with_no_overflow():
+    def simulator():
+        for i in range(1000000):
+            chosen0 = i % 2   
+            yield  {'p_logs': [0.5, 1],
+                    'rs': [chosen0, chosen0], 
+                    'p_preds': [0.2 if chosen0 == 1 else 0.8, 1]}
+
+    expected = [(0.15, 0.25), (0.15, 0.25)]
+    
+    assert_estimations_within(pdis_cressieread.Estimator, simulator, expected)
+    assert_intervals_within(pdis_cressieread.Interval, simulator, expected)
+
+
