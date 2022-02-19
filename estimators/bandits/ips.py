@@ -1,4 +1,5 @@
 from estimators.bandits import base
+from typing import Optional
 
 
 class Estimator(base.Estimator):
@@ -14,5 +15,5 @@ class Estimator(base.Estimator):
         w = p_pred / p_log
         self.weighted_reward += r * w * count
 
-    def get(self) -> float:
+    def get(self) -> Optional[float]:
         return self.weighted_reward/self.examples_count if self.examples_count > 0 else None

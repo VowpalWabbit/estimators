@@ -2,6 +2,7 @@
 
 from math import fsum, inf
 from estimators.bandits import base
+from typing import Optional
 
 
 class Estimator(base.Estimator):
@@ -30,7 +31,7 @@ class Estimator(base.Estimator):
         return fsum(c * (w - 1) / ((w - 1) * beta + n)
                     for c, w, _ in self.data)
 
-    def get(self) -> float:
+    def get(self) -> Optional[float]:
         from scipy.optimize import brentq
 
         n = fsum(c for c, _, _ in self.data)

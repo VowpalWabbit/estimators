@@ -2,7 +2,7 @@
 
 from math import fsum, inf
 from estimators.bandits import base
-from typing import List
+from typing import List, Optional
 
 
 class Estimator(base.Estimator):
@@ -27,7 +27,7 @@ class Estimator(base.Estimator):
             self.wmax = max(self.wmax, w)
             self.wmin = min(self.wmin, w)
 
-    def get(self) -> float:
+    def get(self) -> Optional[float]:
         n = fsum(c for c, _, _ in self.data)
         if n == 0:
             return None
@@ -83,7 +83,7 @@ class Interval(base.Interval):
             self.wmax = max(self.wmax, w)
             self.wmin = min(self.wmin, w)
 
-    def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[float]:
+    def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[Optional[float]]:
         from math import isclose, sqrt
         from scipy.stats import f
 
