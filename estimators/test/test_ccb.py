@@ -100,12 +100,13 @@ def test_higher_alpha_tighter_intervals():
 
 def test_various_slots_count():
     def simulator():
-        yield {'p_logs': [1, 1],
-               'rs': [1, 1],
-               'p_preds': [1, 1]}
-        yield {'p_logs': [1],
-               'rs': [1],
-               'p_preds': [1]}
+        for i in range(100):
+            yield {'p_logs': [1, 1],
+                   'rs': [1, 1],
+                   'p_preds': [1, 1]}
+            yield {'p_logs': [1],
+                   'rs': [1],
+                   'p_preds': [1]}
 
     expected = [(0.9, 1.1), (0.4, 0.6)]
     assert_estimations_within(pdis_cressieread.Estimator, simulator, expected)
