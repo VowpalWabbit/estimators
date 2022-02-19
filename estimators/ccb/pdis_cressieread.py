@@ -3,6 +3,10 @@ from math import fsum, inf
 from typing import List
 
 
+def _get_safe(values, index, default):
+    return values[index] if index < len(values) else default
+
+
 class Estimator(base.Estimator):
     def __init__(self, wmin: float = 0, wmax: float = inf):
         assert wmin < 1
@@ -36,14 +40,14 @@ class Estimator(base.Estimator):
         stepvhats = []
         for step in range(1, self.maxstep + 1):
             sumw = fsum(c * w for c, ws, _ in self.data
-                        for w in (prod(ws[:step]),))
+                        for w in (prod(ws[:min(step, len(ws))]),))
             sumwsq = fsum(c * w**2 for c, ws, _ in self.data
-                          for w in (prod(ws[:step]),))
-            sumwr = fsum(c * w * rs[step - 1] for c, ws, rs in self.data
-                         for w in (prod(ws[:step]),))
-            sumwsqr = fsum(c * w**2 * rs[step - 1] for c, ws, rs in self.data
-                           for w in (prod(ws[:step]),))
-            sumr = fsum(c * rs[ - 1] for c, _, rs in self.data)
+                          for w in (prod(ws[:min(step, len(ws))]),))
+            sumwr = fsum(c * w * _get_safe(rs, step - 1, 0) for c, ws, rs in self.data
+                         for w in (prod(ws[:min(step, len(ws))]),))
+            sumwsqr = fsum(c * w**2 * _get_safe(rs, step - 1, 0) for c, ws, rs in self.data
+                           for w in (prod(ws[:min(step, len(ws))]),))
+            sumr = fsum(c * _get_safe(rs, step - 1, 0) for c, _, rs in self.data)
             wfake = self.wmax**step if sumw < n else self.wmin**step
 
             if wfake == inf:
@@ -90,7 +94,7 @@ class Interval(base.Interval):
             self.wmin = min(self.wmin, min(ws))
             self.maxstep = max(self.maxstep, len(ws))
 
-    def get(self, alpha: float = 0.05) -> List[List[float]]:
+    def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[List[float]]:
         from math import isclose, sqrt
         from scipy.stats import f
 
@@ -106,15 +110,15 @@ class Interval(base.Interval):
 
         for step in range(1, self.maxstep + 1):
             sumw = fsum(c * w for c, ws, _ in self.data
-                              for w in (prod(ws[:step]),))
+                              for w in (prod(ws[:min(step, len(ws))]),))
             sumwsq = fsum(c * w**2 for c, ws, _ in self.data
-                              for w in (prod(ws[:step]),))
-            sumwr = fsum(c * w * rs[step - 1] for c, ws, rs in self.data
-                                           for w in (prod(ws[:step]),))
-            sumwsqr = fsum(c * w**2 * rs[step - 1] for c, ws, rs in self.data
-                                                for w in (prod(ws[:step]),))
-            sumwsqrsq = fsum(c * w**2 * rs[step - 1]**2 for c, ws, rs in self.data
-                                                    for w in (prod(ws[:step]),))
+                              for w in (prod(ws[:min(step, len(ws))]),))
+            sumwr = fsum(c * w * _get_safe(rs, step - 1, 0) for c, ws, rs in self.data
+                                           for w in (prod(ws[:min(step, len(ws))]),))
+            sumwsqr = fsum(c * w**2 * _get_safe(rs, step - 1, 0) for c, ws, rs in self.data
+                                                for w in (prod(ws[:min(step, len(ws))]),))
+            sumwsqrsq = fsum(c * w**2 * _get_safe(rs, step - 1, 0)**2 for c, ws, rs in self.data
+                                                    for w in (prod(ws[:min(step, len(ws))]),))
 
             uncwfake = self.wmax**step if sumw < n else self.wmin**step
             if uncwfake == inf:
@@ -137,17 +141,12 @@ class Interval(base.Interval):
                              - (r**2 * sumwsq - 2 * r * sumwsqr + sumwsqrsq) / (1 + n)
                             )
                         z = phi + 1 / (2 * n)
-                        if isclose(y*z, 0, abs_tol=1e-9):
-                            y = 0
-
-                        if z <= 0 and y * z >= 0:
-                            kappa = sqrt(y / (2 * z))
-                            if isclose(kappa, 0):
-                                candidates.append(sign * r)
-                            else:
-                                gstar = x - sqrt(2 * y * z)
-
-                                candidates.append(gstar)
+                        if isclose(y*z, 0, abs_tol=atol):
+                            gstar = x - sqrt(2) * atol
+                            candidates.append(gstar)
+                        elif z <= 0 and y * z >= 0:
+                            gstar = x - sqrt(2 * y * z)
+                            candidates.append(gstar)
                     else:
                         barw = (wfake + sumw) / (1 + n)
                         barwsq = (wfake*wfake + sumwsq) / (1 + n)
@@ -160,16 +159,13 @@ class Interval(base.Interval):
                             y = (barwsqr - barw * barwr)**2 / (barwsq - barw**2) - (barwsqrsq - barwr**2)
                             z = phi + (1/2) * (1 - barw)**2 / (barwsq - barw**2)
 
-                            if isclose(y*z, 0, abs_tol=1e-9):
-                                y = 0
+                            if isclose(y*z, 0, abs_tol=atol):
+                                gstar = x - sqrt(2) * atol
+                                candidates.append(gstar)
+                            elif z <= 0 and y * z >= 0:
+                                gstar = x - sqrt(2 * y * z)
+                                candidates.append(gstar)
 
-                            if z <= 0 and y * z >= 0:
-                                kappa = sqrt(y / (2 * z)) if y * z > 0 else 0
-                                if isclose(kappa, 0):
-                                    candidates.append(sign * r)
-                                else:
-                                    gstar = x - sqrt(2 * y * z)
-                                    candidates.append(gstar)
 
                 best = min(candidates)
                 vbound = min(self.rmax, max(self.rmin, sign*best))
