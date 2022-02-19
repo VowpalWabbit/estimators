@@ -24,8 +24,9 @@ class Estimator(base.Estimator):
         if not isinstance(p_logs, list) or not isinstance(p_preds, list):
             raise ValueError('Error: p_logs and p_preds must be lists')
 
-        if(len(p_logs) != len(p_preds)):
-            raise ValueError('Error: p_logs and p_preds must be the same length, found {} and {} respectively'.format(len(p_logs), len(p_preds)))
+        if len(p_logs) != len(p_preds):
+            raise ValueError(f'Error: p_logs and p_preds must be the same length, found {len(p_logs)} '
+                             f'and {len(p_preds)} respectively')
 
         self.examples_count += count
         num_slots = len(p_logs)

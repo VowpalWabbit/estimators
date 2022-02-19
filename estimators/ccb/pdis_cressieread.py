@@ -20,7 +20,7 @@ class Estimator(base.Estimator):
 
     def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float], count: float = 1.0) -> None:
         if count > 0:
-            ws = [ p_pred / p_log for p_pred, p_log in zip(p_preds, p_logs) ]
+            ws = [p_pred / p_log for p_pred, p_log in zip(p_preds, p_logs)]
             assert all(w >= 0 for w in ws), 'Error: negative importance weight'
 
             self.data.append((count, ws, rs))
@@ -42,27 +42,27 @@ class Estimator(base.Estimator):
         for step in range(1, self.maxstep + 1):
             sumw = fsum(c * w for c, ws, _ in self.data
                         for w in (prod(ws[:min(step, len(ws))]),))
-            sumwsq = fsum(c * w**2 for c, ws, _ in self.data
+            sumwsq = fsum(c * w ** 2 for c, ws, _ in self.data
                           for w in (prod(ws[:min(step, len(ws))]),))
             sumwr = fsum(c * w * _get_safe(rs, step - 1, 0) for c, ws, rs in self.data
                          for w in (prod(ws[:min(step, len(ws))]),))
-            sumwsqr = fsum(c * w**2 * _get_safe(rs, step - 1, 0) for c, ws, rs in self.data
+            sumwsqr = fsum(c * w ** 2 * _get_safe(rs, step - 1, 0) for c, ws, rs in self.data
                            for w in (prod(ws[:min(step, len(ws))]),))
             sumr = fsum(c * _get_safe(rs, step - 1, 0) for c, _, rs in self.data)
-            wfake = self.wmax**step if sumw < n else self.wmin**step
+            wfake = self.wmax ** step if sumw < n else self.wmin ** step
 
             if wfake == inf:
                 gamma = -(1 + n) / n
                 beta = 0
             else:
                 a = (wfake + sumw) / (1 + n)
-                b = (wfake**2 + sumwsq) / (1 + n)
-                assert a*a < b
-                gamma = (b - a) / (a*a - b)
-                beta = (1 - a) / (a*a - b)
+                b = (wfake ** 2 + sumwsq) / (1 + n)
+                assert a * a < b
+                gamma = (b - a) / (a * a - b)
+                beta = (1 - a) / (a * a - b)
 
             vhat = (-gamma * sumwr - beta * sumwsqr) / (1 + n)
-            missing = max(0, 1 - (-gamma * sumw - beta * sumwsq) / (1 + n))
+            missing = max(0.0, 1 - (-gamma * sumw - beta * sumwsq) / (1 + n))
             rhatmissing = sumr / n
             vhat += missing * rhatmissing
 
@@ -87,7 +87,7 @@ class Interval(base.Interval):
 
     def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float], count: float = 1.0) -> None:
         if count > 0:
-            ws = [ p_pred / p_log for p_pred, p_log in zip(p_preds, p_logs) ]
+            ws = [p_pred / p_log for p_pred, p_log in zip(p_preds, p_logs)]
             assert all(w >= 0 for w in ws), 'Error: negative importance weight'
 
             self.data.append((count, ws, rs))
@@ -112,38 +112,38 @@ class Interval(base.Interval):
 
         for step in range(1, self.maxstep + 1):
             sumw = fsum(c * w for c, ws, _ in self.data
-                              for w in (prod(ws[:min(step, len(ws))]),))
-            sumwsq = fsum(c * w**2 for c, ws, _ in self.data
-                              for w in (prod(ws[:min(step, len(ws))]),))
+                        for w in (prod(ws[:min(step, len(ws))]),))
+            sumwsq = fsum(c * w ** 2 for c, ws, _ in self.data
+                          for w in (prod(ws[:min(step, len(ws))]),))
             sumwr = fsum(c * w * _get_safe(rs, step - 1, 0) for c, ws, rs in self.data
-                                           for w in (prod(ws[:min(step, len(ws))]),))
-            sumwsqr = fsum(c * w**2 * _get_safe(rs, step - 1, 0) for c, ws, rs in self.data
-                                                for w in (prod(ws[:min(step, len(ws))]),))
-            sumwsqrsq = fsum(c * w**2 * _get_safe(rs, step - 1, 0)**2 for c, ws, rs in self.data
-                                                    for w in (prod(ws[:min(step, len(ws))]),))
+                         for w in (prod(ws[:min(step, len(ws))]),))
+            sumwsqr = fsum(c * w ** 2 * _get_safe(rs, step - 1, 0) for c, ws, rs in self.data
+                           for w in (prod(ws[:min(step, len(ws))]),))
+            sumwsqrsq = fsum(c * w ** 2 * _get_safe(rs, step - 1, 0) ** 2 for c, ws, rs in self.data
+                             for w in (prod(ws[:min(step, len(ws))]),))
 
-            uncwfake = self.wmax**step if sumw < n else self.wmin**step
+            uncwfake = self.wmax ** step if sumw < n else self.wmin ** step
             if uncwfake == inf:
-               uncgstar = 1 + 1 / n
+                uncgstar = 1 + 1 / n
             else:
-               unca = (uncwfake + sumw) / (1 + n)
-               uncb = (uncwfake**2 + sumwsq) / (1 + n)
-               uncgstar = (1 + n) * (unca - 1)**2 / (uncb - unca*unca)
+                unca = (uncwfake + sumw) / (1 + n)
+                uncb = (uncwfake ** 2 + sumwsq) / (1 + n)
+                uncgstar = (1 + n) * (unca - 1) ** 2 / (uncb - unca * unca)
 
-            Delta = f.isf(q=alpha, dfn=1, dfd=n)
-            phi = (-uncgstar - Delta) / (2 * (1 + n))
+            delta = f.isf(q=alpha, dfn=1, dfd=n)
+            phi = (-uncgstar - delta) / (2 * (1 + n))
 
             bounds = []
             for r, sign in ((self.rmin, 1), (self.rmax, -1)):
                 candidates = []
-                for wfake in (self.wmin**(1+step), self.wmax**(1+step)):
+                for wfake in (self.wmin ** (1 + step), self.wmax ** (1 + step)):
                     if wfake == inf:
                         x = sign * (r + (sumwr - sumw * r) / n)
-                        y = (  (r * sumw - sumwr)**2 / (n * (1 + n))
-                             - (r**2 * sumwsq - 2 * r * sumwsqr + sumwsqrsq) / (1 + n)
-                            )
+                        y = ((r * sumw - sumwr) ** 2 / (n * (1 + n))
+                             - (r ** 2 * sumwsq - 2 * r * sumwsqr + sumwsqrsq) / (1 + n)
+                             )
                         z = phi + 1 / (2 * n)
-                        if isclose(y*z, 0, abs_tol=atol):
+                        if isclose(y * z, 0, abs_tol=atol):
                             gstar = x - sqrt(2) * atol
                             candidates.append(gstar)
                         elif z <= 0 and y * z >= 0:
@@ -151,26 +151,25 @@ class Interval(base.Interval):
                             candidates.append(gstar)
                     else:
                         barw = (wfake + sumw) / (1 + n)
-                        barwsq = (wfake*wfake + sumwsq) / (1 + n)
+                        barwsq = (wfake * wfake + sumwsq) / (1 + n)
                         barwr = sign * (wfake * r + sumwr) / (1 + n)
                         barwsqr = sign * (wfake * wfake * r + sumwsqr) / (1 + n)
                         barwsqrsq = (wfake * wfake * r * r + sumwsqrsq) / (1 + n)
 
-                        if barwsq > barw**2:
-                            x = barwr + ((1 - barw) * (barwsqr - barw * barwr) / (barwsq - barw**2))
-                            y = (barwsqr - barw * barwr)**2 / (barwsq - barw**2) - (barwsqrsq - barwr**2)
-                            z = phi + (1/2) * (1 - barw)**2 / (barwsq - barw**2)
+                        if barwsq > barw ** 2:
+                            x = barwr + ((1 - barw) * (barwsqr - barw * barwr) / (barwsq - barw ** 2))
+                            y = (barwsqr - barw * barwr) ** 2 / (barwsq - barw ** 2) - (barwsqrsq - barwr ** 2)
+                            z = phi + (1 / 2) * (1 - barw) ** 2 / (barwsq - barw ** 2)
 
-                            if isclose(y*z, 0, abs_tol=atol):
+                            if isclose(y * z, 0, abs_tol=atol):
                                 gstar = x - sqrt(2) * atol
                                 candidates.append(gstar)
                             elif z <= 0 and y * z >= 0:
                                 gstar = x - sqrt(2 * y * z)
                                 candidates.append(gstar)
 
-
                 best = min(candidates)
-                vbound = min(self.rmax, max(self.rmin, sign*best))
+                vbound = min(self.rmax, max(self.rmin, sign * best))
                 bounds.append(vbound)
 
             stepbounds.append(bounds)
