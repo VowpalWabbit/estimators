@@ -97,3 +97,32 @@ def test_higher_alpha_tighter_intervals():
     assert_higher_alpha_tighter_intervals(lambda: first_slot.Interval(cressieread.Interval()), simulator)
     assert_higher_alpha_tighter_intervals(lambda: first_slot.Interval(gaussian.Interval()), simulator)
     assert_higher_alpha_tighter_intervals(lambda: first_slot.Interval(clopper_pearson.Interval()), simulator)
+
+def test_various_slots_count():
+    def simulator():
+        for i in range(100):
+            yield {'p_logs': [1, 1],
+                   'rs': [1, 1],
+                   'p_preds': [1, 1]}
+            yield {'p_logs': [1],
+                   'rs': [1],
+                   'p_preds': [1]}
+
+    expected = [(0.9, 1.1), (0.4, 0.6)]
+    assert_estimations_within(pdis_cressieread.Estimator, simulator, expected)
+    assert_intervals_within(pdis_cressieread.Interval, simulator, expected)
+
+def test_convergence_with_no_overflow():
+    def simulator():
+        for i in range(1000000):
+            chosen0 = i % 2   
+            yield  {'p_logs': [0.5, 1],
+                    'rs': [chosen0, chosen0], 
+                    'p_preds': [0.2 if chosen0 == 1 else 0.8, 1]}
+
+    expected = [(0.15, 0.25), (0.15, 0.25)]
+    
+    assert_estimations_within(pdis_cressieread.Estimator, simulator, expected)
+    assert_intervals_within(pdis_cressieread.Interval, simulator, expected)
+
+
