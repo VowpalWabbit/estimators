@@ -35,7 +35,8 @@ class Estimator(base.Estimator):
             return reduce(operator.mul, vs, 1)
 
         n = fsum(c for c, _, _ in self.data)
-        assert n > 0, 'Error: No data point added'
+        if n == 0:
+            return []
 
         stepvhats = []
         for step in range(1, self.maxstep + 1):
@@ -104,7 +105,8 @@ class Interval(base.Interval):
             return reduce(operator.mul, vs, 1)
 
         n = fsum(c for c, _, _ in self.data)
-        assert n > 0, 'Error: No data point added'
+        if n == 0:
+            return []
 
         stepbounds = []
 

@@ -1,8 +1,6 @@
 import numpy as np
 
-from estimators.bandits import clopper_pearson
-from estimators.bandits import gaussian
-from estimators.bandits import cressieread
+from estimators import bandits
 from estimators.ccb import first_slot, pdis_cressieread
 from estimators.test.utils import Helper, Scenario, get_intervals
 
@@ -27,9 +25,9 @@ def test_more_examples_tighter_intervals():
                     'rs': [chosen, (chosen + 1) % 2], 
                     'p_preds': [0.5 + 0.3 * (-1)**chosen, 1]}
 
-    assert_more_examples_tighter_intervals(lambda: first_slot.Interval(cressieread.Interval()), simulator)
-    assert_more_examples_tighter_intervals(lambda: first_slot.Interval(gaussian.Interval()), simulator)
-    assert_more_examples_tighter_intervals(lambda: first_slot.Interval(clopper_pearson.Interval()), simulator)
+    assert_more_examples_tighter_intervals(lambda: first_slot.Interval(bandits.cressieread.Interval()), simulator)
+    assert_more_examples_tighter_intervals(lambda: first_slot.Interval(bandits.gaussian.Interval()), simulator)
+    assert_more_examples_tighter_intervals(lambda: first_slot.Interval(bandits.clopper_pearson.Interval()), simulator)
 
 def assert_estimations_within(estimator, simulator, expected):
     scenario = Scenario(simulator, estimator())
@@ -94,9 +92,10 @@ def test_higher_alpha_tighter_intervals():
                     'rs': [chosen, (chosen + 1) % 2], 
                     'p_preds': [0.5 + 0.3 * (-1)**chosen, 1]}
 
-    assert_higher_alpha_tighter_intervals(lambda: first_slot.Interval(cressieread.Interval()), simulator)
-    assert_higher_alpha_tighter_intervals(lambda: first_slot.Interval(gaussian.Interval()), simulator)
-    assert_higher_alpha_tighter_intervals(lambda: first_slot.Interval(clopper_pearson.Interval()), simulator)
+    assert_higher_alpha_tighter_intervals(lambda: first_slot.Interval(bandits.cressieread.Interval()), simulator)
+    assert_higher_alpha_tighter_intervals(lambda: first_slot.Interval(bandits.gaussian.Interval()), simulator)
+    assert_higher_alpha_tighter_intervals(lambda: first_slot.Interval(bandits.clopper_pearson.Interval()), simulator)
+
 
 def test_various_slots_count():
     def simulator():
@@ -112,6 +111,7 @@ def test_various_slots_count():
     assert_estimations_within(pdis_cressieread.Estimator, simulator, expected)
     assert_intervals_within(pdis_cressieread.Interval, simulator, expected)
 
+
 def test_convergence_with_no_overflow():
     def simulator():
         for i in range(1000000):
@@ -124,5 +124,12 @@ def test_convergence_with_no_overflow():
     
     assert_estimations_within(pdis_cressieread.Estimator, simulator, expected)
     assert_intervals_within(pdis_cressieread.Interval, simulator, expected)
+
+
+def test_no_data_estimation_is_none():
+    assert first_slot.Estimator(bandits.ips.Estimator()).get() == []
+    assert first_slot.Estimator(bandits.cressieread.Interval()).get() == []
+    assert pdis_cressieread.Estimator().get() == []
+    assert pdis_cressieread.Interval().get() == []
 
 

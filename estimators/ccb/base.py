@@ -19,7 +19,7 @@ class Estimator(ABC):
 		...
 
 	@abstractmethod
-	def get(self) -> float:
+	def get(self) -> List[float]:
 		""" Calculates the selected estimator
 
 		Returns:
@@ -43,7 +43,7 @@ class Interval(ABC):
 		...
 
 	@abstractmethod
-	def get(self, alpha: float) -> List[float]:
+	def get(self, alpha: float) -> List[List[float]]:
 		""" Calculates the CI
 		Args:
 			alpha: alpha value
