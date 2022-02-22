@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setuptools.setup(
     name="vw-estimators",
-    version="0.0.1",
+    version="0.1.0",
     description="Python package of estimators to perform off-policy evaluation",
     long_description=long_description,
     long_description_content_type="text/markdown",
