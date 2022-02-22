@@ -1,5 +1,5 @@
 from estimators.slates import base
-from typing import List
+from typing import List, Optional
 
 # PseudoInverse estimator for slate recommendation. The following implements the
 # case for a Cartesian product when mu is a product distribution. This can be
@@ -8,8 +8,12 @@ from typing import List
 
 
 class Estimator(base.Estimator):
+    examples_count: float
+    weighted_reward: float
+
     def __init__(self):
-        self.data = {'n':0.,'N':0}
+        self.examples_count = 0
+        self.weighted_reward = 0
 
     def add_example(self, p_logs: List[float], r: float, p_preds: List[float], count: float = 1.0) -> None:
         """Expects lists for logged probabilities and predicted probabilities. These should correspond to each slot.
@@ -20,21 +24,24 @@ class Estimator(base.Estimator):
         if not isinstance(p_logs, list) or not isinstance(p_preds, list):
             raise ValueError('Error: p_logs and p_preds must be lists')
 
-        if(len(p_logs) != len(p_preds)):
-            raise ValueError('Error: p_logs and p_preds must be the same length, found {} and {} respectively'.format(len(p_logs), len(p_preds)))
+        if len(p_logs) != len(p_preds):
+            raise ValueError(f'Error: p_logs and p_preds must be the same length, found {len(p_logs)} '
+                             f'and {len(p_preds)} respectively')
 
-        self.data['N'] += count
-        p_over_ps = 0
+        self.examples_count += count
         num_slots = len(p_logs)
+        w = 1 - num_slots
         for p_log, p_pred in zip(p_logs, p_preds):
-            p_over_ps += p_pred/p_log
-        p_over_ps -= num_slots - 1
+            w += p_pred/p_log
+        self.weighted_reward += r * w * count
 
-        if r != 0:
-            self.data['n'] += r*p_over_ps*count
+    def get(self) -> Optional[float]:
+        if self.examples_count > 0:
+            return self.weighted_reward / self.examples_count
+        return None
 
-    def get(self) -> float:
-        if self.data['N'] == 0:
-            raise ValueError('Error: No data point added')
-
-        return self.data['n']/self.data['N']
+    def __add__(self, other: 'Estimator') -> 'Estimator':
+        result = Estimator()
+        result.examples_count = self.examples_count + other.examples_count
+        result.weighted_reward = self.weighted_reward + other.weighted_reward
+        return result

@@ -1,7 +1,7 @@
 import math
 from estimators.bandits import base
 from scipy import stats
-from typing import List
+from typing import List, Optional
 
 
 class Interval(base.Interval):
@@ -20,12 +20,20 @@ class Interval(base.Interval):
         self.weighted_reward += r * w * count
         self.weighted_reward_sq += ((r * w)**2) * count
 
-    def get(self, alpha: float = 0.05) -> List[float]:
-        if self.weighted_reward_sq > 0.0 and self.examples_count > 1:
-            z_gaussian_cdf = stats.norm.ppf(1 - alpha / 2)
-            variance = (self.weighted_reward_sq - self.weighted_reward**2 / self.examples_count) / \
-                       (self.examples_count - 1)
-            gauss_delta = z_gaussian_cdf * math.sqrt(variance / self.examples_count)
-            ips = self.weighted_reward / self.examples_count
-            return [ips - gauss_delta, ips + gauss_delta]
-        return [0, 0]
+    def get(self, alpha: float = 0.05) -> List[Optional[float]]:
+        if self.examples_count <= 1:
+            return [None, None]
+
+        z_gaussian_cdf = stats.norm.ppf(1 - alpha / 2)
+        variance = (self.weighted_reward_sq - self.weighted_reward**2 / self.examples_count) / \
+                   (self.examples_count - 1)
+        gauss_delta = z_gaussian_cdf * math.sqrt(variance / self.examples_count)
+        ips = self.weighted_reward / self.examples_count
+        return [ips - gauss_delta, ips + gauss_delta]
+
+    def __add__(self, other: 'Interval') -> 'Interval':
+        result = Interval()
+        result.examples_count = self.examples_count + other.examples_count
+        result.weighted_reward = self.weighted_reward + other.weighted_reward
+        result.weighted_reward_sq = self.weighted_reward_sq + other.weighted_reward_sq
+        return result
