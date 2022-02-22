@@ -178,7 +178,7 @@ def test_cats_ips():
 
         ips_estimator.add_example(data['p'], r, data['pred_p'])
         snips_estimator.add_example(data['p'], r, data['pred_p'])
-        assert ips_estimator.get() >= snips_estimator.get()
+    assert ips_estimator.get() >= snips_estimator.get()
 
 
 def test_cats_transformer_on_edges():
