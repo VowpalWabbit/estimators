@@ -8,17 +8,13 @@ def _get_safe(values, index, default):
     return values[index] if index < len(values) else default
 
 
-class _Impl:
-    wmin: float
-    wmax: float
-    maxstep: int
-    n: IncrementalFsum
-    sumw: List[IncrementalFsum]
-    sumwsq: List[IncrementalFsum]
-    sumwr: List[IncrementalFsum]
-    sumwsqr: List[IncrementalFsum]  
-    sumr: List[IncrementalFsum]
+def _adjust_statistics_container(statistics, count, constructor):
+    constructor = IncrementalFsum if len(statistics) == 0 else constructor
+    for i in range(max(count - len(statistics), 0)):
+        statistics.append(constructor())
 
+ 
+class Estimator(base.Estimator):
     def __init__(self, wmin: float = 0, wmax: float = inf):
         assert wmin < 1
         assert wmax > 1
@@ -27,6 +23,7 @@ class _Impl:
         self.wmax = wmax
         self.maxstep = 0
 
+        self.data = []
         self.n = IncrementalFsum()
         self.sumw = []
         self.sumwsq = []
@@ -34,22 +31,18 @@ class _Impl:
         self.sumwsqr = []
         self.sumr = []
 
-    def _resize_statistics(self, statistics, constructor):
-        constructor = IncrementalFsum if len(statistics) == 0 else constructor
-        for i in range(max(self.maxstep - len(statistics), 0)):
-            statistics.append(constructor())
 
-    def add(self, p_logs: List[float], rs: List[float], p_preds: List[float], count: float = 1.0) -> None:
+    def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float], count: float = 1.0) -> None:
         from copy import deepcopy
         if count > 0:
             ws = [p_pred / p_log for p_pred, p_log in zip(p_preds, p_logs)]
             assert all(w >= 0 for w in ws), 'Error: negative importance weight'
             self.maxstep = max(self.maxstep, len(ws))
-            self._resize_statistics(self.sumw, lambda: deepcopy(self.sumw[-1]))
-            self._resize_statistics(self.sumwsq, lambda: deepcopy(self.sumwsq[-1]))
-            self._resize_statistics(self.sumwr, IncrementalFsum)
-            self._resize_statistics(self.sumwsqr, IncrementalFsum)
-            self._resize_statistics(self.sumr, IncrementalFsum)
+            _adjust_statistics_container(self.sumw, self.maxstep, lambda: deepcopy(self.sumw[-1]))
+            _adjust_statistics_container(self.sumwsq, self.maxstep, lambda: deepcopy(self.sumw[-1]))
+            _adjust_statistics_container(self.sumwr, self.maxstep, IncrementalFsum)
+            _adjust_statistics_container(self.sumwsqr, self.maxstep, IncrementalFsum)
+            _adjust_statistics_container(self.sumr, self.maxstep, IncrementalFsum)
             w = 1.0
             self.n += count
             for i in range(self.maxstep):
@@ -64,31 +57,20 @@ class _Impl:
             self.wmin = min(self.wmin, min(ws))
 
 
-class Estimator(base.Estimator):
-    _impl: _Impl
-
-    def __init__(self, wmin: float = 0, wmax: float = inf):
-        self._impl = _Impl(wmin, wmax)
-
-
-    def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float], count: float = 1.0) -> None:
-        self._impl.add(p_logs, rs, p_preds, count)
-
-
     def get(self) -> List[float]:
-        n = float(self._impl.n)
+        n = float(self.n)
         if n == 0:
             return []
 
         stepvhats = []
-        for step in range(self._impl.maxstep):
-            sumw = float(self._impl.sumw[step])
-            sumwsq = float(self._impl.sumwsq[step])
-            sumwr = float(self._impl.sumwr[step])
-            sumwsqr = float(self._impl.sumwsqr[step])
-            sumr = float(self._impl.sumr[step])
+        for step in range(self.maxstep):
+            sumw = float(self.sumw[step])
+            sumwsq = float(self.sumwsq[step])
+            sumwr = float(self.sumwr[step])
+            sumwsqr = float(self.sumwsqr[step])
+            sumr = float(self.sumr[step])
 
-            wfake = self._impl.wmax ** (step + 1) if sumw < n else self._impl.wmin ** (step + 1)
+            wfake = self.wmax ** (step + 1) if sumw < n else self.wmin ** (step + 1)
 
             if wfake == inf:
                 gamma = -(1 + n) / n
