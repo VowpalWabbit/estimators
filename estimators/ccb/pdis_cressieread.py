@@ -9,12 +9,21 @@ def _get_safe(values, index, default):
 
 
 def _resize_statistics(statistics, count, constructor):
-    constructor = IncrementalFsum if len(statistics) == 0 else constructor
-    for i in range(max(count - len(statistics), 0)):
+    for _ in range(max(count - len(statistics), 0)):
         statistics.append(constructor())
 
  
 class Estimator(base.Estimator):
+    wmin: float
+    wmax: float
+    maxstep: int
+    n: IncrementalFsum
+    sumw: List[IncrementalFsum]
+    sumwsq: List[IncrementalFsum]
+    sumwr: List[IncrementalFsum]
+    sumwsqr: List[IncrementalFsum]
+    sumr: List[IncrementalFsum]
+
     def __init__(self, wmin: float = 0, wmax: float = inf):
         assert wmin < 1
         assert wmax > 1
@@ -23,13 +32,12 @@ class Estimator(base.Estimator):
         self.wmax = wmax
         self.maxstep = 0
 
-        self.data = []
         self.n = IncrementalFsum()
-        self.sumw = []
-        self.sumwsq = []
-        self.sumwr = []
-        self.sumwsqr = []
-        self.sumr = []
+        self.sumw = [IncrementalFsum()]
+        self.sumwsq = [IncrementalFsum()]
+        self.sumwr = [IncrementalFsum()]
+        self.sumwsqr = [IncrementalFsum()]
+        self.sumr = [IncrementalFsum()]
 
 
     def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float], count: float = 1.0) -> None:
@@ -47,11 +55,12 @@ class Estimator(base.Estimator):
             self.n += count
             for i in range(self.maxstep):
                 w *= _get_safe(ws, i, 1)
+                r = _get_safe(rs, i, 0)
                 self.sumw[i] += count * w
                 self.sumwsq[i] += count * w ** 2
-                self.sumwr[i] += count * w * _get_safe(rs, i, 0)
-                self.sumwsqr[i] += count * w ** 2 * _get_safe(rs, i, 0)
-                self.sumr[i] += count * _get_safe(rs, i, 0)
+                self.sumwr[i] += count * w * r
+                self.sumwsqr[i] += count * w ** 2 * r
+                self.sumr[i] += count * r
 
             self.wmax = max(self.wmax, max(ws))
             self.wmin = min(self.wmin, min(ws))
@@ -93,6 +102,18 @@ class Estimator(base.Estimator):
 
 
 class Interval(base.Interval):
+    wmin: float
+    wmax: float
+    maxstep: int
+    rmin: float
+    rmax: float
+    n: IncrementalFsum
+    sumw: List[IncrementalFsum]
+    sumwsq: List[IncrementalFsum]
+    sumwr: List[IncrementalFsum]
+    sumwsqr: List[IncrementalFsum]
+    sumwsqrsq: List[IncrementalFsum]
+
     def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1):
         assert wmin < 1
         assert wmax > 1
@@ -104,46 +125,56 @@ class Interval(base.Interval):
         self.rmin = rmin
         self.rmax = rmax
 
-        self.data = []
+        self.n = IncrementalFsum()
+        self.sumw = [IncrementalFsum()]
+        self.sumwsq = [IncrementalFsum()]
+        self.sumwr = [IncrementalFsum()]
+        self.sumwsqr = [IncrementalFsum()]
+        self.sumwsqrsq = [IncrementalFsum()]
 
     def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float], count: float = 1.0) -> None:
+        from copy import deepcopy
         if count > 0:
             ws = [p_pred / p_log for p_pred, p_log in zip(p_preds, p_logs)]
             assert all(w >= 0 for w in ws), 'Error: negative importance weight'
+            self.maxstep = max(self.maxstep, len(ws))
+            _resize_statistics(self.sumw, self.maxstep, lambda: deepcopy(self.sumw[-1]))
+            _resize_statistics(self.sumwsq, self.maxstep, lambda: deepcopy(self.sumwsq[-1]))
+            _resize_statistics(self.sumwr, self.maxstep, IncrementalFsum)
+            _resize_statistics(self.sumwsqr, self.maxstep, IncrementalFsum)
+            _resize_statistics(self.sumwsqrsq, self.maxstep, IncrementalFsum)
+            w = 1.0
+            self.n += count
+            for i in range(self.maxstep):
+                w *= _get_safe(ws, i, 1)
+                r = _get_safe(rs, i, 0)
+                self.sumw[i] += count * w
+                self.sumwsq[i] += count * w ** 2
+                self.sumwr[i] += count * w * r
+                self.sumwsqr[i] += count * w ** 2 * r
+                self.sumwsqrsq[i] += count * w ** 2 * r ** 2
 
-            self.data.append((count, ws, rs))
             self.wmax = max(self.wmax, max(ws))
             self.wmin = min(self.wmin, min(ws))
-            self.maxstep = max(self.maxstep, len(ws))
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[List[float]]:
         from math import isclose, sqrt
         from scipy.stats import f
 
-        def prod(vs):
-            import operator
-            from functools import reduce
-            return reduce(operator.mul, vs, 1)
-
-        n = fsum(c for c, _, _ in self.data)
+        n = float(self.n)
         if n == 0:
             return []
 
         stepbounds = []
 
-        for step in range(1, self.maxstep + 1):
-            sumw = fsum(c * w for c, ws, _ in self.data
-                        for w in (prod(ws[:min(step, len(ws))]),))
-            sumwsq = fsum(c * w ** 2 for c, ws, _ in self.data
-                          for w in (prod(ws[:min(step, len(ws))]),))
-            sumwr = fsum(c * w * _get_safe(rs, step - 1, 0) for c, ws, rs in self.data
-                         for w in (prod(ws[:min(step, len(ws))]),))
-            sumwsqr = fsum(c * w ** 2 * _get_safe(rs, step - 1, 0) for c, ws, rs in self.data
-                           for w in (prod(ws[:min(step, len(ws))]),))
-            sumwsqrsq = fsum(c * w ** 2 * _get_safe(rs, step - 1, 0) ** 2 for c, ws, rs in self.data
-                             for w in (prod(ws[:min(step, len(ws))]),))
+        for step in range(self.maxstep):
+            sumw = float(self.sumw[step])
+            sumwsq = float(self.sumwsq[step])
+            sumwr = float(self.sumwr[step])
+            sumwsqr = float(self.sumwsqr[step])
+            sumwsqrsq = float(self.sumwsqrsq[step])
 
-            uncwfake = self.wmax ** step if sumw < n else self.wmin ** step
+            uncwfake = self.wmax ** (step + 1) if sumw < n else self.wmin ** (step + 1)
             if uncwfake == inf:
                 uncgstar = 1 + 1 / n
             else:
