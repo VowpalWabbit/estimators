@@ -78,43 +78,49 @@ class EstimatorImpl:
         return vhat
 
 
-class Estimator(base.Estimator):
-    _impl: EstimatorImpl
-
-    def __init__(self, wmin: float = 0, wmax: float = inf):
-        self._impl = EstimatorImpl(wmin, wmax, 0)
-
-
-    def add_example(self, p_log: float, r: float, p_pred: float, count: float = 1.0) -> None:
-        self._impl.add(p_pred / p_log, r, count)
-
-
-    def get(self) -> Optional[float]:
-        return self._impl.get()
-
-
-class Interval(base.Interval):
+class IntervalImpl:
+    wmin: float
+    wmax: float
+    rmin: float
+    rmax: float
+    step: int
+    n: IncrementalFsum
+    sumw: IncrementalFsum
+    sumwsq: IncrementalFsum
+    sumwr: IncrementalFsum
+    sumwsqr: IncrementalFsum
+    sumwsqrsq: IncrementalFsum
     # NB: This works better you use the true wmin and wmax
     #     which is _not_ the empirical minimum and maximum
     #     but rather the actual smallest and largest possible values
-    def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1):
+    def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1, step: int = 0):
         assert wmin < 1
         assert wmax > 1
 
         self.wmin = wmin
         self.wmax = wmax
-
         self.rmin = rmin
         self.rmax = rmax
+        self.step = step
 
-        self.data = []
+        self.n = IncrementalFsum()
+        self.sumw = IncrementalFsum()
+        self.sumwsq = IncrementalFsum()
+        self.sumwr = IncrementalFsum()
+        self.sumwsqr = IncrementalFsum()
+        self.sumwsqrsq = IncrementalFsum()
 
-    def add_example(self, p_log: float, r: float, p_pred: float, count: float = 1.0) -> None:
+    def add(self, w: float, r: float, count: float = 1.0) -> None:
         if count > 0:
-            w = p_pred / p_log
             assert w >= 0, 'Error: negative importance weight'
 
-            self.data.append((count, w, r))
+            self.n += count
+            self.sumw += count * w
+            self.sumwsq += count * w ** 2
+            self.sumwr += count * w * r
+            self.sumwsqr += count * w ** 2 * r
+            self.sumwsqrsq += count * w ** 2 * r ** 2
+
             self.wmax = max(self.wmax, w)
             self.wmin = min(self.wmin, w)
 
@@ -122,17 +128,17 @@ class Interval(base.Interval):
         from math import isclose, sqrt
         from scipy.stats import f
 
-        n = fsum(c for c, _, _ in self.data)
+        n = float(self.n)
         if n == 0:
             return [None, None]
 
-        sumw = fsum(c * w for c, w, _ in self.data)
-        sumwsq = fsum(c * w**2 for c, w, _ in self.data)
-        sumwr = fsum(c * w * r for c, w, r in self.data)
-        sumwsqr = fsum(c * w**2 * r for c, w, r in self.data)
-        sumwsqrsq = fsum(c * w**2 * r**2 for c, w, r in self.data)
+        sumw = float(self.sumw)
+        sumwsq = float(self.sumwsq)
+        sumwr = float(self.sumwr)
+        sumwsqr = float(self.sumwsqr)
+        sumwsqrsq = float(self.sumwsqrsq)
 
-        uncwfake = self.wmax if sumw < n else self.wmin
+        uncwfake = self.wmax ** (self.step + 1) if sumw < n else self.wmin ** (self.step + 1)
         if uncwfake == inf:
            uncgstar = 1 + 1 / n
         else:
@@ -146,7 +152,7 @@ class Interval(base.Interval):
         bounds = []
         for r, sign in ((self.rmin, 1), (self.rmax, -1)):
             candidates = []
-            for wfake in (self.wmin, self.wmax):
+            for wfake in (self.wmin ** (self.step + 1), self.wmax ** (self.step + 1)):
                 if wfake == inf:
                     x = sign * (r + (sumwr - sumw * r) / n)
                     y = (  (r * sumw - sumwr)**2 / (n * (1 + n))
@@ -186,3 +192,33 @@ class Interval(base.Interval):
             bounds.append(vbound)
 
         return bounds
+
+
+class Estimator(base.Estimator):
+    _impl: EstimatorImpl
+
+    def __init__(self, wmin: float = 0, wmax: float = inf):
+        self._impl = EstimatorImpl(wmin, wmax, 0)
+
+
+    def add_example(self, p_log: float, r: float, p_pred: float, count: float = 1.0) -> None:
+        self._impl.add(p_pred / p_log, r, count)
+
+
+    def get(self) -> Optional[float]:
+        return self._impl.get()
+
+
+class Interval(base.Interval):
+    _impl: IntervalImpl
+
+    def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1):
+        self._impl = IntervalImpl(wmin, wmax, rmin, rmax, 0)
+
+
+    def add_example(self, p_log: float, r: float, p_pred: float, count: float = 1.0) -> None:
+        self._impl.add(p_pred / p_log, r, count)
+
+
+    def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[Optional[float]]:
+        return self._impl.get(alpha, atol)
