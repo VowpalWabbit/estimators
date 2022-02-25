@@ -8,7 +8,7 @@ def _get_safe(values, index, default):
     return values[index] if index < len(values) else default
 
 
-def _adjust_statistics_container(statistics, count, constructor):
+def _resize_statistics(statistics, count, constructor):
     constructor = IncrementalFsum if len(statistics) == 0 else constructor
     for i in range(max(count - len(statistics), 0)):
         statistics.append(constructor())
@@ -38,11 +38,11 @@ class Estimator(base.Estimator):
             ws = [p_pred / p_log for p_pred, p_log in zip(p_preds, p_logs)]
             assert all(w >= 0 for w in ws), 'Error: negative importance weight'
             self.maxstep = max(self.maxstep, len(ws))
-            _adjust_statistics_container(self.sumw, self.maxstep, lambda: deepcopy(self.sumw[-1]))
-            _adjust_statistics_container(self.sumwsq, self.maxstep, lambda: deepcopy(self.sumw[-1]))
-            _adjust_statistics_container(self.sumwr, self.maxstep, IncrementalFsum)
-            _adjust_statistics_container(self.sumwsqr, self.maxstep, IncrementalFsum)
-            _adjust_statistics_container(self.sumr, self.maxstep, IncrementalFsum)
+            _resize_statistics(self.sumw, self.maxstep, lambda: deepcopy(self.sumw[-1]))
+            _resize_statistics(self.sumwsq, self.maxstep, lambda: deepcopy(self.sumwsq[-1]))
+            _resize_statistics(self.sumwr, self.maxstep, IncrementalFsum)
+            _resize_statistics(self.sumwsqr, self.maxstep, IncrementalFsum)
+            _resize_statistics(self.sumr, self.maxstep, IncrementalFsum)
             w = 1.0
             self.n += count
             for i in range(self.maxstep):
