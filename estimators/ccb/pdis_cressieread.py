@@ -1,12 +1,19 @@
 from estimators.ccb import base
 from math import fsum, inf
 from typing import List
+from estimators.math import IncrementalFsum
 
 
 def _get_safe(values, index, default):
     return values[index] if index < len(values) else default
 
 
+def _adjust_statistics_container(statistics, count, constructor):
+    constructor = IncrementalFsum if len(statistics) == 0 else constructor
+    for i in range(max(count - len(statistics), 0)):
+        statistics.append(constructor())
+
+ 
 class Estimator(base.Estimator):
     def __init__(self, wmin: float = 0, wmax: float = inf):
         assert wmin < 1
@@ -17,39 +24,53 @@ class Estimator(base.Estimator):
         self.maxstep = 0
 
         self.data = []
+        self.n = IncrementalFsum()
+        self.sumw = []
+        self.sumwsq = []
+        self.sumwr = []
+        self.sumwsqr = []
+        self.sumr = []
+
 
     def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float], count: float = 1.0) -> None:
+        from copy import deepcopy
         if count > 0:
             ws = [p_pred / p_log for p_pred, p_log in zip(p_preds, p_logs)]
             assert all(w >= 0 for w in ws), 'Error: negative importance weight'
+            self.maxstep = max(self.maxstep, len(ws))
+            _adjust_statistics_container(self.sumw, self.maxstep, lambda: deepcopy(self.sumw[-1]))
+            _adjust_statistics_container(self.sumwsq, self.maxstep, lambda: deepcopy(self.sumw[-1]))
+            _adjust_statistics_container(self.sumwr, self.maxstep, IncrementalFsum)
+            _adjust_statistics_container(self.sumwsqr, self.maxstep, IncrementalFsum)
+            _adjust_statistics_container(self.sumr, self.maxstep, IncrementalFsum)
+            w = 1.0
+            self.n += count
+            for i in range(self.maxstep):
+                w *= _get_safe(ws, i, 1)
+                self.sumw[i] += count * w
+                self.sumwsq[i] += count * w ** 2
+                self.sumwr[i] += count * w * _get_safe(rs, i, 0)
+                self.sumwsqr[i] += count * w ** 2 * _get_safe(rs, i, 0)
+                self.sumr[i] += count * _get_safe(rs, i, 0)
 
-            self.data.append((count, ws, rs))
             self.wmax = max(self.wmax, max(ws))
             self.wmin = min(self.wmin, min(ws))
-            self.maxstep = max(self.maxstep, len(ws))
+
 
     def get(self) -> List[float]:
-        def prod(vs):
-            import operator
-            from functools import reduce
-            return reduce(operator.mul, vs, 1)
-
-        n = fsum(c for c, _, _ in self.data)
+        n = float(self.n)
         if n == 0:
             return []
 
         stepvhats = []
-        for step in range(1, self.maxstep + 1):
-            sumw = fsum(c * w for c, ws, _ in self.data
-                        for w in (prod(ws[:min(step, len(ws))]),))
-            sumwsq = fsum(c * w ** 2 for c, ws, _ in self.data
-                          for w in (prod(ws[:min(step, len(ws))]),))
-            sumwr = fsum(c * w * _get_safe(rs, step - 1, 0) for c, ws, rs in self.data
-                         for w in (prod(ws[:min(step, len(ws))]),))
-            sumwsqr = fsum(c * w ** 2 * _get_safe(rs, step - 1, 0) for c, ws, rs in self.data
-                           for w in (prod(ws[:min(step, len(ws))]),))
-            sumr = fsum(c * _get_safe(rs, step - 1, 0) for c, _, rs in self.data)
-            wfake = self.wmax ** step if sumw < n else self.wmin ** step
+        for step in range(self.maxstep):
+            sumw = float(self.sumw[step])
+            sumwsq = float(self.sumwsq[step])
+            sumwr = float(self.sumwr[step])
+            sumwsqr = float(self.sumwsqr[step])
+            sumr = float(self.sumr[step])
+
+            wfake = self.wmax ** (step + 1) if sumw < n else self.wmin ** (step + 1)
 
             if wfake == inf:
                 gamma = -(1 + n) / n
