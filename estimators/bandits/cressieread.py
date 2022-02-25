@@ -1,6 +1,6 @@
 # CR(-2) is particularly computationally convenient
 
-from math import fsum, inf
+from math import inf
 from estimators.bandits import base
 from typing import List, Optional
 from estimators.math import IncrementalFsum
