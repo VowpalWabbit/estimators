@@ -1,7 +1,8 @@
 from estimators.ccb import base
 from math import fsum, inf
-from typing import List
+from typing import List, Callable
 from estimators.math import IncrementalFsum
+from estimators.bandits.cressieread import EstimatorImpl
 
 
 def _get_safe(values, index, default):
@@ -14,91 +15,32 @@ def _resize_statistics(statistics, count, constructor):
 
  
 class Estimator(base.Estimator):
-    wmin: float
-    wmax: float
-    maxstep: int
-    n: IncrementalFsum
-    sumw: List[IncrementalFsum]
-    sumwsq: List[IncrementalFsum]
-    sumwr: List[IncrementalFsum]
-    sumwsqr: List[IncrementalFsum]
-    sumr: List[IncrementalFsum]
+    _impl_ctr: Callable[[int], EstimatorImpl]
+    _impl: List[EstimatorImpl]
 
     def __init__(self, wmin: float = 0, wmax: float = inf):
-        assert wmin < 1
-        assert wmax > 1
-
-        self.wmin = wmin
-        self.wmax = wmax
-        self.maxstep = 0
-
-        self.n = IncrementalFsum()
-        self.sumw = [IncrementalFsum()]
-        self.sumwsq = [IncrementalFsum()]
-        self.sumwr = [IncrementalFsum()]
-        self.sumwsqr = [IncrementalFsum()]
-        self.sumr = [IncrementalFsum()]
+        self._impl_ctr = lambda step: EstimatorImpl(wmin, wmax, step)
+        self._impl = [self._impl_ctr(0)]
 
 
     def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float], count: float = 1.0) -> None:
-        from copy import deepcopy
         if count > 0:
             ws = [p_pred / p_log for p_pred, p_log in zip(p_preds, p_logs)]
-            assert all(w >= 0 for w in ws), 'Error: negative importance weight'
-            self.maxstep = max(self.maxstep, len(ws))
-            _resize_statistics(self.sumw, self.maxstep, lambda: deepcopy(self.sumw[-1]))
-            _resize_statistics(self.sumwsq, self.maxstep, lambda: deepcopy(self.sumwsq[-1]))
-            _resize_statistics(self.sumwr, self.maxstep, IncrementalFsum)
-            _resize_statistics(self.sumwsqr, self.maxstep, IncrementalFsum)
-            _resize_statistics(self.sumr, self.maxstep, IncrementalFsum)
             w = 1.0
-            self.n += count
-            for i in range(self.maxstep):
-                w *= _get_safe(ws, i, 1)
-                r = _get_safe(rs, i, 0)
-                self.sumw[i] += count * w
-                self.sumwsq[i] += count * w ** 2
-                self.sumwr[i] += count * w * r
-                self.sumwsqr[i] += count * w ** 2 * r
-                self.sumr[i] += count * r
-
-            self.wmax = max(self.wmax, max(ws))
-            self.wmin = min(self.wmin, min(ws))
+            for i in range(len(ws)):
+                w *= ws[i]
+                if len(self._impl) <= i:
+                    self._impl.append(self._impl_ctr(i))
+                self._impl[i].add(w, rs[i], count)
 
 
     def get(self) -> List[float]:
-        n = float(self.n)
-        if n == 0:
-            return []
-
-        stepvhats = []
-        for step in range(self.maxstep):
-            sumw = float(self.sumw[step])
-            sumwsq = float(self.sumwsq[step])
-            sumwr = float(self.sumwr[step])
-            sumwsqr = float(self.sumwsqr[step])
-            sumr = float(self.sumr[step])
-
-            wfake = self.wmax ** (step + 1) if sumw < n else self.wmin ** (step + 1)
-
-            if wfake == inf:
-                gamma = -(1 + n) / n
-                beta = 0
-            else:
-                a = (wfake + sumw) / (1 + n)
-                b = (wfake ** 2 + sumwsq) / (1 + n)
-                assert a * a < b
-                gamma = (b - a) / (a * a - b)
-                beta = (1 - a) / (a * a - b)
-
-            vhat = (-gamma * sumwr - beta * sumwsqr) / (1 + n)
-            missing = max(0.0, 1 - (-gamma * sumw - beta * sumwsq) / (1 + n))
-            rhatmissing = sumr / n
-            vhat += missing * rhatmissing
-
-            stepvhats.append(vhat)
-
-        return stepvhats
+        result = []
+        n0 = float(self._impl[0].n)
+        if n0 > 0:
+            for impl in self._impl:
+                result.append(impl.get() * float(impl.n) / n0 )
+        return result
 
 
 class Interval(base.Interval):
