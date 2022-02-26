@@ -5,6 +5,7 @@ from estimators.bandits import base
 from typing import List, Optional
 from estimators.math import IncrementalFsum
 
+
 class EstimatorImpl:
     wmin: float
     wmax: float
@@ -15,9 +16,11 @@ class EstimatorImpl:
     sumwr: IncrementalFsum
     sumwsqr: IncrementalFsum
     sumr: IncrementalFsum
+
     # NB: This works better you use the true wmin and wmax
     #     which is _not_ the empirical minimum and maximum
     #     but rather the actual smallest and largest possible values
+
     def __init__(self, wmin: float = 0, wmax: float = inf, step: int = 0):
         assert wmin < 1
         assert wmax > 1
@@ -65,13 +68,13 @@ class EstimatorImpl:
             beta = 0
         else:
             a = (wfake + sumw) / (1 + n)
-            b = (wfake**2 + sumwsq) / (1 + n)
-            assert a*a < b
-            gamma = (b - a) / (a*a - b)
-            beta = (1 - a) / (a*a - b)
+            b = (wfake ** 2 + sumwsq) / (1 + n)
+            assert a * a < b
+            gamma = (b - a) / (a * a - b)
+            beta = (1 - a) / (a * a - b)
 
         vhat = (-gamma * sumwr - beta * sumwsqr) / (1 + n)
-        missing = max(0, 1 - (-gamma * sumw - beta * sumwsq) / (1 + n))
+        missing = max(0.0, 1 - (-gamma * sumw - beta * sumwsq) / (1 + n))
         rhatmissing = sumr / n
         vhat += missing * rhatmissing
 
@@ -90,9 +93,11 @@ class IntervalImpl:
     sumwr: IncrementalFsum
     sumwsqr: IncrementalFsum
     sumwsqrsq: IncrementalFsum
+
     # NB: This works better you use the true wmin and wmax
     #     which is _not_ the empirical minimum and maximum
     #     but rather the actual smallest and largest possible values
+
     def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1, step: int = 0):
         assert wmin < 1
         assert wmax > 1
@@ -140,14 +145,14 @@ class IntervalImpl:
 
         uncwfake = self.wmax ** (self.step + 1) if sumw < n else self.wmin ** (self.step + 1)
         if uncwfake == inf:
-           uncgstar = 1 + 1 / n
+            uncgstar = 1 + 1 / n
         else:
-           unca = (uncwfake + sumw) / (1 + n)
-           uncb = (uncwfake**2 + sumwsq) / (1 + n)
-           uncgstar = (1 + n) * (unca - 1)**2 / (uncb - unca*unca)
+            unca = (uncwfake + sumw) / (1 + n)
+            uncb = (uncwfake ** 2 + sumwsq) / (1 + n)
+            uncgstar = (1 + n) * (unca - 1) ** 2 / (uncb - unca * unca)
 
-        Delta = f.isf(q=alpha, dfn=1, dfd=n)
-        phi = (-uncgstar - Delta) / (2 * (1 + n))
+        delta = f.isf(q=alpha, dfn=1, dfd=n)
+        phi = (-uncgstar - delta) / (2 * (1 + n))
 
         bounds = []
         for r, sign in ((self.rmin, 1), (self.rmax, -1)):
@@ -155,14 +160,14 @@ class IntervalImpl:
             for wfake in (self.wmin ** (self.step + 1), self.wmax ** (self.step + 1)):
                 if wfake == inf:
                     x = sign * (r + (sumwr - sumw * r) / n)
-                    y = (  (r * sumw - sumwr)**2 / (n * (1 + n))
-                         - (r**2 * sumwsq - 2 * r * sumwsqr + sumwsqrsq) / (1 + n)
-                        )
+                    y = ((r * sumw - sumwr) ** 2 / (n * (1 + n))
+                         - (r ** 2 * sumwsq - 2 * r * sumwsqr + sumwsqrsq) / (1 + n)
+                         )
                     z = phi + 1 / (2 * n)
-                    if isclose(y*z, 0, abs_tol=1e-9):
+                    if isclose(y * z, 0, abs_tol=1e-9):
                         y = 0
 
-                    if isclose(y*z, 0, abs_tol=atol*atol):
+                    if isclose(y * z, 0, abs_tol=atol * atol):
                         gstar = x - sqrt(2) * atol
                         candidates.append(gstar)
                     elif z <= 0 and y * z >= 0:
@@ -170,17 +175,17 @@ class IntervalImpl:
                         candidates.append(gstar)
                 else:
                     barw = (wfake + sumw) / (1 + n)
-                    barwsq = (wfake*wfake + sumwsq) / (1 + n)
+                    barwsq = (wfake * wfake + sumwsq) / (1 + n)
                     barwr = sign * (wfake * r + sumwr) / (1 + n)
                     barwsqr = sign * (wfake * wfake * r + sumwsqr) / (1 + n)
                     barwsqrsq = (wfake * wfake * r * r + sumwsqrsq) / (1 + n)
 
-                    if barwsq > barw**2:
-                        x = barwr + ((1 - barw) * (barwsqr - barw * barwr) / (barwsq - barw**2))
-                        y = (barwsqr - barw * barwr)**2 / (barwsq - barw**2) - (barwsqrsq - barwr**2)
-                        z = phi + (1/2) * (1 - barw)**2 / (barwsq - barw**2)
+                    if barwsq > barw ** 2:
+                        x = barwr + ((1 - barw) * (barwsqr - barw * barwr) / (barwsq - barw ** 2))
+                        y = (barwsqr - barw * barwr) ** 2 / (barwsq - barw ** 2) - (barwsqrsq - barwr ** 2)
+                        z = phi + (1 / 2) * (1 - barw) ** 2 / (barwsq - barw ** 2)
 
-                        if isclose(y*z, 0, abs_tol=atol*atol):
+                        if isclose(y * z, 0, abs_tol=atol * atol):
                             gstar = x - sqrt(2) * atol
                             candidates.append(gstar)
                         elif z <= 0 and y * z >= 0:
@@ -188,7 +193,7 @@ class IntervalImpl:
                             candidates.append(gstar)
 
             best = min(candidates)
-            vbound = min(self.rmax, max(self.rmin, sign*best))
+            vbound = min(self.rmax, max(self.rmin, sign * best))
             bounds.append(vbound)
 
         return bounds
@@ -200,10 +205,8 @@ class Estimator(base.Estimator):
     def __init__(self, wmin: float = 0, wmax: float = inf):
         self._impl = EstimatorImpl(wmin, wmax, 0)
 
-
     def add_example(self, p_log: float, r: float, p_pred: float, count: float = 1.0) -> None:
         self._impl.add(p_pred / p_log, r, count)
-
 
     def get(self) -> Optional[float]:
         return self._impl.get()
@@ -215,10 +218,8 @@ class Interval(base.Interval):
     def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1):
         self._impl = IntervalImpl(wmin, wmax, rmin, rmax, 0)
 
-
     def add_example(self, p_log: float, r: float, p_pred: float, count: float = 1.0) -> None:
         self._impl.add(p_pred / p_log, r, count)
-
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[Optional[float]]:
         return self._impl.get(alpha, atol)

@@ -12,7 +12,6 @@ class Estimator(base.Estimator):
         self._impl_ctr = lambda step: EstimatorImpl(wmin, wmax, step)
         self._impl = [self._impl_ctr(0)]
 
-
     def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float], count: float = 1.0) -> None:
         if count > 0:
             ws = [p_pred / p_log for p_pred, p_log in zip(p_preds, p_logs)]
@@ -23,13 +22,12 @@ class Estimator(base.Estimator):
                     self._impl.append(self._impl_ctr(i))
                 self._impl[i].add(w, rs[i], count)
 
-
     def get(self) -> List[float]:
         result = []
         n0 = float(self._impl[0].n)
         if n0 > 0:
             for impl in self._impl:
-                result.append(impl.get() * float(impl.n) / n0 )
+                result.append(impl.get() * float(impl.n) / n0)
         return result
 
 
@@ -41,7 +39,6 @@ class Interval(base.Interval):
         self._impl_ctr = lambda step: IntervalImpl(wmin, wmax, rmin, rmax, step)
         self._impl = [self._impl_ctr(0)]
 
-
     def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float], count: float = 1.0) -> None:
         if count > 0:
             ws = [p_pred / p_log for p_pred, p_log in zip(p_preds, p_logs)]
@@ -51,7 +48,6 @@ class Interval(base.Interval):
                 if len(self._impl) <= i:
                     self._impl.append(self._impl_ctr(i))
                 self._impl[i].add(w, rs[i], count)
-
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[List[float]]:
         result = []
