@@ -1,3 +1,5 @@
+# Incremental version of https://en.wikipedia.org/wiki/Kahan_summation_algorithm
+
 class IncrementalFsum:
     def __init__(self):
         self.partials = []
