@@ -9,7 +9,6 @@ from estimators.math import IncrementalFsum
 class EstimatorImpl:
     wmin: float
     wmax: float
-    step: int
     n: IncrementalFsum
     sumw: IncrementalFsum
     sumwsq: IncrementalFsum
@@ -21,13 +20,12 @@ class EstimatorImpl:
     #     which is _not_ the empirical minimum and maximum
     #     but rather the actual smallest and largest possible values
 
-    def __init__(self, wmin: float = 0, wmax: float = inf, step: int = 0):
+    def __init__(self, wmin: float = 0, wmax: float = inf):
         assert wmin < 1
         assert wmax > 1
 
         self.wmin = wmin
         self.wmax = wmax
-        self.step = step
 
         self.n = IncrementalFsum()
         self.sumw = IncrementalFsum()
@@ -61,7 +59,7 @@ class EstimatorImpl:
         sumwsqr = float(self.sumwsqr)
         sumr = float(self.sumr)
 
-        wfake = self.wmax ** (self.step + 1) if sumw < n else self.wmin ** (self.step + 1)
+        wfake = self.wmax if sumw < n else self.wmin
 
         if wfake == inf:
             gamma = -(1 + n) / n
@@ -86,7 +84,6 @@ class IntervalImpl:
     wmax: float
     rmin: float
     rmax: float
-    step: int
     n: IncrementalFsum
     sumw: IncrementalFsum
     sumwsq: IncrementalFsum
@@ -98,7 +95,7 @@ class IntervalImpl:
     #     which is _not_ the empirical minimum and maximum
     #     but rather the actual smallest and largest possible values
 
-    def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1, step: int = 0):
+    def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1):
         assert wmin < 1
         assert wmax > 1
 
@@ -106,7 +103,6 @@ class IntervalImpl:
         self.wmax = wmax
         self.rmin = rmin
         self.rmax = rmax
-        self.step = step
 
         self.n = IncrementalFsum()
         self.sumw = IncrementalFsum()
@@ -143,7 +139,7 @@ class IntervalImpl:
         sumwsqr = float(self.sumwsqr)
         sumwsqrsq = float(self.sumwsqrsq)
 
-        uncwfake = self.wmax ** (self.step + 1) if sumw < n else self.wmin ** (self.step + 1)
+        uncwfake = self.wmax if sumw < n else self.wmin
         if uncwfake == inf:
             uncgstar = 1 + 1 / n
         else:
@@ -157,7 +153,7 @@ class IntervalImpl:
         bounds = []
         for r, sign in ((self.rmin, 1), (self.rmax, -1)):
             candidates = []
-            for wfake in (self.wmin ** (self.step + 1), self.wmax ** (self.step + 1)):
+            for wfake in (self.wmin, self.wmax):
                 if wfake == inf:
                     x = sign * (r + (sumwr - sumw * r) / n)
                     y = ((r * sumw - sumwr) ** 2 / (n * (1 + n))
@@ -203,7 +199,7 @@ class Estimator(base.Estimator):
     _impl: EstimatorImpl
 
     def __init__(self, wmin: float = 0, wmax: float = inf):
-        self._impl = EstimatorImpl(wmin, wmax, 0)
+        self._impl = EstimatorImpl(wmin, wmax)
 
     def add_example(self, p_log: float, r: float, p_pred: float, count: float = 1.0) -> None:
         self._impl.add(p_pred / p_log, r, count)
@@ -216,7 +212,7 @@ class Interval(base.Interval):
     _impl: IntervalImpl
 
     def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1):
-        self._impl = IntervalImpl(wmin, wmax, rmin, rmax, 0)
+        self._impl = IntervalImpl(wmin, wmax, rmin, rmax)
 
     def add_example(self, p_log: float, r: float, p_pred: float, count: float = 1.0) -> None:
         self._impl.add(p_pred / p_log, r, count)

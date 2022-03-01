@@ -5,12 +5,14 @@ from estimators.bandits.cressieread import EstimatorImpl, IntervalImpl
 
 
 class Estimator(base.Estimator):
-    _impl_ctr: Callable[[int], EstimatorImpl]
+    wmin: float
+    wmax: float
     _impl: List[EstimatorImpl]
 
     def __init__(self, wmin: float = 0, wmax: float = inf):
-        self._impl_ctr = lambda step: EstimatorImpl(wmin, wmax, step)
-        self._impl = [self._impl_ctr(0)]
+        self.wmin = wmin
+        self.wmax = wmax
+        self._impl = []
 
     def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float], count: float = 1.0) -> None:
         if count > 0:
@@ -19,12 +21,12 @@ class Estimator(base.Estimator):
             for i in range(len(ws)):
                 w *= ws[i]
                 if len(self._impl) <= i:
-                    self._impl.append(self._impl_ctr(i))
+                    self._impl.append(EstimatorImpl(self.wmin ** (i + 1), self.wmax ** (i + 1)))
                 self._impl[i].add(w, rs[i], count)
 
     def get(self) -> List[float]:
         result = []
-        n0 = float(self._impl[0].n)
+        n0 = float(self._impl[0].n) if any(self._impl) else 0
         if n0 > 0:
             for impl in self._impl:
                 result.append(impl.get() * float(impl.n) / n0)
@@ -32,12 +34,18 @@ class Estimator(base.Estimator):
 
 
 class Interval(base.Interval):
-    _impl_ctr: Callable[[int], IntervalImpl]
+    wmin: float
+    wmax: float
+    rmin: float
+    rmax: float
     _impl: List[IntervalImpl]
 
     def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1):
-        self._impl_ctr = lambda step: IntervalImpl(wmin, wmax, rmin, rmax, step)
-        self._impl = [self._impl_ctr(0)]
+        self.wmin = wmin
+        self.wmax = wmax
+        self.rmin = rmin
+        self.rmax = rmax
+        self._impl = []
 
     def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float], count: float = 1.0) -> None:
         if count > 0:
@@ -46,12 +54,12 @@ class Interval(base.Interval):
             for i in range(len(ws)):
                 w *= ws[i]
                 if len(self._impl) <= i:
-                    self._impl.append(self._impl_ctr(i))
+                    self._impl.append(IntervalImpl(self.wmin ** (i + 1), self.wmax ** (i + 1), self.rmin, self.rmax))
                 self._impl[i].add(w, rs[i], count)
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[List[float]]:
         result = []
-        n0 = float(self._impl[0].n)
+        n0 = float(self._impl[0].n) if any(self._impl) else 0
         if n0 > 0:
             for impl in self._impl:
                 result.append([v * float(impl.n) / n0 for v in impl.get()])
