@@ -63,8 +63,6 @@ class Interval():
 
         if count > 0:
             self.n += count
-            self.rmax = max(self.rmax, max(rs))
-            self.rmin = min(self.rmin, min(rs))
             ws = [p_pred / p_log for p_pred, p_log in zip(p_preds, p_logs)]
             w = 1.0
             for i in range(len(ws)):

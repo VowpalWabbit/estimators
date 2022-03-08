@@ -124,6 +124,8 @@ class IntervalImpl:
 
             self.wmax = max(self.wmax, w)
             self.wmin = min(self.wmin, w)
+            self.rmax = max(self.rmax, r)
+            self.rmin = min(self.rmin, r)
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[Optional[float]]:
         from math import isclose, sqrt
