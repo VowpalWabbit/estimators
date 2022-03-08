@@ -7,14 +7,14 @@ from estimators.math import IncrementalFsum
 class Estimator():
     wmin: float
     wmax: float
-    n: IncrementalFsum
+    n: float
     _impl: Dict[str, EstimatorImpl]
 
 
     def __init__(self, wmin: float = 0, wmax: float = inf):
         self.wmin = wmin
         self.wmax = wmax
-        self.n = IncrementalFsum()
+        self.n = 0
         self._impl = {}
 
     def add_example(self, slot_ids: List[str], p_logs: List[float], rs: List[float], p_preds: List[float], count: float = 1.0) -> None:
@@ -34,9 +34,9 @@ class Estimator():
 
     def get(self) -> Dict[str, float]:
         result = {}
-        if float(self.n) > 0:
+        if self.n > 0:
             for slot_id, estimator in self._impl.items():
-                result[slot_id] = estimator.get() * float(estimator.n) / float(self.n)
+                result[slot_id] = estimator.get() * float(estimator.n) / self.n
         return result
 
 
@@ -45,7 +45,7 @@ class Interval():
     wmax: float
     rmin: float
     rmax: float
-    n: IncrementalFsum
+    n: float
     _impl: Dict[str, IntervalImpl]
 
     def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1):
@@ -53,7 +53,7 @@ class Interval():
         self.wmax = wmax
         self.rmin = rmin
         self.rmax = rmax
-        self.n = IncrementalFsum()
+        self.n = 0
         self._impl = {}
 
     def add_example(self, slot_ids: List[str], p_logs: List[float], rs: List[float], p_preds: List[float], count: float = 1.0) -> None:
@@ -73,7 +73,7 @@ class Interval():
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> Dict[str, List[float]]:
         result = {}
-        if float(self.n) > 0:
+        if self.n > 0:
             for slot_id, estimator in self._impl.items():
-                result[slot_id] = [v * float(estimator.n) / float(self.n) for v in estimator.get()]
+                result[slot_id] = [v * float(estimator.n) / self.n for v in estimator.get()]
         return result
