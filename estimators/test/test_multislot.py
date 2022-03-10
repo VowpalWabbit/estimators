@@ -11,11 +11,11 @@ def assert_estimate_and_interval_convergence_after_swapping_slot_ids(
         swap_slot_ids_simulator,
         expected_estimate,
         expected_estimate_after_swap):
-    estimate_data = Scenario(lambda: simulator(1000), estimator())
-    estimate_swap_slot_ids_data = Scenario(lambda: swap_slot_ids_simulator(3000), estimator())
+    estimate_data = Scenario(lambda: simulator(1000, ['0', '1']), estimator())
+    estimate_swap_slot_ids_data = Scenario(lambda: swap_slot_ids_simulator(1000), estimator())
 
-    interval_data = Scenario(lambda: simulator(1000), interval_estimator())
-    interval_swap_slot_ids_data = Scenario(lambda: swap_slot_ids_simulator(3000), interval_estimator())
+    interval_data = Scenario(lambda: simulator(1000, ['0', '1']), interval_estimator())
+    interval_swap_slot_ids_data = Scenario(lambda: swap_slot_ids_simulator(1000), interval_estimator())
 
     estimate_data.get_estimate()
     estimate_swap_slot_ids_data.get_estimate()
@@ -45,35 +45,27 @@ def assert_estimate_and_interval_convergence_after_swapping_slot_ids(
 
 
 def test_estimate_and_interval_convergence_after_swapping_slot_ids():
-    def simulator(n):
+    def simulator(n, slot_ids):
         for i in range(n):
             chosen = i % 2
-            yield {'slot_ids': ['0', '1'],
+            yield {'slot_ids': slot_ids,
                    'p_logs': [0.5, 1],
                    'rs': [chosen, (chosen + 1) % 2],
                    'p_preds': [0.5 + 0.3 * (-1)**chosen, 1]}
 
     def swap_slot_ids_simulator(n):
-        for i in range(n):
-            chosen = i % 2
-            if i < n/3:
-                yield {'slot_ids': ['0', '1'],
-                       'p_logs': [0.5, 1],
-                       'rs': [chosen, (chosen + 1) % 2],
-                       'p_preds': [0.5 + 0.3 * (-1)**chosen, 1]}
-            else:
-                yield {'slot_ids': ['1', '0'],
-                       'p_logs': [0.5, 1],
-                       'rs': [chosen, (chosen + 1) % 2],
-                       'p_preds': [0.5 + 0.3 * (-1)**chosen, 1]}
+        for ex in simulator(n, ['0', '1']):
+            yield ex
+        for ex in simulator(2 * n, ['1', '0']):
+            yield ex
 
     expected_slot_0_estimate = 0.2
     expected_slot_1_estimate = 0.8
     expected_estimate = [(expected_slot_0_estimate - 0.05, expected_slot_0_estimate + 0.05),
                          (expected_slot_1_estimate - 0.05, expected_slot_1_estimate + 0.05)]
 
-    expected_slot_0_estimate_after_swap = 0.6
-    expected_slot_1_estimate_after_swap = 0.4
+    expected_slot_0_estimate_after_swap = (1 * expected_slot_0_estimate  + 2 * expected_slot_1_estimate) / (1 + 2)
+    expected_slot_1_estimate_after_swap = (1 * expected_slot_1_estimate  + 2 * expected_slot_0_estimate) / (1 + 2)
     expected_estimate_after_swap = [(expected_slot_0_estimate_after_swap - 0.05, expected_slot_0_estimate_after_swap + 0.05),
                                     (expected_slot_1_estimate_after_swap - 0.05, expected_slot_1_estimate_after_swap + 0.05)]
 
