@@ -148,6 +148,27 @@ def test_no_data_estimation_is_none():
     assert_interval_is_none(clopper_pearson.Interval)
 
 
+def test_simple_convergence():
+    def simulator(r):
+        for i in range(10000):
+            chosen = i % 2
+            yield  {'p_log': 0.5,
+                    'r': r if chosen == 0 else 0,
+                    'p_pred': 0.8 if chosen == 0 else 0.2}
+    r = 1
+    expected = (0.75 * r, 0.85 * r)
+    assert_interval_within(gaussian.Interval, lambda: simulator(r), expected)
+    assert_interval_within(lambda: clopper_pearson.Interval(0, r), lambda: simulator(r), expected)
+    assert_interval_within(lambda: cressieread.Interval(rmin=0, rmax=r), lambda: simulator(r), expected)
+
+    r = 10
+    expected = (0.75 * r, 0.85 * r)
+    assert_interval_within(gaussian.Interval, lambda: simulator(r), expected)
+    assert_interval_within(lambda: clopper_pearson.Interval(0, r), lambda: simulator(r), expected)
+    assert_interval_within(lambda: cressieread.Interval(rmin=0, rmax=r), lambda: simulator(r), expected)
+   
+    # TODO: test + fix for cressieread with negative rewards
+
 def test_convergence_with_no_overflow():
     def simulator():
         for i in range(1000000):
