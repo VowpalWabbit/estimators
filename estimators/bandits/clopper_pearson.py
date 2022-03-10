@@ -8,7 +8,7 @@ class Interval(base.Interval):
     weighted_reward: float
     max_weighted_reward: float
 
-    def __init__(self):
+    def __init__(self, rmin: float = 0, rmax: float = 1):
         self.examples_count = 0
         self.weighted_reward = 0
         self.max_weighted_reward = 0

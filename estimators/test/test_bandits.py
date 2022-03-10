@@ -52,7 +52,7 @@ def test_estimate_10_from_10s():
     assert_estimation_is_close(mle.Estimator, simulator, 10)
     assert_estimation_is_close(cressieread.Estimator, simulator, 10)
     assert_interval_covers(gaussian.Interval, simulator, 10)
-    assert_interval_covers(clopper_pearson.Interval, simulator, 10)
+    assert_interval_covers(lambda: clopper_pearson.Interval(rmin=0, rmax=10), simulator, 10)
     assert_interval_covers(lambda: cressieread.Interval(rmin=0, rmax=10), simulator, 10)
 
 def test_estimate_negative_constant():
@@ -68,7 +68,7 @@ def test_estimate_negative_constant():
     assert_estimation_is_close(mle.Estimator, simulator, -1)
     assert_estimation_is_close(cressieread.Estimator, simulator, -1)
     assert_interval_covers(gaussian.Interval, simulator, -1)
-    assert_interval_covers(clopper_pearson.Interval, simulator, -1)
+    assert_interval_covers(lambda: clopper_pearson.Interval(rmin=-1, rmax=0), simulator, -1)
     assert_interval_covers(lambda: cressieread.Interval(rmin=-1, rmax=0), simulator, -1)
 
 
