@@ -31,12 +31,11 @@ class Interval(base.Interval):
         self.max_weighted_reward = max(self.max_weighted_reward, r * w)
 
     def get(self, alpha: float = 0.05) -> List[Optional[float]]:
-        atol = 1e-10
         if self.max_weighted_reward > 0.0:
             successes = self.weighted_reward / self.max_weighted_reward
             n = self.examples_count / self.max_weighted_reward
-            return [self._scale_back(beta.ppf(alpha / 2, successes, max(n - successes + 1, atol))),
-                    self._scale_back(beta.ppf(1 - alpha / 2, successes + 1, max(n - successes, atol)))]
+            return [self._scale_back(beta.ppf(alpha / 2, successes, n - successes + 1) if n - successes + 1 > 0 else 1),
+                    self._scale_back(beta.ppf(1 - alpha / 2, successes + 1, n - successes) if n - successes > 0 else 1)]
         return [None, None]
 
     def __add__(self, other: 'Interval') -> 'Interval':
