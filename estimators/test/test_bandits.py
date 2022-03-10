@@ -15,6 +15,12 @@ def assert_estimation_is_close(estimator, simulator, value):
     scenario.get_estimate()
     Helper.assert_is_close(scenario.result, value)
 
+def assert_interval_covers(estimator, simulator, expected):
+    scenario = Scenario(simulator, estimator())
+    scenario.get_interval()
+    assert scenario.result[0] <= expected
+    assert scenario.result[1] >= expected
+
 
 def test_estimate_1_from_1s():
     ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
@@ -28,6 +34,42 @@ def test_estimate_1_from_1s():
     assert_estimation_is_close(snips.Estimator, simulator, 1)
     assert_estimation_is_close(mle.Estimator, simulator, 1)
     assert_estimation_is_close(cressieread.Estimator, simulator, 1)
+    assert_interval_covers(gaussian.Interval, simulator, 1)
+    assert_interval_covers(clopper_pearson.Interval, simulator, 1)
+    assert_interval_covers(cressieread.Interval, simulator, 1)
+
+
+def test_estimate_10_from_10s():
+    ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
+    def simulator():
+        for _ in range(10):
+            yield  {'p_log': 1,
+                    'r': 10,
+                    'p_pred': 1}
+
+    assert_estimation_is_close(ips.Estimator, simulator, 10)
+    assert_estimation_is_close(snips.Estimator, simulator, 10)
+    assert_estimation_is_close(mle.Estimator, simulator, 10)
+    assert_estimation_is_close(cressieread.Estimator, simulator, 10)
+    assert_interval_covers(gaussian.Interval, simulator, 10)
+    assert_interval_covers(clopper_pearson.Interval, simulator, 10)
+    assert_interval_covers(lambda: cressieread.Interval(rmin=0, rmax=10), simulator, 10)
+
+def test_estimate_negative_constant():
+    ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
+    def simulator():
+        for _ in range(10):
+            yield  {'p_log': 1,
+                    'r': -1,
+                    'p_pred': 1}
+
+    assert_estimation_is_close(ips.Estimator, simulator, -1)
+    assert_estimation_is_close(snips.Estimator, simulator, -1)
+    assert_estimation_is_close(mle.Estimator, simulator, -1)
+    assert_estimation_is_close(cressieread.Estimator, simulator, -1)
+    assert_interval_covers(gaussian.Interval, simulator, -1)
+    assert_interval_covers(clopper_pearson.Interval, simulator, -1)
+    assert_interval_covers(lambda: cressieread.Interval(rmin=-1, rmax=0), simulator, -1)
 
 
 def assert_more_examples_tighter_intervals(estimator, simulator):
