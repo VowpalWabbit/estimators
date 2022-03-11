@@ -1,4 +1,5 @@
 from math import inf
+from scipy.stats import beta
 from typing import List, Callable, Dict
 from estimators.bandits.cressieread import EstimatorImpl, IntervalImpl
 from estimators.math import IncrementalFsum
@@ -32,11 +33,27 @@ class Estimator():
                     self._impl[slot_ids[i]] = EstimatorImpl(0, inf)
                 self._impl[slot_ids[i]].add(w, rs[i], count)
 
-    def get(self) -> Dict[str, float]:
+    def get_appearance(self) -> Dict[str, float]:
         result = {}
         if float(self.n) > 0:
             for slot_id, estimator in self._impl.items():
-                result[slot_id] = estimator.get() * float(estimator.n) / float(self.n)
+                result[slot_id] = float(estimator.n) / float(self.n)
+        return result
+
+    def get_conditional(self) -> Dict[str, float]:
+        result = {}
+        if float(self.n) > 0:
+            for slot_id, estimator in self._impl.items():
+                result[slot_id] = estimator.get()
+        return result
+
+    def get(self) -> Dict[str, float]:
+        result = {}
+        if float(self.n) > 0:
+            appearance_estimate = self.get_appearance()
+            conditional_estimate = self.get_conditional()
+            for slot_id, estimator in self._impl.items():
+                result[slot_id] = appearance_estimate[slot_id] * conditional_estimate[slot_id]
         return result
 
 
@@ -71,9 +88,31 @@ class Interval():
                     self._impl[slot_ids[i]] = IntervalImpl(0, inf, self.rmin, self.rmax)
                 self._impl[slot_ids[i]].add(w, rs[i], count)
 
-    def get(self, alpha: float = 0.05, atol: float = 1e-9) -> Dict[str, List[float]]:
+    def get_appearance(self, alpha: float = 0.05) -> Dict[str, List[float]]:
         result = {}
         if float(self.n) > 0:
             for slot_id, estimator in self._impl.items():
-                result[slot_id] = [v * float(estimator.n) / float(self.n) for v in estimator.get()]
+                if int(float(estimator.n)) == 0:
+                    result[slot_id] = [0, beta.ppf(1 - alpha / 2, float(estimator.n) + 1, float(self.n) - float(estimator.n))]
+                elif int(float(estimator.n)) == int(float(self.n)):
+                    result[slot_id] = [beta.ppf(alpha / 2, float(estimator.n), float(self.n) - float(estimator.n) + 1), 1]
+                else:
+                    result[slot_id] = [beta.ppf(alpha / 2, float(estimator.n), float(self.n) - float(estimator.n) + 1),
+                                       beta.ppf(1 - alpha / 2, float(estimator.n) + 1, float(self.n) - float(estimator.n))]
+        return result
+
+    def get_conditional(self, alpha: float = 0.05, atol: float = 1e-9) -> Dict[str, List[float]]:
+        result = {}
+        if float(self.n) > 0:
+            for slot_id, estimator in self._impl.items():
+                result[slot_id] = estimator.get(alpha, atol)
+        return result
+
+    def get(self, alpha: float = 0.05, atol: float = 1e-9) -> Dict[str, List[float]]:
+        result = {}
+        if float(self.n) > 0:
+            appearance_estimate = self.get_appearance(alpha)
+            conditional_estimate = self.get_conditional(alpha, atol)
+            for slot_id, estimator in self._impl.items():
+                result[slot_id] = [a * b for a, b in zip(appearance_estimate[slot_id], conditional_estimate[slot_id])]
         return result
