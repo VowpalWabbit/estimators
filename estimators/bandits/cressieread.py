@@ -95,7 +95,7 @@ class IntervalImpl:
     #     which is _not_ the empirical minimum and maximum
     #     but rather the actual smallest and largest possible values
 
-    def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1):
+    def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1, empirical_r_bounds: bool = False):
         assert wmin < 1
         assert wmax > 1
 
@@ -103,6 +103,7 @@ class IntervalImpl:
         self.wmax = wmax
         self.rmin = rmin
         self.rmax = rmax
+        self.empirical_r_bounds = empirical_r_bounds
 
         self.n = IncrementalFsum()
         self.sumw = IncrementalFsum()
@@ -125,8 +126,9 @@ class IntervalImpl:
             self.wmax = max(self.wmax, w)
             self.wmin = min(self.wmin, w)
 
-            self.rmax = max(self.rmax, r)
-            self.rmin = min(self.rmin, r)
+            if self.empirical_r_bounds:
+                self.rmax = max(self.rmax, r)
+                self.rmin = min(self.rmin, r)
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[Optional[float]]:
         from math import isclose, sqrt
