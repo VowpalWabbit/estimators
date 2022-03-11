@@ -129,6 +129,9 @@ class IntervalImpl:
             if self.empirical_r_bounds:
                 self.rmax = max(self.rmax, r)
                 self.rmin = min(self.rmin, r)
+            else:
+                if r > self.rmax or r < self.rmin:
+                    raise ValueError(f'Error: Value of r={r} is outside rmin={self.rmin}, rmax={self.rmax} bounds')
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[Optional[float]]:
         from math import isclose, sqrt
