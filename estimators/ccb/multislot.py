@@ -50,10 +50,10 @@ class Estimator():
     def get(self) -> Dict[str, float]:
         result = {}
         if float(self.n) > 0:
-            appearance_estimate = self.get_appearance()
-            conditional_estimate = self.get_conditional()
+            appearance = self.get_appearance()
+            conditional = self.get_conditional()
             for slot_id, estimator in self._impl.items():
-                result[slot_id] = appearance_estimate[slot_id] * conditional_estimate[slot_id]
+                result[slot_id] = appearance[slot_id] * conditional[slot_id]
         return result
 
 
@@ -92,13 +92,13 @@ class Interval():
         result = {}
         if float(self.n) > 0:
             for slot_id, estimator in self._impl.items():
+                lower_bound = beta.ppf(alpha / 2, float(estimator.n), float(self.n) - float(estimator.n) + 1)
+                upper_bound = beta.ppf(1 - alpha / 2, float(estimator.n) + 1, float(self.n) - float(estimator.n))
                 if int(float(estimator.n)) == 0:
-                    result[slot_id] = [0, beta.ppf(1 - alpha / 2, float(estimator.n) + 1, float(self.n) - float(estimator.n))]
-                elif int(float(estimator.n)) == int(float(self.n)):
-                    result[slot_id] = [beta.ppf(alpha / 2, float(estimator.n), float(self.n) - float(estimator.n) + 1), 1]
-                else:
-                    result[slot_id] = [beta.ppf(alpha / 2, float(estimator.n), float(self.n) - float(estimator.n) + 1),
-                                       beta.ppf(1 - alpha / 2, float(estimator.n) + 1, float(self.n) - float(estimator.n))]
+                    lower_bound = 0
+                if int(float(estimator.n)) == int(float(self.n)):
+                    upper_bound = 1
+                result[slot_id] = [lower_bound, upper_bound]
         return result
 
     def get_conditional(self, alpha: float = 0.05, atol: float = 1e-9) -> Dict[str, List[float]]:
@@ -111,8 +111,8 @@ class Interval():
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> Dict[str, List[float]]:
         result = {}
         if float(self.n) > 0:
-            appearance_estimate = self.get_appearance(alpha)
-            conditional_estimate = self.get_conditional(alpha, atol)
+            appearance = self.get_appearance(alpha)
+            conditional = self.get_conditional(alpha, atol)
             for slot_id, estimator in self._impl.items():
-                result[slot_id] = [a * b for a, b in zip(appearance_estimate[slot_id], conditional_estimate[slot_id])]
+                result[slot_id] = [a * b for a, b in zip(appearance[slot_id], conditional[slot_id])]
         return result
