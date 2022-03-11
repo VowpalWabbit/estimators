@@ -54,7 +54,7 @@ class Interval(base.Interval):
             for i in range(len(ws)):
                 w *= ws[i]
                 if len(self._impl) <= i:
-                    self._impl.append(IntervalImpl(self.wmin ** (i + 1), self.wmax ** (i + 1), self.rmin, self.rmax))
+                    self._impl.append(IntervalImpl(self.wmin ** (i + 1), self.wmax ** (i + 1), self.rmin, self.rmax, True))
                 self._impl[i].add(w, rs[i], count)
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[List[float]]:

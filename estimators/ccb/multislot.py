@@ -85,7 +85,7 @@ class Interval():
             for i in range(len(ws)):
                 w *= ws[i]
                 if slot_ids[i] not in self._impl:
-                    self._impl[slot_ids[i]] = IntervalImpl(0, inf, self.rmin, self.rmax)
+                    self._impl[slot_ids[i]] = IntervalImpl(0, inf, self.rmin, self.rmax, True)
                 self._impl[slot_ids[i]].add(w, rs[i], count)
 
     def get_appearance(self, alpha: float = 0.05) -> Dict[str, List[float]]:
