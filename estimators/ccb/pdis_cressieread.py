@@ -40,12 +40,13 @@ class Interval(base.Interval):
     rmax: float
     _impl: List[IntervalImpl]
 
-    def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1):
+    def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1, empirical_r_bounds: bool = False):
         self.wmin = wmin
         self.wmax = wmax
         self.rmin = rmin
         self.rmax = rmax
         self._impl = []
+        self.empirical_r_bounds = empirical_r_bounds
 
     def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float], count: float = 1.0) -> None:
         if count > 0:
@@ -54,7 +55,7 @@ class Interval(base.Interval):
             for i in range(len(ws)):
                 w *= ws[i]
                 if len(self._impl) <= i:
-                    self._impl.append(IntervalImpl(self.wmin ** (i + 1), self.wmax ** (i + 1), self.rmin, self.rmax, True))
+                    self._impl.append(IntervalImpl(self.wmin ** (i + 1), self.wmax ** (i + 1), self.rmin, self.rmax, self.empirical_r_bounds))
                 self._impl[i].add(w, rs[i], count)
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[List[float]]:

@@ -65,13 +65,14 @@ class Interval():
     n: IncrementalFsum
     _impl: Dict[str, IntervalImpl]
 
-    def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1):
+    def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1, empirical_r_bounds: bool = False):
         self.wmin = wmin
         self.wmax = wmax
         self.rmin = rmin
         self.rmax = rmax
         self.n = IncrementalFsum()
         self._impl = {}
+        self.empirical_r_bounds = empirical_r_bounds
 
     def add_example(self, slot_ids: List[str], p_logs: List[float], rs: List[float], p_preds: List[float], count: float = 1.0) -> None:
         if len(p_logs) != len(rs) or len(rs) != len(p_preds) or len(p_preds) != len(set(slot_ids)):
@@ -85,7 +86,7 @@ class Interval():
             for i in range(len(ws)):
                 w *= ws[i]
                 if slot_ids[i] not in self._impl:
-                    self._impl[slot_ids[i]] = IntervalImpl(0, inf, self.rmin, self.rmax, True)
+                    self._impl[slot_ids[i]] = IntervalImpl(0, inf, self.rmin, self.rmax, self.empirical_r_bounds)
                 self._impl[slot_ids[i]].add(w, rs[i], count)
 
     def get_appearance(self, alpha: float = 0.05) -> Dict[str, List[float]]:

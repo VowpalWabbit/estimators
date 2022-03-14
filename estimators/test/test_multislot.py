@@ -14,8 +14,8 @@ def assert_estimate_and_interval_convergence_after_swapping_slot_ids(
     estimate_data = Scenario(lambda: simulator(1000, ['0', '1']), estimator())
     estimate_swap_slot_ids_data = Scenario(lambda: swap_slot_ids_simulator(1000), estimator())
 
-    interval_data = Scenario(lambda: simulator(1000, ['0', '1']), interval_estimator())
-    interval_swap_slot_ids_data = Scenario(lambda: swap_slot_ids_simulator(1000), interval_estimator())
+    interval_data = Scenario(lambda: simulator(1000, ['0', '1']), interval_estimator(empirical_r_bounds=True))
+    interval_swap_slot_ids_data = Scenario(lambda: swap_slot_ids_simulator(1000), interval_estimator(empirical_r_bounds=True))
 
     estimate_data.get_estimate()
     estimate_swap_slot_ids_data.get_estimate()
@@ -80,7 +80,7 @@ def test_estimate_and_interval_convergence_after_swapping_slot_ids():
 
 def assert_estimates_within_interval_bounds(estimator, interval_estimator, simulator):
     estimate_data = Scenario(lambda: simulator(100), estimator())
-    interval_data = Scenario(lambda: simulator(100), interval_estimator())
+    interval_data = Scenario(lambda: simulator(100), interval_estimator(empirical_r_bounds=True))
 
     estimate_data.get_estimate()
     interval_data.get_interval()
