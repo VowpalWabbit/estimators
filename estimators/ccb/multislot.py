@@ -32,14 +32,14 @@ class Estimator():
                     self._impl[slot_ids[i]] = EstimatorImpl(0, inf)
                 self._impl[slot_ids[i]].add(w, rs[i], count)
 
-    def get_appearance(self) -> Dict[str, float]:
+    def get_impression(self) -> Dict[str, float]:
         result = {}
         if float(self.n) > 0:
             for slot_id, estimator in self._impl.items():
                 result[slot_id] = float(estimator.n) / float(self.n)
         return result
 
-    def get_conditional(self) -> Dict[str, float]:
+    def get_r_given_impression(self) -> Dict[str, float]:
         result = {}
         if float(self.n) > 0:
             for slot_id, estimator in self._impl.items():
@@ -49,10 +49,10 @@ class Estimator():
     def get(self) -> Dict[str, float]:
         result = {}
         if float(self.n) > 0:
-            appearance = self.get_appearance()
-            conditional = self.get_conditional()
+            impression = self.get_impression()
+            r_given_impression = self.get_r_given_impression()
             for slot_id, estimator in self._impl.items():
-                result[slot_id] = appearance[slot_id] * conditional[slot_id]
+                result[slot_id] = impression[slot_id] * r_given_impression[slot_id]
         return result
 
 
@@ -88,14 +88,14 @@ class Interval():
                     self._impl[slot_ids[i]] = IntervalImpl(0, inf, self.rmin, self.rmax, self.empirical_r_bounds)
                 self._impl[slot_ids[i]].add(w, rs[i], count)
 
-    def get_appearance(self, alpha: float = 0.05) -> Dict[str, List[float]]:
+    def get_impression(self, alpha: float = 0.05) -> Dict[str, List[float]]:
         result = {}
         if float(self.n) > 0:
             for slot_id, estimator in self._impl.items():
                 result[slot_id] = clopper_pearson(float(estimator.n), float(self.n), alpha)
         return result
 
-    def get_conditional(self, alpha: float = 0.05, atol: float = 1e-9) -> Dict[str, List[float]]:
+    def get_r_given_impression(self, alpha: float = 0.05, atol: float = 1e-9) -> Dict[str, List[float]]:
         result = {}
         if float(self.n) > 0:
             for slot_id, estimator in self._impl.items():
@@ -105,8 +105,8 @@ class Interval():
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> Dict[str, List[float]]:
         result = {}
         if float(self.n) > 0:
-            appearance = self.get_appearance(alpha)
-            conditional = self.get_conditional(alpha, atol)
+            impression = self.get_impression(alpha)
+            r_given_impression = self.get_r_given_impression(alpha, atol)
             for slot_id, estimator in self._impl.items():
-                result[slot_id] = [a * b for a, b in zip(appearance[slot_id], conditional[slot_id])]
+                result[slot_id] = [a * b for a, b in zip(impression[slot_id], r_given_impression[slot_id])]
         return result

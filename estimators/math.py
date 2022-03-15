@@ -3,7 +3,7 @@ from typing import List, Optional
 
 class IncrementalFsum:
     """ Incremental version of https://en.wikipedia.org/wiki/Kahan_summation_algorithm """
-    
+
     def __init__(self):
         self.partials = []
 
@@ -20,15 +20,11 @@ class IncrementalFsum:
             x = hi
         self.partials[i:] = [x]
         return self
-        
+
     def __float__(self):
         return sum(self.partials, 0.0)
 
 def clopper_pearson(successes: float, n: float, alpha: float = 0.05) -> List[Optional[float]]:
-    lower_bound = beta.ppf(alpha / 2, successes, n - successes + 1)
-    upper_bound = beta.ppf(1 - alpha / 2, successes + 1, n - successes)
-    if successes <= 0:
-        lower_bound = 0
-    if successes >= n:
-        upper_bound = 1
+    lower_bound = beta.ppf(alpha / 2, successes, n - successes + 1) if successes > 0 else 0
+    upper_bound = beta.ppf(1 - alpha / 2, successes + 1, n - successes) if successes < n else 1
     return [lower_bound, upper_bound]
