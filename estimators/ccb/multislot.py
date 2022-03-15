@@ -1,8 +1,7 @@
 from math import inf
-from scipy.stats import beta
 from typing import List, Callable, Dict
 from estimators.bandits.cressieread import EstimatorImpl, IntervalImpl
-from estimators.math import IncrementalFsum
+from estimators.math import IncrementalFsum, clopper_pearson
 
 
 class Estimator():
@@ -93,13 +92,7 @@ class Interval():
         result = {}
         if float(self.n) > 0:
             for slot_id, estimator in self._impl.items():
-                lower_bound = beta.ppf(alpha / 2, float(estimator.n), float(self.n) - float(estimator.n) + 1)
-                upper_bound = beta.ppf(1 - alpha / 2, float(estimator.n) + 1, float(self.n) - float(estimator.n))
-                if int(float(estimator.n)) == 0:
-                    lower_bound = 0
-                if int(float(estimator.n)) == int(float(self.n)):
-                    upper_bound = 1
-                result[slot_id] = [lower_bound, upper_bound]
+                result[slot_id] = clopper_pearson(float(estimator.n), float(self.n), alpha)
         return result
 
     def get_conditional(self, alpha: float = 0.05, atol: float = 1e-9) -> Dict[str, List[float]]:
