@@ -46,7 +46,7 @@ class Estimator():
                 result[slot_id] = estimator.get()
         return result
 
-    def get(self) -> Dict[str, float]:
+    def get_r(self) -> Dict[str, float]:
         result = {}
         if float(self.n) > 0:
             impression = self.get_impression()
@@ -102,7 +102,7 @@ class Interval():
                 result[slot_id] = estimator.get(alpha, atol)
         return result
 
-    def get(self, alpha: float = 0.05, atol: float = 1e-9) -> Dict[str, List[float]]:
+    def get_r(self, alpha: float = 0.05, atol: float = 1e-9) -> Dict[str, List[float]]:
         result = {}
         if float(self.n) > 0:
             impression = self.get_impression(alpha)
