@@ -70,7 +70,7 @@ def test_estimate_negative_constant():
     assert_interval_covers(gaussian.Interval, simulator, -1)
     # TODO: investigate and fix
 #    assert_interval_covers(lambda: clopper_pearson.Interval(rmin=-1, rmax=0), simulator, -1)
-#    assert_interval_covers(lambda: cressieread.Interval(rmin=-1, rmax=0), simulator, -1)
+    assert_interval_covers(lambda: cressieread.Interval(rmin=-1, rmax=0), simulator, -1)
 
 
 def assert_more_examples_tighter_intervals(estimator, simulator):

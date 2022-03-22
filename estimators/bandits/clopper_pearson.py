@@ -1,7 +1,7 @@
-from sre_constants import AT_LOCALE
 from scipy.stats import beta
 from estimators.bandits import base
 from typing import List, Optional
+from estimators.math import clopper_pearson
 
 
 class Interval(base.Interval):
@@ -34,8 +34,8 @@ class Interval(base.Interval):
         if self.max_weighted_reward > 0.0:
             successes = self.weighted_reward / self.max_weighted_reward
             n = self.examples_count / self.max_weighted_reward
-            return [self._scale_back(beta.ppf(alpha / 2, successes, n - successes + 1) if n - successes + 1 > 0 else 1),
-                    self._scale_back(beta.ppf(1 - alpha / 2, successes + 1, n - successes) if n - successes > 0 else 1)]
+            cp = clopper_pearson(successes, n, alpha)
+            return [self._scale_back(cp[0]), self._scale_back(cp[1])]
         return [None, None]
 
     def __add__(self, other: 'Interval') -> 'Interval':
