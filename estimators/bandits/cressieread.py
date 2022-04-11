@@ -78,6 +78,21 @@ class EstimatorImpl:
 
         return vhat
 
+    def __add__(self, other: 'EstimatorImpl') -> 'EstimatorImpl':
+        result = EstimatorImpl()
+
+        result.wmin = min(self.wmin, other.wmin)
+        result.wmax = max(self.wmax, other.wmax)
+
+        result.n = self.n + other.n
+        result.sumw = self.sumw + other.sumw
+        result.sumwsq = self.sumwsq + other.sumwsq
+        result.sumwr = self.sumwr + other.sumwr
+        result.sumwsqr = self.sumwsqr + other.sumwsqr
+        result.sumr = self.sumr + other.sumr
+
+        return result
+
 
 class IntervalImpl:
     wmin: float
@@ -202,6 +217,21 @@ class IntervalImpl:
 
         return bounds
 
+    def __add__(self, other: 'IntervalImpl') -> 'IntervalImpl':
+        result = IntervalImpl()
+
+        result.wmin = min(self.wmin, other.wmin)
+        result.wmax = max(self.wmax, other.wmax)
+
+        result.n = self.n + other.n
+        result.sumw = self.sumw + other.sumw
+        result.sumwsq = self.sumwsq + other.sumwsq
+        result.sumwr = self.sumwr + other.sumwr
+        result.sumwsqr = self.sumwsqr + other.sumwsqr
+        result.sumwsqrsq = self.sumwsqrsq + other.sumwsqrsq
+
+        return result
+
 
 class Estimator(base.Estimator):
     _impl: EstimatorImpl
@@ -215,6 +245,11 @@ class Estimator(base.Estimator):
     def get(self) -> Optional[float]:
         return self._impl.get()
 
+    def __add__(self, other: 'Estimator') -> 'Estimator':
+        result = Estimator()
+        result._impl = self._impl + other._impl
+        return result
+
 
 class Interval(base.Interval):
     _impl: IntervalImpl
@@ -227,3 +262,8 @@ class Interval(base.Interval):
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[Optional[float]]:
         return self._impl.get(alpha, atol)
+
+    def __add__(self, other: 'Interval') -> 'Interval':
+        result = Interval()
+        result._impl = self._impl + other._impl
+        return result

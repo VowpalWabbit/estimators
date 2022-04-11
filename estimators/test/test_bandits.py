@@ -126,9 +126,9 @@ def assert_summation_works(estimator, simulator):
 
     scenario1000.aggregate()
     scenario2000.aggregate()
+    scenario3000.aggregate()
 
     result_1000_plus_2000 = (scenario1000.estimator + scenario2000.estimator).get()
-    scenario3000.aggregate()
     result_3000 = scenario3000.estimator.get()
 
     if isinstance(result_1000_plus_2000, float):
@@ -147,6 +147,8 @@ def test_summation_works():
 
     assert_summation_works(ips.Estimator, simulator)
     assert_summation_works(snips.Estimator, simulator)
+    assert_summation_works(cressieread.Estimator, simulator)
+
     assert_summation_works(gaussian.Interval, simulator)
     assert_summation_works(clopper_pearson.Interval, simulator)
 
