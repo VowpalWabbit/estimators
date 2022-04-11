@@ -11,7 +11,7 @@ def test_incremental_fsum_simple():
     assert float(fsum) == 1
 
     fsum += 2
-    assert (float)(fsum) == 3
+    assert float(fsum) == 3
 
 def test_incremental_fsum_is_better_than_naive_one():
     compensated_sum = IncrementalFsum()
@@ -28,7 +28,7 @@ def test_incremental_fsum_is_better_than_naive_one():
         naive_sum += small
 
     expected = large + 1
-    assert math.fabs(expected - naive_sum) > math.fabs(expected - (float)(compensated_sum))
+    assert math.fabs(expected - naive_sum) > math.fabs(expected - float(compensated_sum))
 
 def test_incremental_fsum_summation():
     large = 2 ** 40
@@ -46,10 +46,11 @@ def test_incremental_fsum_summation():
 
     first_plus_second = first + second
     expected = 2 * large + 2
-    Helper.assert_is_close((float)(first_plus_second), expected)
+    assert math.isclose(float(first_plus_second), expected, rel_tol = 1e-14)
 
+    first_plus_second += large
     for _ in range(2 ** 20):
         first_plus_second += small
 
-    expected = 2 * large + 3
-    Helper.assert_is_close((float)(first_plus_second), 2 * large + 3)
+    expected = 3 * large + 3
+    assert math.isclose(float(first_plus_second), expected, rel_tol = 1e-14)
