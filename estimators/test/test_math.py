@@ -5,10 +5,10 @@ import math
 
 def test_incremental_fsum_simple():
     fsum = IncrementalFsum()
-    assert (float)(fsum) == 0
+    assert float(fsum) == 0
 
     fsum += 1
-    assert (float)(fsum) == 1
+    assert float(fsum) == 1
 
     fsum += 2
     assert (float)(fsum) == 3
@@ -22,10 +22,10 @@ def test_incremental_fsum_is_better_than_naive_one():
     naive_sum += large
     compensated_sum += large
 
-    d = 0.5 ** 20
+    small = 0.5 ** 20
     for _ in range(2 ** 20):
-        compensated_sum += d
-        naive_sum += d
+        compensated_sum += small
+        naive_sum += small
 
     expected = large + 1
     assert math.fabs(expected - naive_sum) > math.fabs(expected - (float)(compensated_sum))
@@ -39,17 +39,17 @@ def test_incremental_fsum_summation():
     first += large
     second += large
 
-    d = 0.5 ** 20
+    small = 0.5 ** 20
     for _ in range(2 ** 20):
-        first += d
-        second += d
+        first += small
+        second += small
 
     first_plus_second = first + second
     expected = 2 * large + 2
     Helper.assert_is_close((float)(first_plus_second), expected)
 
     for _ in range(2 ** 20):
-        first_plus_second += d
+        first_plus_second += small
 
     expected = 2 * large + 3
     Helper.assert_is_close((float)(first_plus_second), 2 * large + 3)
