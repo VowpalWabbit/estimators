@@ -151,6 +151,7 @@ def test_summation_works():
 
     assert_summation_works(gaussian.Interval, simulator)
     assert_summation_works(clopper_pearson.Interval, simulator)
+    assert_summation_works(cressieread.Interval, simulator)
 
 def test_cats_ips():
     ips_estimator = ips.Estimator()
