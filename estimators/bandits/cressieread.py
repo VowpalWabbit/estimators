@@ -79,10 +79,9 @@ class EstimatorImpl:
         return vhat
 
     def __add__(self, other: 'EstimatorImpl') -> 'EstimatorImpl':
-        result = EstimatorImpl()
-
-        result.wmin = min(self.wmin, other.wmin)
-        result.wmax = max(self.wmax, other.wmax)
+        result = EstimatorImpl(
+            wmin=min(self.wmin, other.wmin),
+            wmax=max(self.wmax, other.wmax))
 
         result.n = self.n + other.n
         result.sumw = self.sumw + other.sumw
