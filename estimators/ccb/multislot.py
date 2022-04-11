@@ -57,16 +57,12 @@ class Estimator():
 
 
 class Interval():
-    wmin: float
-    wmax: float
     rmin: float
     rmax: float
     n: IncrementalFsum
     _impl: Dict[str, IntervalImpl]
 
-    def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1, empirical_r_bounds: bool = False):
-        self.wmin = wmin
-        self.wmax = wmax
+    def __init__(self, rmin: float = 0, rmax: float = 1, empirical_r_bounds: bool = False):
         self.rmin = rmin
         self.rmax = rmax
         self.n = IncrementalFsum()
