@@ -34,10 +34,10 @@ class Estimator(base.Estimator):
         return result
 
     def __add__(self, other: 'Estimator') -> 'Estimator':
-        large, small = self, other if len(self._impl) >= len(other._impl) else other, self
+        (large, small) = (self, other) if len(self._impl) >= len(other._impl) else (other, self)
         result = Estimator(wmin = min(self.wmin, other.wmin), wmax = max(self.wmax, other.wmax))
         for i in range(len(large._impl)):
-            result._impl.append(large._impl + small._impl if i < len(small._impl) else deepcopy(large._impl))
+            result._impl.append(large._impl[i] + small._impl[i] if i < len(small._impl) else deepcopy(large._impl[i]))
         return result
 
 
@@ -81,7 +81,7 @@ class Interval(base.Interval):
             assert self.rmin == other.rmin, 'Summation of estimators with various r bounds is prohibited'
             assert self.rmax == other.rmax, 'Summation of estimators with various r bounds is prohibited'
 
-        large, small = self, other if len(self._impl) >= len(other._impl) else other, self
+        (large, small) = (self, other) if len(self._impl) >= len(other._impl) else (other, self)
         result = Interval(
             wmin = min(self.wmin, other.wmin),
             wmax=max(self.wmax, other.wmax),
@@ -89,5 +89,5 @@ class Interval(base.Interval):
             rmax=max(self.rmax, other.rmax),
             empirical_r_bounds=self.empirical_r_bounds)
         for i in range(len(large._impl)):
-            result._impl.append(large._impl + small._impl if i < len(small._impl) else deepcopy(large._impl))
+            result._impl.append(large._impl[i] + small._impl[i] if i < len(small._impl) else deepcopy(large._impl[i]))
         return result

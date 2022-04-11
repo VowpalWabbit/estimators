@@ -225,12 +225,13 @@ class IntervalImpl:
             assert self.rmin == other.rmin, 'Summation of estimators with various r bounds is prohibited'
             assert self.rmax == other.rmax, 'Summation of estimators with various r bounds is prohibited'
 
-        result = IntervalImpl()
-        result.empirical_r_bounds = self.empirical_r_bounds        
-        result.wmin = min(self.wmin, other.wmin)
-        result.wmax = max(self.wmax, other.wmax)
-        result.rmin = min(self.rmin, other.rmin)
-        result.rmax = max(self.rmax, other.rmax)
+        result = IntervalImpl(
+            wmin=min(self.wmin, other.wmin),
+            wmax=max(self.wmax, other.wmax),
+            rmin=min(self.rmin, other.rmin),
+            rmax=max(self.rmax, other.rmax),
+            empirical_r_bounds=self.empirical_r_bounds 
+        )
 
         result.n = self.n + other.n
         result.sumw = self.sumw + other.sumw
