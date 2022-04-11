@@ -55,6 +55,14 @@ class Estimator():
                 result[slot_id] = impression[slot_id] * r_given_impression[slot_id]
         return result
 
+    def __add__(self, other: 'Estimator') -> 'Estimator':
+        slot_ids = set(self._impl.keys()).union(set(other._impl.keys()))
+        result = Estimator(wmin = min(self.wmin, other.wmin), wmax = max(self.wmax, other.wmax))
+        default = lambda: EstimatorImpl(0, inf)
+        for id in slot_ids:
+            result._impl[id] = self._impl.get(id, default()) + other._impl.get(id, default())
+        return result
+
 
 class Interval():
     rmin: float
@@ -105,4 +113,19 @@ class Interval():
             r_given_impression = self.get_r_given_impression(alpha, atol)
             for slot_id, estimator in self._impl.items():
                 result[slot_id] = [a * b for a, b in zip(impression[slot_id], r_given_impression[slot_id])]
+        return result
+
+    def __add__(self, other: 'Interval') -> 'Interval':
+        assert not (self.empirical_r_bounds ^ other.empirical_r_bounds), 'Summation of estimators with various r bounds policy is prohibited'
+        
+        if not self.empirical_r_bounds:
+            assert self.rmin == other.rmin, 'Summation of estimators with various r bounds is prohibited'
+            assert self.rmax == other.rmax, 'Summation of estimators with various r bounds is prohibited'
+        rmin = min(self.rmin, other.rmin)
+        rmax = max(self.rmax, other.rmax)
+        slot_ids = set(self._impl.keys()).union(set(other._impl.keys()))
+        result = Interval(rmin=rmin, rmax=rmax, empirical_r_bounds=self.empirical_r_bounds)
+        default = lambda: IntervalImpl(wmin=0, wmax=inf, rmin=rmin, rmax=rmax, empirical_r_bounds=self.empirical_r_bounds)
+        for id in slot_ids:
+            result._impl[id] = self._impl.get(id, default()) + other._impl.get(id, default())
         return result
