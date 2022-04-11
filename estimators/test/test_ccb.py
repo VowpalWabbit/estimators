@@ -90,7 +90,7 @@ def assert_higher_alpha_tighter_intervals(estimator, simulator):
     for i in range(len(scenarios) - 1):
         assert len(scenarios[i].result) == len(scenarios[i + 1].result)
         for j in range(len(scenarios[i].result)):
-            assert_is_within(scenarios[i].result[j], scenarios[i + 1].result[j])
+            assert_is_within(scenarios[i + 1].result[j], scenarios[i].result[j])
 
 
 def test_higher_alpha_tighter_intervals():

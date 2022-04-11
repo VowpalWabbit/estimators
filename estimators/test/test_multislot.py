@@ -4,6 +4,13 @@ from estimators.ccb import multislot
 from estimators.test.utils import Scenario, get_intervals, get_r_intervals
 
 
+def assert_is_within(value, interval):
+    if isinstance(value, list):
+        assert len(value) == 2
+        assert value[0] >= interval[0]
+        assert value[1] <= interval[1]
+
+
 def assert_estimate_and_interval_convergence_after_swapping_slot_ids(
         estimator,
         interval_estimator,
@@ -25,23 +32,19 @@ def assert_estimate_and_interval_convergence_after_swapping_slot_ids(
 
     assert len(estimate_data.result) == len(expected_estimate)
     for i in range(len(expected_estimate)):
-        assert estimate_data.result[str(i)] >= expected_estimate[i][0]
-        assert estimate_data.result[str(i)] <= expected_estimate[i][1]
+        assert_is_within(estimate_data.result[str(i)], expected_estimate[i])
 
     assert len(estimate_swap_slot_ids_data.result) == len(expected_estimate_after_swap)
     for i in range(len(expected_estimate_after_swap)):
-        assert estimate_swap_slot_ids_data.result[str(i)] >= expected_estimate_after_swap[i][0]
-        assert estimate_swap_slot_ids_data.result[str(i)] <= expected_estimate_after_swap[i][1]
+        assert_is_within(estimate_swap_slot_ids_data.result[str(i)], expected_estimate_after_swap[i])
 
     assert len(interval_data.result) == len(expected_estimate)
     for i in range(len(expected_estimate)):
-        assert interval_data.result[str(i)][0] >= expected_estimate[i][0]
-        assert interval_data.result[str(i)][1] <= expected_estimate[i][1]
+        assert_is_within(interval_data.result[str(i)], expected_estimate[i])
 
     assert len(interval_swap_slot_ids_data.result) == len(expected_estimate_after_swap)
     for i in range(len(expected_estimate_after_swap)):
-        assert interval_swap_slot_ids_data.result[str(i)][0] >= expected_estimate_after_swap[i][0]
-        assert interval_swap_slot_ids_data.result[str(i)][1] <= expected_estimate_after_swap[i][1]
+        assert_is_within(interval_swap_slot_ids_data.result[str(i)], expected_estimate_after_swap[i])
 
 
 def test_estimate_and_interval_convergence_after_swapping_slot_ids():
@@ -87,8 +90,7 @@ def assert_estimates_within_interval_bounds(estimator, interval_estimator, simul
 
     assert len(estimate_data.result) == len(interval_data.result)
     for key in estimate_data.result:
-        assert estimate_data.result[key] > interval_data.result[key][0]
-        assert estimate_data.result[key] < interval_data.result[key][1]
+        assert_is_within(estimate_data.result[key], interval_data.result[key])
 
 
 def test_estimates_within_interval_bounds():
@@ -113,8 +115,7 @@ def assert_more_examples_tighter_intervals(estimator, simulator):
 
     assert len(less_data.result) == len(more_data.result)
     for key in less_data.result:
-        assert less_data.result[key][0] <= more_data.result[key][0]
-        assert less_data.result[key][1] >= more_data.result[key][1]
+        assert_is_within(more_data.result[key], less_data.result[key])
 
 
 def test_more_examples_tighter_intervals():
@@ -135,8 +136,7 @@ def assert_estimations_within(estimator, simulator, expected):
     scenario.get_r_estimate()
     assert len(scenario.result) == len(expected)
     for i in range(len(expected)):
-        assert scenario.result[str(i)] >= expected[i][0]
-        assert scenario.result[str(i)] <= expected[i][1]
+        assert_is_within(scenario.result[str(i)], expected[i])
 
 
 def test_estimations_convergence_simple():
@@ -158,8 +158,7 @@ def assert_intervals_within(estimator, simulator, expected):
     scenario.get_r_interval()
     assert len(scenario.result) == len(expected)
     for i in range(len(expected)):
-        assert scenario.result[str(i)][0] >= expected[i][0]
-        assert scenario.result[str(i)][1] <= expected[i][1]
+        assert_is_within(scenario.result[str(i)], expected[i])
 
 
 def test_interval_convergence_simple():
@@ -185,8 +184,7 @@ def assert_higher_alpha_tighter_intervals(estimator, simulator):
     for i in range(len(scenarios) - 1):
         assert len(scenarios[i].result) == len(scenarios[i + 1].result)
         for j in range(len(scenarios[i].result)):
-            assert scenarios[i].result[str(j)][0] <= scenarios[i + 1].result[str(j)][0]
-            assert scenarios[i].result[str(j)][1] >= scenarios[i + 1].result[str(j)][1]
+            assert_is_within(scenarios[i + 1].result[str(j)], scenarios[i].result[str(j)])
 
 
 def test_higher_alpha_tighter_intervals():
@@ -237,3 +235,38 @@ def test_convergence_with_no_overflow():
 def test_no_data_estimation_is_none():
     assert multislot.Estimator().get_r() == {}
     assert multislot.Interval().get_r() == {}
+
+
+def assert_summation_with_different_simulators_works(estimator, simulator1, simulator2, expected):
+    scenario1 = Scenario(simulator1, estimator())
+    scenario2 = Scenario(simulator2, estimator())
+
+    scenario1.aggregate()
+    scenario2.aggregate()
+
+    result_1_plus_2 = (scenario1.estimator + scenario2.estimator).get_r()
+
+    assert len(result_1_plus_2) == len(expected)
+    for id in result_1_plus_2.keys():
+        assert_is_within(result_1_plus_2[id], expected[id])
+
+
+def test_summation_with_various_slots_works():
+    def simulator1():
+        for i in range(100):
+            yield {'slot_ids': ['0', '1'],
+                   'p_logs': [1, 1],
+                   'rs': [1, 1],
+                   'p_preds': [1, 1]}
+
+    def simulator2():
+        for i in range(100):
+            yield {'slot_ids': ['0', '2'],
+                   'p_logs': [1, 1],
+                   'rs': [1, 1],
+                   'p_preds': [1, 1]}
+
+    expected = {'0' : (0.9, 1.1), '1': (0.4, 0.6), '2': (0.4, 0.6)}
+    assert_summation_with_different_simulators_works(multislot.Estimator, simulator1, simulator2, expected)
+    assert_summation_with_different_simulators_works(multislot.Interval, simulator1, simulator2, expected)
+

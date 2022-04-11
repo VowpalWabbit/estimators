@@ -58,6 +58,7 @@ class Estimator():
     def __add__(self, other: 'Estimator') -> 'Estimator':
         slot_ids = set(self._impl.keys()).union(set(other._impl.keys()))
         result = Estimator(wmin = min(self.wmin, other.wmin), wmax = max(self.wmax, other.wmax))
+        result.n = self.n + other.n
         default = lambda: EstimatorImpl(0, inf)
         for id in slot_ids:
             result._impl[id] = self._impl.get(id, default()) + other._impl.get(id, default())
@@ -125,6 +126,7 @@ class Interval():
         rmax = max(self.rmax, other.rmax)
         slot_ids = set(self._impl.keys()).union(set(other._impl.keys()))
         result = Interval(rmin=rmin, rmax=rmax, empirical_r_bounds=self.empirical_r_bounds)
+        result.n = self.n + other.n
         default = lambda: IntervalImpl(wmin=0, wmax=inf, rmin=rmin, rmax=rmax, empirical_r_bounds=self.empirical_r_bounds)
         for id in slot_ids:
             result._impl[id] = self._impl.get(id, default()) + other._impl.get(id, default())
