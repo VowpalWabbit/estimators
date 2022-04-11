@@ -105,12 +105,13 @@ class IntervalImpl:
     sumwr: IncrementalFsum
     sumwsqr: IncrementalFsum
     sumwsqrsq: IncrementalFsum
+    empirical_r_bounds: bool
 
     # NB: This works better you use the true wmin and wmax
     #     which is _not_ the empirical minimum and maximum
     #     but rather the actual smallest and largest possible values
 
-    def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1, empirical_r_bounds: bool = False):
+    def __init__(self, wmin: float, wmax: float, rmin: float, rmax: float, empirical_r_bounds: bool):
         assert wmin < 1
         assert wmax > 1
 
@@ -218,10 +219,18 @@ class IntervalImpl:
         return bounds
 
     def __add__(self, other: 'IntervalImpl') -> 'IntervalImpl':
-        result = IntervalImpl()
+        assert not (self.empirical_r_bounds ^ other.empirical_r_bounds), 'Summation of estimators with various r bounds policy is prohibited'
+        
+        if not self.empirical_r_bounds:
+            assert self.rmin == other.rmin, 'Summation of estimators with various r bounds is prohibited'
+            assert self.rmax == other.rmax, 'Summation of estimators with various r bounds is prohibited'
 
+        result = IntervalImpl()
+        result.empirical_r_bounds = self.empirical_r_bounds        
         result.wmin = min(self.wmin, other.wmin)
         result.wmax = max(self.wmax, other.wmax)
+        result.rmin = min(self.rmin, other.rmin)
+        result.rmax = max(self.rmax, other.rmax)
 
         result.n = self.n + other.n
         result.sumw = self.sumw + other.sumw
@@ -254,8 +263,8 @@ class Estimator(base.Estimator):
 class Interval(base.Interval):
     _impl: IntervalImpl
 
-    def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1):
-        self._impl = IntervalImpl(wmin, wmax, rmin, rmax)
+    def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1, empirical_r_bounds = False):
+        self._impl = IntervalImpl(wmin, wmax, rmin, rmax, empirical_r_bounds)
 
     def add_example(self, p_log: float, r: float, p_pred: float, count: float = 1.0) -> None:
         self._impl.add(p_pred / p_log, r, count)
