@@ -46,11 +46,11 @@ def test_incremental_fsum_summation():
 
     first_plus_second = first + second
     expected = 2 * large + 2
-    assert math.isclose(float(first_plus_second), expected, rel_tol = 1e-14)
+    assert math.isclose(float(first_plus_second), expected, rel_tol = 0.5**50)
 
     first_plus_second += large
     for _ in range(2 ** 15):
         first_plus_second += small
 
     expected = 3 * large + 3
-    assert math.isclose(float(first_plus_second), expected, rel_tol = 1e-14)
+    assert math.isclose(float(first_plus_second), expected, rel_tol = 0.5**50)
