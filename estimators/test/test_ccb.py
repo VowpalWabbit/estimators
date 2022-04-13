@@ -10,6 +10,9 @@ def assert_is_within(value, interval):
         assert len(value) == 2
         assert value[0] >= interval[0]
         assert value[1] <= interval[1]
+    else:
+        assert value >= interval[0]
+        assert value <= interval[1]        
 
 
 def assert_more_examples_tighter_intervals(estimator, simulator):
