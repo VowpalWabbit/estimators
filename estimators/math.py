@@ -1,5 +1,6 @@
 from scipy.stats import beta
 from typing import List, Optional
+from copy import deepcopy
 
 class IncrementalFsum:
     """ Incremental version of https://en.wikipedia.org/wiki/Kahan_summation_algorithm """
@@ -20,6 +21,13 @@ class IncrementalFsum:
             x = hi
         self.partials[i:] = [x]
         return self
+
+    def __add__(self, other):
+        result = IncrementalFsum()
+        result.partials = deepcopy(self.partials)
+        for y in other.partials:
+            result += y
+        return result
 
     def __float__(self):
         return sum(self.partials, 0.0)
