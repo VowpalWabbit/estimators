@@ -15,6 +15,12 @@ def assert_estimation_is_close(estimator, simulator, value):
     scenario.get_estimate()
     Helper.assert_is_close(scenario.result, value)
 
+def assert_interval_covers(estimator, simulator, expected):
+    scenario = Scenario(simulator, estimator())
+    scenario.get_interval()
+    assert scenario.result[0] <= expected
+    assert scenario.result[1] >= expected
+
 
 def test_estimate_1_from_1s():
     ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
@@ -28,6 +34,43 @@ def test_estimate_1_from_1s():
     assert_estimation_is_close(snips.Estimator, simulator, 1)
     assert_estimation_is_close(mle.Estimator, simulator, 1)
     assert_estimation_is_close(cressieread.Estimator, simulator, 1)
+    assert_interval_covers(gaussian.Interval, simulator, 1)
+    assert_interval_covers(clopper_pearson.Interval, simulator, 1)
+    assert_interval_covers(cressieread.Interval, simulator, 1)
+
+
+def test_estimate_10_from_10s():
+    ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
+    def simulator():
+        for _ in range(10):
+            yield  {'p_log': 1,
+                    'r': 10,
+                    'p_pred': 1}
+
+    assert_estimation_is_close(ips.Estimator, simulator, 10)
+    assert_estimation_is_close(snips.Estimator, simulator, 10)
+    assert_estimation_is_close(mle.Estimator, simulator, 10)
+    assert_estimation_is_close(cressieread.Estimator, simulator, 10)
+    assert_interval_covers(gaussian.Interval, simulator, 10)
+    assert_interval_covers(lambda: clopper_pearson.Interval(rmin=0, rmax=10), simulator, 10)
+    assert_interval_covers(lambda: cressieread.Interval(rmin=0, rmax=10), simulator, 10)
+
+def test_estimate_negative_constant():
+    ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
+    def simulator():
+        for _ in range(10):
+            yield  {'p_log': 1,
+                    'r': -1,
+                    'p_pred': 1}
+
+    assert_estimation_is_close(ips.Estimator, simulator, -1)
+    assert_estimation_is_close(snips.Estimator, simulator, -1)
+    assert_estimation_is_close(mle.Estimator, simulator, -1)
+    assert_estimation_is_close(cressieread.Estimator, simulator, -1)
+
+    assert_interval_covers(gaussian.Interval, simulator, -1)
+    assert_interval_covers(lambda: clopper_pearson.Interval(rmin=-1, rmax=0), simulator, -1)
+    assert_interval_covers(lambda: cressieread.Interval(rmin=-1, rmax=0), simulator, -1)
 
 
 def assert_more_examples_tighter_intervals(estimator, simulator):
@@ -106,6 +149,27 @@ def test_no_data_estimation_is_none():
     assert_interval_is_none(clopper_pearson.Interval)
 
 
+def test_simple_convergence():
+    def simulator(r):
+        for i in range(10000):
+            chosen = i % 2
+            yield  {'p_log': 0.5,
+                    'r': r if chosen == 0 else 0,
+                    'p_pred': 0.8 if chosen == 0 else 0.2}
+    r = 1
+    expected = (0.75 * r, 0.85 * r)
+    assert_interval_within(gaussian.Interval, lambda: simulator(r), expected)
+    assert_interval_within(lambda: clopper_pearson.Interval(0, r), lambda: simulator(r), expected)
+    assert_interval_within(lambda: cressieread.Interval(rmin=0, rmax=r), lambda: simulator(r), expected)
+
+    r = 10
+    expected = (0.75 * r, 0.85 * r)
+    assert_interval_within(gaussian.Interval, lambda: simulator(r), expected)
+    assert_interval_within(lambda: clopper_pearson.Interval(0, r), lambda: simulator(r), expected)
+    assert_interval_within(lambda: cressieread.Interval(rmin=0, rmax=r), lambda: simulator(r), expected)
+   
+    # TODO: test + fix for cressieread with negative rewards
+
 def test_convergence_with_no_overflow():
     def simulator():
         for i in range(1000000):
@@ -126,9 +190,9 @@ def assert_summation_works(estimator, simulator):
 
     scenario1000.aggregate()
     scenario2000.aggregate()
+    scenario3000.aggregate()
 
     result_1000_plus_2000 = (scenario1000.estimator + scenario2000.estimator).get()
-    scenario3000.aggregate()
     result_3000 = scenario3000.estimator.get()
 
     if isinstance(result_1000_plus_2000, float):
@@ -147,8 +211,11 @@ def test_summation_works():
 
     assert_summation_works(ips.Estimator, simulator)
     assert_summation_works(snips.Estimator, simulator)
+    assert_summation_works(cressieread.Estimator, simulator)
+
     assert_summation_works(gaussian.Interval, simulator)
     assert_summation_works(clopper_pearson.Interval, simulator)
+    assert_summation_works(cressieread.Interval, simulator)
 
 def test_cats_ips():
     ips_estimator = ips.Estimator()
