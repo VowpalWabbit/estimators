@@ -296,8 +296,8 @@ def test_no_data_estimation_is_none():
     assert multislot.Estimator().get_r() == {}
     assert multislot.Interval().get_r() == {}
     assert multislot.Estimator().get_r_all() == None
-    assert multislot.Interval().get_r_all[0] == None
-    assert multislot.Interval().get_r_all[1] == None
+    assert multislot.Interval().get_r_all()[0] == None
+    assert multislot.Interval().get_r_all()[1] == None
 
 
 def assert_summation_with_different_simulators_works(estimator, simulator1, simulator2, expected):
