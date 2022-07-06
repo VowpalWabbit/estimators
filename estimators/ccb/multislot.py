@@ -55,6 +55,9 @@ class Estimator():
                 result[slot_id] = impression[slot_id] * r_given_impression[slot_id]
         return result
 
+    def get_r_all(self) -> float:
+        return 0
+
     def __add__(self, other: 'Estimator') -> 'Estimator':
         slot_ids = set(self._impl.keys()).union(set(other._impl.keys()))
         result = Estimator(wmin = min(self.wmin, other.wmin), wmax = max(self.wmax, other.wmax))
@@ -115,6 +118,9 @@ class Interval():
             for slot_id, estimator in self._impl.items():
                 result[slot_id] = [a * b for a, b in zip(impression[slot_id], r_given_impression[slot_id])]
         return result
+
+    def get_r_all(self) -> List[float]:
+        return [0, 1]
 
     def __add__(self, other: 'Interval') -> 'Interval':
         assert not (self.empirical_r_bounds ^ other.empirical_r_bounds), 'Summation of estimators with various r bounds policy is prohibited'
