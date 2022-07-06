@@ -1,7 +1,7 @@
 import numpy as np
 
 from estimators.ccb import multislot
-from estimators.test.utils import Scenario, get_r_intervals, get_r_all_intervals
+from estimators.test.utils import Scenario, get_r_intervals, get_r_overall_intervals
 
 
 def assert_is_within(value, interval):
@@ -95,12 +95,12 @@ def assert_estimates_within_interval_bounds(estimator, interval_estimator, simul
     for key in estimate_data.result:
         assert_is_within(estimate_data.result[key], interval_data.result[key])
 
-def assert_estimates_all_within_interval_bounds(estimator, interval_estimator, simulator):
+def assert_estimates_overall_within_interval_bounds(estimator, interval_estimator, simulator):
     estimate_data = Scenario(lambda: simulator(100), estimator())
     interval_data = Scenario(lambda: simulator(100), interval_estimator(empirical_r_bounds=True))
 
-    estimate_data.get_r_all_estimate()
-    interval_data.get_r_all_interval()
+    estimate_data.get_r_overall_estimate()
+    interval_data.get_r_overall_interval()
 
     assert_is_within(estimate_data.result, interval_data.result)
 
@@ -116,7 +116,7 @@ def test_estimates_within_interval_bounds():
                    'p_preds': [0.5 + 0.3 * (-1)**chosen, 1]}
 
     assert_estimates_within_interval_bounds(multislot.Estimator, multislot.Interval, simulator)
-    assert_estimates_all_within_interval_bounds(multislot.Estimator, multislot.Interval, simulator)
+    assert_estimates_overall_within_interval_bounds(multislot.Estimator, multislot.Interval, simulator)
 
 
 def assert_more_examples_tighter_intervals(estimator, simulator):
@@ -131,12 +131,12 @@ def assert_more_examples_tighter_intervals(estimator, simulator):
         assert_is_within(more_data.result[key], less_data.result[key])
 
 
-def assert_more_examples_tighter_intervals_all(estimator, simulator):
+def assert_more_examples_tighter_intervals_overall(estimator, simulator):
     less_data = Scenario(lambda: simulator(100), estimator())
     more_data = Scenario(lambda: simulator(10000), estimator())
 
-    less_data.get_r_all_interval()
-    more_data.get_r_all_interval()
+    less_data.get_r_overall_interval()
+    more_data.get_r_overall_interval()
 
     assert_is_within(more_data.result, less_data.result)
 
@@ -152,7 +152,7 @@ def test_more_examples_tighter_intervals():
                    'p_preds': [0.5 + 0.3 * (-1)**chosen, 1]}
 
     assert_more_examples_tighter_intervals(multislot.Interval, simulator)
-    assert_more_examples_tighter_intervals_all(multislot.Interval, simulator)
+    assert_more_examples_tighter_intervals_overall(multislot.Interval, simulator)
 
 
 def assert_estimations_within(estimator, simulator, expected):
@@ -163,9 +163,9 @@ def assert_estimations_within(estimator, simulator, expected):
         assert_is_within(scenario.result[str(i)], expected[i])
 
 
-def assert_estimations_all_within(estimator, simulator, expected):
+def assert_estimations_overall_within(estimator, simulator, expected):
     scenario = Scenario(simulator, estimator())
-    scenario.get_r_all_estimate()
+    scenario.get_r_overall_estimate()
     assert_is_within(scenario.result, expected)
 
 
@@ -182,7 +182,7 @@ def test_estimations_convergence_simple():
     assert_estimations_within(multislot.Estimator, simulator, expected)
 
     expected = (0.15, 0.25)
-    assert_estimations_all_within(multislot.Estimator, simulator, expected)
+    assert_estimations_overall_within(multislot.Estimator, simulator, expected)
 
 
 def assert_intervals_within(estimator, simulator, expected):
@@ -193,9 +193,9 @@ def assert_intervals_within(estimator, simulator, expected):
         assert_is_within(scenario.result[str(i)], expected[i])
 
 
-def assert_intervals_all_within(estimator, simulator, expected):
+def assert_intervals_overall_within(estimator, simulator, expected):
     scenario = Scenario(simulator, estimator())
-    scenario.get_r_all_interval()
+    scenario.get_r_overall_interval()
     assert_is_within(scenario.result, expected)
 
 
@@ -212,7 +212,7 @@ def test_interval_convergence_simple():
     assert_intervals_within(multislot.Interval, simulator, expected)
 
     expected = (0.15, 0.25)
-    assert_intervals_all_within(multislot.Interval, simulator, expected)
+    assert_intervals_overall_within(multislot.Interval, simulator, expected)
 
 
 def assert_higher_alpha_tighter_intervals(estimator, simulator):
@@ -227,11 +227,11 @@ def assert_higher_alpha_tighter_intervals(estimator, simulator):
             assert_is_within(scenarios[i + 1].result[str(j)], scenarios[i].result[str(j)])
 
 
-def assert_higher_alpha_tighter_intervals_all(estimator, simulator):
+def assert_higher_alpha_tighter_intervals_overall(estimator, simulator):
     alphas = np.arange(0.1, 1, 0.1)
 
     scenarios = [Scenario(simulator, estimator(), alpha=alpha) for alpha in alphas]
-    get_r_all_intervals(scenarios)
+    get_r_overall_intervals(scenarios)
 
     for i in range(len(scenarios) - 1):
         assert_is_within(scenarios[i + 1].result, scenarios[i].result)
@@ -248,7 +248,7 @@ def test_higher_alpha_tighter_intervals():
                    'p_preds': [0.5 + 0.3 * (-1)**chosen, 1]}
 
     assert_higher_alpha_tighter_intervals(multislot.Interval, simulator)
-    assert_higher_alpha_tighter_intervals_all(multislot.Interval, simulator)
+    assert_higher_alpha_tighter_intervals_overall(multislot.Interval, simulator)
 
 
 def test_various_slots_count():
@@ -268,8 +268,8 @@ def test_various_slots_count():
     assert_intervals_within(multislot.Interval, simulator, expected)
     
     expected = (0.9, 1.1)
-    assert_estimations_all_within(multislot.Estimator, simulator, expected)
-    assert_intervals_all_within(multislot.Interval, simulator, expected)
+    assert_estimations_overall_within(multislot.Estimator, simulator, expected)
+    assert_intervals_overall_within(multislot.Interval, simulator, expected)
 
 
 def test_convergence_with_no_overflow():
@@ -288,16 +288,16 @@ def test_convergence_with_no_overflow():
 
     expected = (0.15, 0.25)
 
-    assert_estimations_all_within(multislot.Estimator, simulator, expected)
-    assert_intervals_all_within(multislot.Interval, simulator, expected)
+    assert_estimations_overall_within(multislot.Estimator, simulator, expected)
+    assert_intervals_overall_within(multislot.Interval, simulator, expected)
 
 
 def test_no_data_estimation_is_none():
     assert multislot.Estimator().get_r() == {}
     assert multislot.Interval().get_r() == {}
-    assert multislot.Estimator().get_r_all() == None
-    assert multislot.Interval().get_r_all()[0] == None
-    assert multislot.Interval().get_r_all()[1] == None
+    assert multislot.Estimator().get_r_overall() == None
+    assert multislot.Interval().get_r_overall()[0] == None
+    assert multislot.Interval().get_r_overall()[1] == None
 
 
 def assert_summation_with_different_simulators_works(estimator, simulator1, simulator2, expected):

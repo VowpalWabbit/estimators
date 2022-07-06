@@ -23,17 +23,17 @@ class Scenario:
         self.aggregate()
         self.result = self.estimator.get_r()
 
-    def get_r_all_estimate(self):
+    def get_r_overall_estimate(self):
         self.aggregate()
-        self.result = self.estimator.get_r_all()
+        self.result = self.estimator.get_r_overall()
     
     def get_r_interval(self):
         self.aggregate()
         self.result = self.estimator.get_r(self.alpha)
 
-    def get_r_all_interval(self):
+    def get_r_overall_interval(self):
         self.aggregate()
-        self.result = self.estimator.get_r_all(self.alpha)
+        self.result = self.estimator.get_r_overall(self.alpha)
 
 
 def get_estimates(scenarios):
@@ -48,17 +48,17 @@ def get_r_estimates(scenarios):
     for scenario in scenarios:
         scenario.get_r_estimate()
 
-def get_r_all_estimates(scenarios):
+def get_r_overall_estimates(scenarios):
     for scenario in scenarios:
-        scenario.get_r_all_estimate()
+        scenario.get_r_overall_estimate()
     
 def get_r_intervals(scenarios):
     for scenario in scenarios:
         scenario.get_r_interval()
 
-def get_r_all_intervals(scenarios):
+def get_r_overall_intervals(scenarios):
     for scenario in scenarios:
-        scenario.get_r_all_interval()
+        scenario.get_r_overall_interval()
 
 
 class Helper():

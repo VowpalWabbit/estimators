@@ -55,7 +55,7 @@ class Estimator():
                 result[slot_id] = impression[slot_id] * r_given_impression[slot_id]
         return result
 
-    def get_r_all(self) -> float:
+    def get_r_overall(self) -> float:
         if any(self._impl):
             return sum(self._impl.values(), EstimatorImpl(0, inf)).get()
         return None
@@ -121,7 +121,7 @@ class Interval():
                 result[slot_id] = [a * b for a, b in zip(impression[slot_id], r_given_impression[slot_id])]
         return result
 
-    def get_r_all(self, alpha: float = 0.05, atol: float = 1e-9) -> List[float]:
+    def get_r_overall(self, alpha: float = 0.05, atol: float = 1e-9) -> List[float]:
         if any(self._impl):
             return sum(self._impl.values(), IntervalImpl(0, inf, self.rmin, self.rmax, self.empirical_r_bounds)).get(alpha, atol)
         return [None, None]
