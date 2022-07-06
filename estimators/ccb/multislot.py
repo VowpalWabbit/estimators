@@ -56,9 +56,7 @@ class Estimator():
         return result
 
     def get_r_overall(self) -> float:
-        if any(self._impl):
-            return sum(self._impl.values(), EstimatorImpl(0, inf)).get()
-        return None
+        return sum(self._impl.values(), EstimatorImpl(0, inf)).get()
 
     def __add__(self, other: 'Estimator') -> 'Estimator':
         slot_ids = set(self._impl.keys()).union(set(other._impl.keys()))
@@ -122,9 +120,7 @@ class Interval():
         return result
 
     def get_r_overall(self, alpha: float = 0.05, atol: float = 1e-9) -> List[float]:
-        if any(self._impl):
-            return sum(self._impl.values(), IntervalImpl(0, inf, self.rmin, self.rmax, self.empirical_r_bounds)).get(alpha, atol)
-        return [None, None]
+        return sum(self._impl.values(), IntervalImpl(0, inf, self.rmin, self.rmax, self.empirical_r_bounds)).get(alpha, atol)
 
     def __add__(self, other: 'Interval') -> 'Interval':
         assert not (self.empirical_r_bounds ^ other.empirical_r_bounds), 'Summation of estimators with various r bounds policy is prohibited'
