@@ -119,7 +119,7 @@ class Interval():
                 result[slot_id] = [a * b for a, b in zip(impression[slot_id], r_given_impression[slot_id])]
         return result
 
-    def get_r_all(self) -> List[float]:
+    def get_r_all(self, alpha: float = 0.05, atol: float = 1e-9) -> List[float]:
         return [0, 1]
 
     def __add__(self, other: 'Interval') -> 'Interval':
