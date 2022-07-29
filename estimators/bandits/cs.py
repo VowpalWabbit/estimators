@@ -100,9 +100,9 @@ class IntervalImpl(object):
             
         self.t += 1
         
-    def get(self, alpha: float) -> List[float, float]:
+    def get(self, alpha: float) -> List[Optional[float]]:
         if self.t == 0 or self.rmin == self.rmax:
-            return [self.rmin, self.rmax]
+            return [None, None]
         
         sumvlow = (  (float(self.sumwsqrsq) - 2 * self.rmin * float(self.sumwsqr) + self.rmin**2 * float(self.sumwsq)) / (self.rmax - self.rmin)**2
                    - 2 * (float(self.sumwrxhatlow) - self.rmin * float(self.sumwxhatlow)) / (self.rmax - self.rmin)
@@ -118,7 +118,7 @@ class IntervalImpl(object):
         sumXhigh = (float(self.sumw) * self.rmax - float(self.sumwr)) / (self.rmax - self.rmin)
         u = 1 - _lblogwealth(t=self.t, sumXt=sumXhigh, v=sumvhigh, rho=self.rho, alpha=alpha/2)
         
-        return self.rmin + l * (self.rmax - self.rmin), self.rmin + u * (self.rmax - self.rmin)
+        return [self.rmin + l * (self.rmax - self.rmin), self.rmin + u * (self.rmax - self.rmin)]
 
 
 class Interval(base.Interval):
