@@ -129,7 +129,7 @@ class Interval(base.Interval):
 
     def add_example(self, p_log: float, r: float, p_pred: float, count: float = 1.0) -> None:
         # TODO: add count
-        assert count == 1.0
+        assert count == 1.0, "need to explicitly model the pdrop generatively in order to prevent misleading confidence interval widths"
         self._impl.add(p_pred / p_log, r)
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[Optional[float]]:
