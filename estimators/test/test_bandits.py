@@ -7,6 +7,7 @@ from estimators.bandits import cressieread
 from estimators.bandits import cats_utils
 from estimators.bandits import gaussian
 from estimators.bandits import clopper_pearson
+from estimators.bandits import cs
 from estimators.test.utils import Helper, Scenario, get_intervals
 
 
@@ -37,6 +38,7 @@ def test_estimate_1_from_1s():
     assert_interval_covers(gaussian.Interval, simulator, 1)
     assert_interval_covers(clopper_pearson.Interval, simulator, 1)
     assert_interval_covers(cressieread.Interval, simulator, 1)
+    assert_interval_covers(cs.Interval, simulator, 1)
 
 
 def test_estimate_10_from_10s():
@@ -71,6 +73,7 @@ def test_estimate_negative_constant():
     assert_interval_covers(gaussian.Interval, simulator, -1)
     assert_interval_covers(lambda: clopper_pearson.Interval(rmin=-1, rmax=0), simulator, -1)
     assert_interval_covers(lambda: cressieread.Interval(rmin=-1, rmax=0), simulator, -1)
+    assert_interval_covers(lambda: cs.Interval(rmin=-1, rmax=0), simulator, -1)
 
 
 def assert_more_examples_tighter_intervals(estimator, simulator):
@@ -95,7 +98,8 @@ def test_more_examples_tighter_intervals():
 
     assert_more_examples_tighter_intervals(cressieread.Interval, simulator)
     assert_more_examples_tighter_intervals(gaussian.Interval, simulator)
-    assert_more_examples_tighter_intervals(clopper_pearson.Interval, simulator)        
+    assert_more_examples_tighter_intervals(clopper_pearson.Interval, simulator)
+    assert_more_examples_tighter_intervals(cs.Interval, simulator)             
 
 
 def assert_higher_alpha_tighter_intervals(estimator, simulator):
@@ -120,7 +124,8 @@ def test_higher_alpha_tighter_intervals():
 
     assert_higher_alpha_tighter_intervals(cressieread.Interval, simulator)
     assert_higher_alpha_tighter_intervals(gaussian.Interval, simulator)
-    assert_higher_alpha_tighter_intervals(clopper_pearson.Interval, simulator)   
+    assert_higher_alpha_tighter_intervals(clopper_pearson.Interval, simulator)
+    assert_higher_alpha_tighter_intervals(cs.Interval, simulator)     
 
 
 def assert_interval_within(estimator, simulator, expected):
@@ -147,6 +152,7 @@ def test_no_data_estimation_is_none():
     assert_interval_is_none(cressieread.Interval)
     assert_interval_is_none(gaussian.Interval)
     assert_interval_is_none(clopper_pearson.Interval)
+    assert_interval_is_none(cs.Interval)
 
 
 def test_simple_convergence():
@@ -167,6 +173,7 @@ def test_simple_convergence():
     assert_interval_within(gaussian.Interval, lambda: simulator(r), expected)
     assert_interval_within(lambda: clopper_pearson.Interval(0, r), lambda: simulator(r), expected)
     assert_interval_within(lambda: cressieread.Interval(rmin=0, rmax=r), lambda: simulator(r), expected)
+    assert_interval_within(lambda: cs.Interval(rmin=0, rmax=r), lambda: simulator(r), expected)
    
     # TODO: test + fix for cressieread with negative rewards
 
@@ -181,6 +188,7 @@ def test_convergence_with_no_overflow():
     assert_interval_within(gaussian.Interval, simulator, expected)
     assert_interval_within(clopper_pearson.Interval, simulator, expected)
     assert_interval_within(cressieread.Interval, simulator, expected)
+    assert_interval_within(cs.Interval, simulator, expected)
 
 
 def assert_summation_works(estimator, simulator):
@@ -216,6 +224,8 @@ def test_summation_works():
     assert_summation_works(gaussian.Interval, simulator)
     assert_summation_works(clopper_pearson.Interval, simulator)
     assert_summation_works(cressieread.Interval, simulator)
+    # TODO: fix
+    #assert_summation_works(cs.Interval, simulator)
 
 def test_cats_ips():
     ips_estimator = ips.Estimator()

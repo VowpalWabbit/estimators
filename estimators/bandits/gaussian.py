@@ -15,6 +15,7 @@ class Interval(base.Interval):
         self.weighted_reward_sq = 0
 
     def add_example(self, p_log: float, r: float, p_pred: float, count: float = 1.0) -> None:
+        assert count == 1.0, "need to explicitly model the pdrop generatively in order to prevent misleading confidence interval widths"
         self.examples_count += count
         w = p_pred/p_log
         self.weighted_reward += r * w * count
