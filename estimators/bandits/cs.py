@@ -127,7 +127,7 @@ class Interval(base.Interval):
     def __init__(self, rmin: float = 0, rmax: float = 1, empirical_r_bounds = False):
         self._impl = IntervalImpl(rmin=rmin, rmax=rmax, adjust=empirical_r_bounds)
 
-    def add_example(self, p_log: float, r: float, p_pred: float, count: float = 1.0) -> None:
+    def add_example(self, p_log: float, r: float, p_pred: float, count: int = 1) -> None:
         # TODO: add count
         assert count == 1.0, "need to explicitly model the pdrop generatively in order to prevent misleading confidence interval widths"
         self._impl.add(p_pred / p_log, r)
