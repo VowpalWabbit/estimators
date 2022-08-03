@@ -24,7 +24,6 @@ class Interval(base.Interval):
         return self.rmin + r * (self.rmax - self.rmin)
 
     def add_example(self, p_log: float, r: float, p_pred: float, count: int = 1) -> None:
-        assert count == 1.0, "need to explicitly model the pdrop generatively in order to prevent misleading confidence interval widths"
         r = self._scale(r)
         self.examples_count += count
         w = p_pred / p_log
