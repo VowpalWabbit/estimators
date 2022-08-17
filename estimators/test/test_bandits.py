@@ -248,7 +248,7 @@ def test_convergence_with_count():
     assert_interval_covers(gaussian.Interval, simulator, 0.5)
     assert_interval_covers(clopper_pearson.Interval, simulator, 0.5)
     assert_interval_covers(cressieread.Interval, simulator, 0.5)
-   # assert_interval_covers(cs.Interval, simulator, 0.5)
+    assert_interval_covers(cs.Interval, simulator, 0.5)
 
 def test_cats_ips():
     ips_estimator = ips.Estimator()
