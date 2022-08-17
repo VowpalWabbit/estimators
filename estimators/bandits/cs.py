@@ -71,8 +71,12 @@ class IntervalImpl(object):
         self.sumwrxhathigh = IncrementalFsum()
         self.sumwxhathigh = IncrementalFsum()
         self.sumxhathighsq = IncrementalFsum()
+
+    def add(self, w: float, r: float, count: int = 1) -> None:
+        for i in range(count):
+            self._add(w, r)
             
-    def add(self, w: float, r: float):
+    def _add(self, w: float, r: float) -> None:
         assert w >= 0
         
         if not self.adjust:
@@ -128,9 +132,7 @@ class Interval(base.Interval):
         self._impl = IntervalImpl(rmin=rmin, rmax=rmax, adjust=empirical_r_bounds)
 
     def add_example(self, p_log: float, r: float, p_pred: float, count: int = 1) -> None:
-        # TODO: add count
-        assert count == 1, "Not implemented yet"
-        self._impl.add(p_pred / p_log, r)
+        self._impl.add(p_pred / p_log, r, count)
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[Optional[float]]:
         return self._impl.get(alpha)
