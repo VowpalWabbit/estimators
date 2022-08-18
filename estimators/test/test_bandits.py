@@ -227,6 +227,29 @@ def test_summation_works():
     # TODO: fix
     #assert_summation_works(cs.Interval, simulator)
 
+def test_convergence_with_count():
+    ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
+    def simulator():
+        for _ in range(1000):
+            yield  {'p_log': 1,
+                    'r': 1,
+                    'p_pred': 1}
+        for _ in range(500):
+            yield { 'p_log': 1,
+                    'r': 0,
+                    'p_pred': 1,
+                    'count': 2
+            }
+
+    assert_estimation_is_close(ips.Estimator, simulator, 0.5)
+    assert_estimation_is_close(snips.Estimator, simulator, 0.5)
+    assert_estimation_is_close(mle.Estimator, simulator, 0.5)
+    assert_estimation_is_close(cressieread.Estimator, simulator, 0.5)
+    assert_interval_covers(gaussian.Interval, simulator, 0.5)
+    assert_interval_covers(clopper_pearson.Interval, simulator, 0.5)
+    assert_interval_covers(cressieread.Interval, simulator, 0.5)
+    assert_interval_covers(cs.Interval, simulator, 0.5)
+
 def test_cats_ips():
     ips_estimator = ips.Estimator()
     snips_estimator = snips.Estimator()

@@ -32,7 +32,7 @@ class Interval(ABC):
 	""" Interface for implementation of contextual bandit estimators interval """
 
 	@abstractmethod
-	def add_example(self, p_log: float, r: float, p_pred: float, count: float) -> None:
+	def add_example(self, p_log: float, r: float, p_pred: float, count: int) -> None:
 		""" 
 		Args:
 			p_log: probability of the logging policy
