@@ -71,8 +71,12 @@ class IntervalImpl(object):
         self.sumwrxhathigh = IncrementalFsum()
         self.sumwxhathigh = IncrementalFsum()
         self.sumxhathighsq = IncrementalFsum()
+
+    def add(self, w: float, r: float, count: int = 1) -> None:
+        for i in range(count):
+            self._add(w, r)
             
-    def add(self, w: float, r: float):
+    def _add(self, w: float, r: float) -> None:
         assert w >= 0
         
         if not self.adjust:
@@ -127,10 +131,8 @@ class Interval(base.Interval):
     def __init__(self, rmin: float = 0, rmax: float = 1, empirical_r_bounds = False):
         self._impl = IntervalImpl(rmin=rmin, rmax=rmax, adjust=empirical_r_bounds)
 
-    def add_example(self, p_log: float, r: float, p_pred: float, count: float = 1.0) -> None:
-        # TODO: add count
-        assert count == 1.0, "need to explicitly model the pdrop generatively in order to prevent misleading confidence interval widths"
-        self._impl.add(p_pred / p_log, r)
+    def add_example(self, p_log: float, r: float, p_pred: float, count: int = 1) -> None:
+        self._impl.add(p_pred / p_log, r, count)
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[Optional[float]]:
         return self._impl.get(alpha)

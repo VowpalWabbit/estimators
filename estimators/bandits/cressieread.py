@@ -128,7 +128,6 @@ class IntervalImpl:
         self.sumwsqrsq = IncrementalFsum()
 
     def add(self, w: float, r: float, count: float = 1.0) -> None:
-        assert count == 1.0, "need to explicitly model the pdrop generatively in order to prevent misleading confidence interval widths"
         if count > 0:
             assert w >= 0, 'Error: negative importance weight'
 
@@ -267,7 +266,7 @@ class Interval(base.Interval):
     def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1, empirical_r_bounds = False):
         self._impl = IntervalImpl(wmin, wmax, rmin, rmax, empirical_r_bounds)
 
-    def add_example(self, p_log: float, r: float, p_pred: float, count: float = 1.0) -> None:
+    def add_example(self, p_log: float, r: float, p_pred: float, count: int = 1) -> None:
         self._impl.add(p_pred / p_log, r, count)
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[Optional[float]]:
