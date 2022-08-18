@@ -14,7 +14,7 @@ class Interval(base.Interval):
         self.weighted_reward = 0
         self.weighted_reward_sq = 0
 
-    def add_example(self, p_log: float, r: float, p_pred: float, count: int = 1) -> None:
+    def add_example(self, p_log: float, r: float, p_pred: float, count: int = 1, p_drop: float = 0, n_drop: Optional[int] = None) -> None:
         self.examples_count += count
         w = p_pred/p_log
         self.weighted_reward += r * w * count

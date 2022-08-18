@@ -23,7 +23,7 @@ class Interval(base.Interval):
     def _scale_back(self, r):
         return self.rmin + r * (self.rmax - self.rmin)
 
-    def add_example(self, p_log: float, r: float, p_pred: float, count: int = 1) -> None:
+    def add_example(self, p_log: float, r: float, p_pred: float, count: int = 1, p_drop: float = 0, n_drop: Optional[int] = None) -> None:
         r = self._scale(r)
         self.examples_count += count
         w = p_pred / p_log

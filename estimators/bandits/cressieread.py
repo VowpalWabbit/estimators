@@ -266,7 +266,7 @@ class Interval(base.Interval):
     def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1, empirical_r_bounds = False):
         self._impl = IntervalImpl(wmin, wmax, rmin, rmax, empirical_r_bounds)
 
-    def add_example(self, p_log: float, r: float, p_pred: float, count: int = 1) -> None:
+    def add_example(self, p_log: float, r: float, p_pred: float, count: int = 1, p_drop: float = 0, n_drop: Optional[int] = None) -> None:
         self._impl.add(p_pred / p_log, r, count)
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[Optional[float]]:
