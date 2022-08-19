@@ -15,8 +15,10 @@ class Interval(base.Interval):
         self.weighted_reward_sq = 0
 
     def add_example(self, p_log: float, r: float, p_pred: float, p_drop: float = 0, n_drop: Optional[int] = None) -> None:
-        self.examples_count += 1
-        w = p_pred/p_log
+        if n_drop is None:
+            n_drop = p_drop / (1 - p_drop)
+        self.examples_count += 1 + n_drop
+        w = p_pred / (p_log * (1 - p_drop))
         self.weighted_reward += r * w
         self.weighted_reward_sq += ((r * w)**2)
 

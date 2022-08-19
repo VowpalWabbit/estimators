@@ -126,10 +126,14 @@ class IntervalImpl:
         self.sumwsqr = IncrementalFsum()
         self.sumwsqrsq = IncrementalFsum()
 
-    def add(self, w: float, r: float) -> None:
+    def add(self, w: float, r: float, p_drop: float, n_drop: int) -> None:
         assert w >= 0, 'Error: negative importance weight'
 
-        self.n += 1
+        if n_drop is None:
+            n_drop = p_drop / (1 - p_drop)
+
+        w /= (1 - p_drop)
+        self.n += 1 + n_drop
         self.sumw += w
         self.sumwsq += w ** 2
         self.sumwr += w * r
@@ -265,7 +269,7 @@ class Interval(base.Interval):
         self._impl = IntervalImpl(wmin, wmax, rmin, rmax, empirical_r_bounds)
 
     def add_example(self, p_log: float, r: float, p_pred: float, p_drop: float = 0, n_drop: Optional[int] = None) -> None:
-        self._impl.add(p_pred / p_log, r)
+        self._impl.add(p_pred / p_log, r, p_drop, n_drop)
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[Optional[float]]:
         return self._impl.get(alpha, atol)
