@@ -1,6 +1,6 @@
 from estimators.ccb import base
 from math import inf
-from typing import List, Callable
+from typing import List, Optional
 from estimators.bandits.cressieread import EstimatorImpl, IntervalImpl
 from copy import deepcopy
 
@@ -55,14 +55,14 @@ class Interval(base.Interval):
         self._impl = []
         self.empirical_r_bounds = empirical_r_bounds
 
-    def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float]) -> None:
+    def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float], p_drop: float = 0, n_drop: Optional[int] = None) -> None:
         ws = [p_pred / p_log for p_pred, p_log in zip(p_preds, p_logs)]
         w = 1.0
         for i in range(len(ws)):
             w *= ws[i]
             if len(self._impl) <= i:
                 self._impl.append(IntervalImpl(self.wmin ** (i + 1), self.wmax ** (i + 1), self.rmin, self.rmax, self.empirical_r_bounds))
-            self._impl[i].add(w, rs[i])
+            self._impl[i].add(w, rs[i], p_drop, n_drop)
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[List[float]]:
         result = []
