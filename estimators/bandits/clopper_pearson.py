@@ -23,11 +23,11 @@ class Interval(base.Interval):
     def _scale_back(self, r):
         return self.rmin + r * (self.rmax - self.rmin)
 
-    def add_example(self, p_log: float, r: float, p_pred: float, count: int = 1, p_drop: float = 0, n_drop: Optional[int] = None) -> None:
+    def add_example(self, p_log: float, r: float, p_pred: float, p_drop: float = 0, n_drop: Optional[int] = None) -> None:
         r = self._scale(r)
-        self.examples_count += count
+        self.examples_count += 1
         w = p_pred / p_log
-        self.weighted_reward += r * w * count
+        self.weighted_reward += r * w
         self.max_weight = max(self.max_weight, w)
 
     def get(self, alpha: float = 0.05) -> List[Optional[float]]:

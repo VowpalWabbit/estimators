@@ -8,13 +8,12 @@ class Estimator(ABC):
 	""" Interface for implementation of conditional contextual bandits estimators """
 
 	@abstractmethod
-	def add_example(self, p_log: List, r: List, p_pred: List, count: float) -> None:
+	def add_example(self, p_log: List, r: List, p_pred: List) -> None:
 		""" 
 		Args:
 			p_log: List of probability of the logging policy
 			r: List of reward for choosing an action in the given context
 			p_pred: List of predicted probability of making decision
-			count: weight
 		"""
 		...
 
@@ -32,13 +31,12 @@ class Interval(ABC):
 	""" Interface for implementation of conditional contextual bandits estimators interval """
 
 	@abstractmethod
-	def add_example(self, p_log: List[float], r: List[float], p_pred: List[float], count: float) -> None:
+	def add_example(self, p_log: List[float], r: List[float], p_pred: List[float]) -> None:
 		""" 
 		Args:
 			p_log: List of probability of the logging policy
 			r: List of reward for choosing an action in the given context
 			p_pred: List of predicted probability of making decision
-			count: weight
 		"""
 		...
 

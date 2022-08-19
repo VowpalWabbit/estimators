@@ -7,7 +7,7 @@ class Estimator(base.Estimator):
         self.impl = bandits_impl
         self.slots_count = 0
 
-    def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float], count: float = 1.0) -> None:
+    def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float]) -> None:
         """Expects lists for logged probabilities, rewards and predicted probabilities. These should correspond to
         each slot. """
 
@@ -32,7 +32,7 @@ class Interval(base.Interval):
         self.impl = bandits_impl
         self.slots_count = 0
 
-    def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float], count: float = 1.0) -> None:
+    def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float]) -> None:
         """Expects lists for logged probabilities, rewards and predicted probabilities. These should correspond to
         each slot. """
 

@@ -34,19 +34,18 @@ class EstimatorImpl:
         self.sumwsqr = IncrementalFsum()
         self.sumr = IncrementalFsum()
 
-    def add(self, w: float, r: float, count: float = 1.0) -> None:
-        if count > 0:
-            assert w >= 0, 'Error: negative importance weight'
+    def add(self, w: float, r: float) -> None:
+        assert w >= 0, 'Error: negative importance weight'
 
-            self.n += count
-            self.sumw += count * w
-            self.sumwsq += count * w ** 2
-            self.sumwr += count * w * r
-            self.sumwsqr += count * w ** 2 * r
-            self.sumr += count * r
+        self.n += 1
+        self.sumw += w
+        self.sumwsq += w ** 2
+        self.sumwr += w * r
+        self.sumwsqr += w ** 2 * r
+        self.sumr += r
 
-            self.wmax = max(self.wmax, w)
-            self.wmin = min(self.wmin, w)
+        self.wmax = max(self.wmax, w)
+        self.wmin = min(self.wmin, w)
 
     def get(self) -> Optional[float]:
         n = float(self.n)
@@ -127,26 +126,25 @@ class IntervalImpl:
         self.sumwsqr = IncrementalFsum()
         self.sumwsqrsq = IncrementalFsum()
 
-    def add(self, w: float, r: float, count: float = 1.0) -> None:
-        if count > 0:
-            assert w >= 0, 'Error: negative importance weight'
+    def add(self, w: float, r: float) -> None:
+        assert w >= 0, 'Error: negative importance weight'
 
-            self.n += count
-            self.sumw += count * w
-            self.sumwsq += count * w ** 2
-            self.sumwr += count * w * r
-            self.sumwsqr += count * w ** 2 * r
-            self.sumwsqrsq += count * w ** 2 * r ** 2
+        self.n += 1
+        self.sumw += w
+        self.sumwsq += w ** 2
+        self.sumwr += w * r
+        self.sumwsqr += w ** 2 * r
+        self.sumwsqrsq += w ** 2 * r ** 2
 
-            self.wmax = max(self.wmax, w)
-            self.wmin = min(self.wmin, w)
+        self.wmax = max(self.wmax, w)
+        self.wmin = min(self.wmin, w)
 
-            if self.empirical_r_bounds:
-                self.rmax = max(self.rmax, r)
-                self.rmin = min(self.rmin, r)
-            else:
-                if r > self.rmax or r < self.rmin:
-                    raise ValueError(f'Error: Value of r={r} is outside rmin={self.rmin}, rmax={self.rmax} bounds')
+        if self.empirical_r_bounds:
+            self.rmax = max(self.rmax, r)
+            self.rmin = min(self.rmin, r)
+        else:
+            if r > self.rmax or r < self.rmin:
+                raise ValueError(f'Error: Value of r={r} is outside rmin={self.rmin}, rmax={self.rmax} bounds')
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[Optional[float]]:
         from math import isclose, sqrt
@@ -248,8 +246,8 @@ class Estimator(base.Estimator):
     def __init__(self, wmin: float = 0, wmax: float = inf):
         self._impl = EstimatorImpl(wmin, wmax)
 
-    def add_example(self, p_log: float, r: float, p_pred: float, count: float = 1.0) -> None:
-        self._impl.add(p_pred / p_log, r, count)
+    def add_example(self, p_log: float, r: float, p_pred: float) -> None:
+        self._impl.add(p_pred / p_log, r)
 
     def get(self) -> Optional[float]:
         return self._impl.get()
@@ -266,8 +264,8 @@ class Interval(base.Interval):
     def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1, empirical_r_bounds = False):
         self._impl = IntervalImpl(wmin, wmax, rmin, rmax, empirical_r_bounds)
 
-    def add_example(self, p_log: float, r: float, p_pred: float, count: int = 1, p_drop: float = 0, n_drop: Optional[int] = None) -> None:
-        self._impl.add(p_pred / p_log, r, count)
+    def add_example(self, p_log: float, r: float, p_pred: float, p_drop: float = 0, n_drop: Optional[int] = None) -> None:
+        self._impl.add(p_pred / p_log, r)
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[Optional[float]]:
         return self._impl.get(alpha, atol)

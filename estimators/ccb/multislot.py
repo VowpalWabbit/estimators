@@ -17,20 +17,19 @@ class Estimator():
         self.n = IncrementalFsum()
         self._impl = {}
 
-    def add_example(self, slot_ids: List[str], p_logs: List[float], rs: List[float], p_preds: List[float], count: float = 1.0) -> None:
+    def add_example(self, slot_ids: List[str], p_logs: List[float], rs: List[float], p_preds: List[float]) -> None:
         if len(p_logs) != len(rs) or len(rs) != len(p_preds) or len(p_preds) != len(set(slot_ids)):
             raise ValueError(f'Error: unique elements in slot_ids and length of p_logs, rs, p_preds must be the same, \
                 found {len(set(slot_ids))}, {len(p_logs)}, {len(rs)}, {len(p_preds)}  respectively')
 
-        if count > 0:
-            self.n += count
-            ws = [p_pred / p_log for p_pred, p_log in zip(p_preds, p_logs)]
-            w = 1.0
-            for i in range(len(ws)):
-                w *= ws[i]
-                if slot_ids[i] not in self._impl:
-                    self._impl[slot_ids[i]] = EstimatorImpl(0, inf)
-                self._impl[slot_ids[i]].add(w, rs[i], count)
+        self.n += 1
+        ws = [p_pred / p_log for p_pred, p_log in zip(p_preds, p_logs)]
+        w = 1.0
+        for i in range(len(ws)):
+            w *= ws[i]
+            if slot_ids[i] not in self._impl:
+                self._impl[slot_ids[i]] = EstimatorImpl(0, inf)
+            self._impl[slot_ids[i]].add(w, rs[i])
 
     def get_impression(self) -> Dict[str, float]:
         result = {}
@@ -81,20 +80,19 @@ class Interval():
         self._impl = {}
         self.empirical_r_bounds = empirical_r_bounds
 
-    def add_example(self, slot_ids: List[str], p_logs: List[float], rs: List[float], p_preds: List[float], count: float = 1.0) -> None:
+    def add_example(self, slot_ids: List[str], p_logs: List[float], rs: List[float], p_preds: List[float]) -> None:
         if len(p_logs) != len(rs) or len(rs) != len(p_preds) or len(p_preds) != len(set(slot_ids)):
             raise ValueError(f'Error: unique elements in slot_ids and length of p_logs, rs, p_preds must be the same, \
                 found {len(set(slot_ids))}, {len(p_logs)}, {len(rs)}, {len(p_preds)}  respectively')
 
-        if count > 0:
-            self.n += count
-            ws = [p_pred / p_log for p_pred, p_log in zip(p_preds, p_logs)]
-            w = 1.0
-            for i in range(len(ws)):
-                w *= ws[i]
-                if slot_ids[i] not in self._impl:
-                    self._impl[slot_ids[i]] = IntervalImpl(0, inf, self.rmin, self.rmax, self.empirical_r_bounds)
-                self._impl[slot_ids[i]].add(w, rs[i], count)
+        self.n += 1
+        ws = [p_pred / p_log for p_pred, p_log in zip(p_preds, p_logs)]
+        w = 1.0
+        for i in range(len(ws)):
+            w *= ws[i]
+            if slot_ids[i] not in self._impl:
+                self._impl[slot_ids[i]] = IntervalImpl(0, inf, self.rmin, self.rmax, self.empirical_r_bounds)
+            self._impl[slot_ids[i]].add(w, rs[i])
 
     def get_impression(self, alpha: float = 0.05) -> Dict[str, List[float]]:
         result = {}

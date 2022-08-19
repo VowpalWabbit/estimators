@@ -10,10 +10,10 @@ class Estimator(base.Estimator):
         self.weighted_examples_count = 0
         self.weighted_reward = 0
 
-    def add_example(self, p_log: float, r: float, p_pred: float, count: float = 1.0) -> None:
+    def add_example(self, p_log: float, r: float, p_pred: float) -> None:
         w = p_pred / p_log
-        self.weighted_examples_count += w * count
-        self.weighted_reward += r * w * count
+        self.weighted_examples_count += w
+        self.weighted_reward += r * w
 
     def get(self) -> Optional[float]:
         return self.weighted_reward / self.weighted_examples_count if self.weighted_examples_count != 0 else None
