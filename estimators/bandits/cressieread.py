@@ -185,8 +185,6 @@ class IntervalImpl:
                          - (r ** 2 * sumwsq - 2 * r * sumwsqr + sumwsqrsq) / (1 + n)
                          )
                     z = phi + 1 / (2 * n)
-                    if isclose(y * z, 0, abs_tol=1e-9):
-                        y = 0
 
                     if isclose(y * z, 0, abs_tol=atol * atol):
                         gstar = x - sqrt(2) * atol
