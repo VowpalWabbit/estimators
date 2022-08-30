@@ -22,6 +22,11 @@ def assert_interval_covers(estimator, simulator, expected):
     assert scenario.result[0] <= expected
     assert scenario.result[1] >= expected
 
+def assert_interval_within(estimator, simulator, expected):
+    scenario = Scenario(simulator, estimator())
+    scenario.get_interval()
+    assert scenario.result[0] >= expected[0]
+    assert scenario.result[1] <= expected[1]
 
 def test_estimate_1_from_1s():
     ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
@@ -128,13 +133,6 @@ def test_higher_alpha_tighter_intervals():
     assert_higher_alpha_tighter_intervals(cs.Interval, simulator)     
 
 
-def assert_interval_within(estimator, simulator, expected):
-    scenario = Scenario(simulator, estimator())
-    scenario.get_interval()
-    assert scenario.result[0] >= expected[0]
-    assert scenario.result[1] <= expected[1]
-
-
 def assert_estimation_is_none(estimator):
     assert estimator().get() is None
 
@@ -176,6 +174,20 @@ def test_simple_convergence():
     assert_interval_within(lambda: cs.Interval(rmin=0, rmax=r), lambda: simulator(r), expected)
    
     # TODO: test + fix for cressieread with negative rewards
+
+def test_zero_variance_reward():
+    r = 0.751
+    def simulator():
+        for i in range(100):
+            yield {'p_log': 0.5,
+                    'r': r,
+                    'p_pred': 0.5}
+    expected = (0.7, 0.8)
+    #got a math domain error before the fix (variance was negative due to rounding errors)
+    assert_interval_within(gaussian.Interval, lambda: simulator(), expected)
+    assert_interval_within(lambda: clopper_pearson.Interval(0, r), lambda: simulator(), expected)
+    assert_interval_within(lambda: cressieread.Interval(rmin=0, rmax=r), lambda: simulator(), expected)
+    assert_interval_within(lambda: cs.Interval(rmin=0, rmax=r), lambda: simulator(), expected)
 
 def test_convergence_with_no_overflow():
     def simulator():
