@@ -8,13 +8,12 @@ class Estimator(ABC):
 	""" Interface for implementation of contextual bandit estimators """
 
 	@abstractmethod
-	def add_example(self, p_log: float, r: float, p_pred: float, count: float) -> None:
+	def add_example(self, p_log: float, r: float, p_pred: float) -> None:
 		""" 
 		Args:
 			p_log: probability of the logging policy
 			r: reward for choosing an action in the given context
 			p_pred: predicted probability of making decision
-			count: weight
 		"""
 		...
 
@@ -32,13 +31,14 @@ class Interval(ABC):
 	""" Interface for implementation of contextual bandit estimators interval """
 
 	@abstractmethod
-	def add_example(self, p_log: float, r: float, p_pred: float, count: int) -> None:
+	def add_example(self, p_log: float, r: float, p_pred: float, p_drop: float = 0, n_drop: Optional[int] = None) -> None:
 		""" 
 		Args:
 			p_log: probability of the logging policy
 			r: reward for choosing an action in the given context
 			p_pred: predicted probability of making decision
-			count: weight
+			p_drop: probability for event to be dropped
+			n_drop: amount of dropped events between current and previous ones (populated as p_drop/(1-p_drop) if None)
 		"""
 		...
 

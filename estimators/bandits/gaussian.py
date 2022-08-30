@@ -14,11 +14,13 @@ class Interval(base.Interval):
         self.weighted_reward = 0
         self.weighted_reward_sq = 0
 
-    def add_example(self, p_log: float, r: float, p_pred: float, count: int = 1) -> None:
-        self.examples_count += count
-        w = p_pred/p_log
-        self.weighted_reward += r * w * count
-        self.weighted_reward_sq += ((r * w)**2) * count
+    def add_example(self, p_log: float, r: float, p_pred: float, p_drop: float = 0, n_drop: Optional[int] = None) -> None:
+        if n_drop is None:
+            n_drop = p_drop / (1 - p_drop)
+        self.examples_count += 1 + n_drop
+        w = p_pred / (p_log * (1 - p_drop))
+        self.weighted_reward += r * w
+        self.weighted_reward_sq += ((r * w)**2)
 
     def get(self, alpha: float = 0.05) -> List[Optional[float]]:
         if self.examples_count <= 1:
@@ -27,7 +29,7 @@ class Interval(base.Interval):
         z_gaussian_cdf = stats.norm.ppf(1 - alpha / 2)
         variance = (self.weighted_reward_sq - self.weighted_reward**2 / self.examples_count) / \
                    (self.examples_count - 1)
-        gauss_delta = z_gaussian_cdf * math.sqrt(variance / self.examples_count)
+        gauss_delta = z_gaussian_cdf * math.sqrt(max(0, variance) / self.examples_count)
         ips = self.weighted_reward / self.examples_count
         return [ips - gauss_delta, ips + gauss_delta]
 

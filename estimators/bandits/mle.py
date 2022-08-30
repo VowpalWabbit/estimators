@@ -18,14 +18,13 @@ class Estimator(base.Estimator):
 
         self.data = []
 
-    def add_example(self, p_log: float, r: float, p_pred: float, count: float = 1.0) -> None:
-        if count > 0:
-            w = p_pred / p_log
-            assert w >= 0, 'Error: negative importance weight'
+    def add_example(self, p_log: float, r: float, p_pred: float) -> None:
+        w = p_pred / p_log
+        assert w >= 0, 'Error: negative importance weight'
 
-            self.data.append((count, w, r))
-            self.wmax = max(self.wmax, w)
-            self.wmin = min(self.wmin, w)
+        self.data.append((1, w, r))
+        self.wmax = max(self.wmax, w)
+        self.wmin = min(self.wmin, w)
 
     def graddualobjective(self, n, beta):
         return fsum(c * (w - 1) / ((w - 1) * beta + n)
