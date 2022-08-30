@@ -71,24 +71,46 @@ class IntervalImpl(object):
         self.sumwrxhathigh = IncrementalFsum()
         self.sumwxhathigh = IncrementalFsum()
         self.sumxhathighsq = IncrementalFsum()
-
-    def add(self, w: float, r: float, count: int = 1) -> None:
-        for i in range(count):
-            self._add(w, r)
             
-    def _add(self, w: float, r: float) -> None:
+    def add(self, w: float, r: float, p_drop: float, n_drop: int) -> None:
         assert w >= 0
+        assert 0 <= p_drop < 1
+        assert n_drop is None or n_drop >= 0
         
         if not self.adjust:
             r = min(self.rmax, max(self.rmin, r))
         else:
             self.rmin = min(self.rmin, r)
             self.rmax = max(self.rmax, r)
-        
+            
+        if n_drop is None:
+            n_drop = p_drop / (1 - p_drop)
+            
+        if n_drop > 0:
+            import scipy.special as sc
+            
+            # we have to simulate presenting n_drop events with w=0 in a row, which we can do in closed form
+            # Sum[(a/(b + s))^2, { s, 0, n - 1 }] 
+            # a^2 PolyGamma[1,b]-a^2 PolyGamma[1,b+n] 
+            
+            sumXlow = (float(self.sumwr) - float(self.sumw) * self.rmin) / (self.rmax - self.rmin)
+            alow = sumXlow + 1/2
+            blow = self.t + 1
+            self.sumxhatlowsq += alow**2 * (sc.polygamma(1, blow).item() - sc.polygamma(1, blow + n_drop).item())
+            
+            sumXhigh = (float(self.sumw) * self.rmax - float(self.sumwr)) / (self.rmax - self.rmin)
+            ahigh = sumXhigh + 1/2
+            bhigh = self.t + 1
+            self.sumxhathighsq += ahigh**2 * (sc.polygamma(1, bhigh).item() - sc.polygamma(1, bhigh + n_drop).item())
+            
+            self.t += n_drop
+            
         sumXlow = (float(self.sumwr) - float(self.sumw) * self.rmin) / (self.rmax - self.rmin)
         Xhatlow = (sumXlow + 1/2) / (self.t + 1)
         sumXhigh = (float(self.sumw) * self.rmax - float(self.sumwr)) / (self.rmax - self.rmin)
         Xhathigh = (sumXhigh + 1/2) / (self.t + 1)
+        
+        w /= (1 - p_drop)
         
         self.sumwsqrsq += (w * r)**2
         self.sumwsqr += w**2 * r
@@ -131,8 +153,8 @@ class Interval(base.Interval):
     def __init__(self, rmin: float = 0, rmax: float = 1, empirical_r_bounds = False):
         self._impl = IntervalImpl(rmin=rmin, rmax=rmax, adjust=empirical_r_bounds)
 
-    def add_example(self, p_log: float, r: float, p_pred: float, count: int = 1) -> None:
-        self._impl.add(p_pred / p_log, r, count)
+    def add_example(self, p_log: float, r: float, p_pred: float, p_drop: float = 0, n_drop: Optional[int] = None) -> None:
+        self._impl.add(p_pred / p_log, r, p_drop, n_drop)
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[Optional[float]]:
         return self._impl.get(alpha)

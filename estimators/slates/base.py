@@ -14,7 +14,6 @@ class Estimator(ABC):
 			p_logs: List of probabilities of the logging policy
 			r: reward for choosing an action in the given context
 			p_preds: List of predicted probabilities of making decision
-			count: weight
 		"""
 		...
 
@@ -37,7 +36,6 @@ class Interval(ABC):
 			p_logs: List of probabilities of the logging policy
 			r: reward for choosing an action in the given context
 			p_preds: List of predicted probabilities of making decision
-			count: weight
 		"""
 		...
 

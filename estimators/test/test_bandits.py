@@ -227,28 +227,51 @@ def test_summation_works():
     # TODO: fix
     #assert_summation_works(cs.Interval, simulator)
 
-def test_convergence_with_count():
+def test_convergence_with_p_drop():
     ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
     def simulator():
         for _ in range(1000):
             yield  {'p_log': 1,
                     'r': 1,
-                    'p_pred': 1}
+                    'p_pred': 1,
+                    'p_drop': 0}
         for _ in range(500):
             yield { 'p_log': 1,
                     'r': 0,
                     'p_pred': 1,
-                    'count': 2
+                    'p_drop': 0.5
             }
 
-    assert_estimation_is_close(ips.Estimator, simulator, 0.5)
-    assert_estimation_is_close(snips.Estimator, simulator, 0.5)
-    assert_estimation_is_close(mle.Estimator, simulator, 0.5)
-    assert_estimation_is_close(cressieread.Estimator, simulator, 0.5)
     assert_interval_covers(gaussian.Interval, simulator, 0.5)
     assert_interval_covers(clopper_pearson.Interval, simulator, 0.5)
     assert_interval_covers(cressieread.Interval, simulator, 0.5)
     assert_interval_covers(cs.Interval, simulator, 0.5)
+
+def assert_smaller_pdrop_tighter_intervals(estimator, simulator):
+    small_pdrop = Scenario(lambda: simulator(0.1), estimator())
+    big_pdrop = Scenario(lambda: simulator(0.5), estimator())
+
+    small_pdrop.get_interval()
+    big_pdrop.get_interval()
+
+    assert big_pdrop.result[0] < small_pdrop.result[0]
+    assert big_pdrop.result[1] > small_pdrop.result[1]    
+
+
+def test_smaller_pdrop_tighter_intervals():
+    def simulator(pdrop):
+        for i in range(1000):
+            chosen = i % 2
+            yield  {'p_log': 0.5,
+                    'r': 1 if chosen == 0 else 0,
+                    'p_pred': 0.2 if chosen == 0 else 0.8,
+                    'p_drop': pdrop}
+
+    assert_smaller_pdrop_tighter_intervals(cressieread.Interval, simulator)
+    assert_smaller_pdrop_tighter_intervals(gaussian.Interval, simulator)
+#   TODO: investigate or remove completely
+#    assert_smaller_pdrop_tighter_intervals(clopper_pearson.Interval, simulator)
+    assert_smaller_pdrop_tighter_intervals(cs.Interval, simulator)               
 
 def test_cats_ips():
     ips_estimator = ips.Estimator()

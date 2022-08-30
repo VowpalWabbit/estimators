@@ -1,5 +1,5 @@
 from estimators.ccb import base
-from typing import List
+from typing import List, Optional
 
 
 class Estimator(base.Estimator):
@@ -7,7 +7,7 @@ class Estimator(base.Estimator):
         self.impl = bandits_impl
         self.slots_count = 0
 
-    def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float], count: float = 1.0) -> None:
+    def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float]) -> None:
         """Expects lists for logged probabilities, rewards and predicted probabilities. These should correspond to
         each slot. """
 
@@ -32,7 +32,7 @@ class Interval(base.Interval):
         self.impl = bandits_impl
         self.slots_count = 0
 
-    def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float], count: float = 1.0) -> None:
+    def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float], p_drop: float = 0, n_drop: Optional[int] = None) -> None:
         """Expects lists for logged probabilities, rewards and predicted probabilities. These should correspond to
         each slot. """
 
@@ -43,7 +43,7 @@ class Interval(base.Interval):
             raise ValueError(f'Error: p_logs, r and p_preds must be the same length, found {len(p_logs)}, {len(rs)} and'
                              f'{len(p_preds)} respectively')
         self.slots_count = max(self.slots_count, len(p_logs))
-        self.impl.add_example(p_logs[0], rs[0], p_preds[0])
+        self.impl.add_example(p_logs[0], rs[0], p_preds[0], p_drop, n_drop)
 
     def get(self, alpha: float = 0.05) -> List[List[float]]:
         if self.slots_count > 0:
