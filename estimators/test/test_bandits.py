@@ -177,6 +177,16 @@ def test_simple_convergence():
    
     # TODO: test + fix for cressieread with negative rewards
 
+def test_interval_sumsq_eq_sqsum():
+    def simulator():
+        for i in range(10):
+            yield {'p_log': 0.5,
+                    'r': 0.3,
+                    'p_pred': 0.8}
+    expected = (0.4, 0.6)
+    #got a math domain error before the fix (variance was negative due to rounding errors)
+    assert_interval_within(gaussian.Interval, lambda: simulator(), expected)
+
 def test_convergence_with_no_overflow():
     def simulator():
         for i in range(1000000):

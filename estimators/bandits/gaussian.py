@@ -29,7 +29,7 @@ class Interval(base.Interval):
         z_gaussian_cdf = stats.norm.ppf(1 - alpha / 2)
         variance = (self.weighted_reward_sq - self.weighted_reward**2 / self.examples_count) / \
                    (self.examples_count - 1)
-        gauss_delta = z_gaussian_cdf * math.sqrt(variance / self.examples_count)
+        gauss_delta = z_gaussian_cdf * math.sqrt(max(0, variance) / self.examples_count)
         ips = self.weighted_reward / self.examples_count
         return [ips - gauss_delta, ips + gauss_delta]
 
