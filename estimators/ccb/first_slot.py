@@ -1,5 +1,6 @@
 from estimators.ccb import base
 from typing import List, Optional
+from copy import deepcopy
 
 
 class Estimator(base.Estimator):
