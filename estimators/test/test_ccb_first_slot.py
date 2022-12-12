@@ -21,10 +21,10 @@ def test_single_example():
 
     for Estimator in estimators:
         Estimator[0].add_example(p_log, reward, p_pred)
-        assert Estimator[0].get()[0] == Estimator[1]
+        assert Estimator[0].get_r()[0] == Estimator[1]
 
 def test_multiple_examples():
-    ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get()'''
+    ''' To test correctness of estimators: Compare the expected value with value returned by Estimator.get_r()'''
 
     # The tuple (Estimator, expected value) for each estimator is stored in estimators
     estimators = [

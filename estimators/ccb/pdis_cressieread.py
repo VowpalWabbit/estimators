@@ -2,6 +2,7 @@ from estimators.ccb import base
 from math import inf
 from typing import List, Optional
 from estimators.bandits.cressieread import EstimatorImpl, IntervalImpl
+from estimators.math import clopper_pearson
 from copy import deepcopy
 
 
@@ -24,13 +25,18 @@ class Estimator(base.Estimator):
                 self._impl.append(EstimatorImpl(self.wmin ** (i + 1), self.wmax ** (i + 1)))
             self._impl[i].add(w, rs[i])
 
-    def get(self) -> List[float]:
-        result = []
-        n0 = float(self._impl[0].n) if any(self._impl) else 0
-        if n0 > 0:
-            for impl in self._impl:
-                result.append(impl.get() * float(impl.n) / n0)
-        return result
+    def get_impression(self) -> List[float]:
+        total = float(self._impl[0].n) if any(self._impl) else 0
+        return [float(e.n) / total for e in self._impl]
+
+    def get_r_given_impression(self) -> List[float]:
+        return [e.get() for e in self._impl]
+
+    def get_r(self) -> List[float]:
+        return [e[0] * e[1] for e in zip(self.get_impression(), self.get_r_given_impression())]
+
+    def get_r_overall(self) -> float:
+        return sum(self._impl, EstimatorImpl(0, inf)).get()        
 
     def __add__(self, other: 'Estimator') -> 'Estimator':
         (large, small) = (self, other) if len(self._impl) >= len(other._impl) else (other, self)
@@ -64,13 +70,18 @@ class Interval(base.Interval):
                 self._impl.append(IntervalImpl(self.wmin ** (i + 1), self.wmax ** (i + 1), self.rmin, self.rmax, self.empirical_r_bounds))
             self._impl[i].add(w, rs[i], p_drop, n_drop)
 
-    def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[List[float]]:
-        result = []
-        n0 = float(self._impl[0].n) if any(self._impl) else 0
-        if n0 > 0:
-            for impl in self._impl:
-                result.append([v * float(impl.n) / n0 for v in impl.get()])
-        return result
+    def get_impression(self, alpha: float = 0.05) -> List[List[float]]:
+        total = float(self._impl[0].n) if any(self._impl) else 0
+        return [clopper_pearson(float(e.n), total, alpha) for e in self._impl]
+
+    def get_r_given_impression(self, alpha: float = 0.05) -> List[List[float]]:
+        return [e.get(alpha) for e in self._impl]
+
+    def get_r(self, alpha: float = 0.05) -> List[List[float]]:
+        return [[e[0][0] * e[1][0], e[0][1] * e[1][1]] for e in zip(self.get_impression(alpha), self.get_r_given_impression(alpha))]
+
+    def get_r_overall(self, alpha: float = 0.05) -> List[float]:
+        return sum(self._impl, IntervalImpl(0, inf, self.rmin, self.rmax)).get(alpha)   
 
     def __add__(self, other: 'Interval') -> 'Interval':
         assert not (self.empirical_r_bounds ^ other.empirical_r_bounds), 'Summation of estimators with various r bounds policy is prohibited'

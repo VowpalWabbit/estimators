@@ -18,12 +18,39 @@ class Estimator(ABC):
 		...
 
 	@abstractmethod
-	def get(self) -> List[float]:
-		""" Calculates the selected estimator
+	def get_impression(self) -> List[float]:
+		""" Calculates impression probability for slot
 
 		Returns:
-			The estimator value
+			array of probability for every slot to be shown in decision
 		"""
+		...
+
+	@abstractmethod
+	def get_r_given_impression(self) -> List[float]:
+		""" Calculates estimated reward for every slot given that the slot was shown
+		
+		Returns:
+			array of estimated reward values
+		"""
+		...
+
+	@abstractmethod
+	def get_r(self) -> List[float]:
+		""" Calculates estimated reward for every slot
+		
+		Returns:
+			array of estimated reward values
+		"""
+		...
+
+	@abstractmethod
+	def get_r_overall(self) -> float:
+		""" Calculates estimated reward for sum of rewards from all slots
+		
+		Returns:
+			estimated value
+		"""		
 		...
 
 
@@ -43,11 +70,37 @@ class Interval(ABC):
 		...
 
 	@abstractmethod
-	def get(self, alpha: float) -> List[List[float]]:
-		""" Calculates the CI
-		Args:
-			alpha: alpha value
+	def get_impression(self, alpha) -> List[List[float]]:
+		""" Calculates impression probability for slot
+
 		Returns:
-			Returns the confidence interval as list[float]
+			array of [lower_bound, upper_bound] for every slot to be shown in decision
 		"""
+		...
+
+	@abstractmethod
+	def get_r_given_impression(self, alpha) -> List[List[float]]:
+		""" Calculates estimated reward for every slot given that the slot was shown
+		
+		Returns:
+			array of [lower_bound, upper_bound] of estimated reward values
+		"""
+		...
+
+	@abstractmethod
+	def get_r(self, alpha) -> List[List[float]]:
+		""" Calculates estimated reward for every slot
+		
+		Returns:
+			array of [lower_bound, upper_bound] of estimated reward values
+		"""
+		...
+
+	@abstractmethod
+	def get_r_overall(self, alpha) -> List[float]:
+		""" Calculates estimated reward for sum of rewards from all slots
+		
+		Returns:
+			[lower_bound, upper_bound] of estimated value
+		"""		
 		...
