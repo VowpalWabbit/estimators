@@ -211,7 +211,10 @@ class IntervalImpl:
                             gstar = x - sqrt(2 * y * z)
                             candidates.append(gstar)
 
-            best = min(candidates)
+            if candidates and len(candidates) > 0:
+                best = min(candidates)
+            else:
+                best = 0
             vbound = min(self.rmax, max(self.rmin, sign * best))
             bounds.append(vbound)
 
