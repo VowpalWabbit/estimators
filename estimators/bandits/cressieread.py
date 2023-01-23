@@ -214,7 +214,7 @@ class IntervalImpl:
             if candidates and len(candidates) > 0:
                 best = min(candidates)
             else:
-                best = 0
+                best = self.rmin
             vbound = min(self.rmax, max(self.rmin, sign * best))
             bounds.append(vbound)
 
