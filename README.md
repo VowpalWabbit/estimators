@@ -19,4 +19,4 @@ python3 -m pytest
 pip install vw-estimators
 ```
 
-Previous published versions at pypy.org: https://pypi.org/project/vw-estimators/
+Previous published versions at pypi.org: https://pypi.org/project/vw-estimators/
