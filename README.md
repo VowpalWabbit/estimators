@@ -13,3 +13,10 @@ Run tests with:
 ```sh
 python3 -m pytest
 ```
+
+## Install
+```sh
+pip install vw-estimators
+```
+
+Previous published versions at pypi.org: https://pypi.org/project/vw-estimators/
