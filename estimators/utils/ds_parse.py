@@ -1,16 +1,20 @@
 import sys
 
-def update_progress(current, total=None, prefix=''):
+
+def update_progress(current, total=None, prefix=""):
     if total:
-        barLength = 50 # Length of the progress bar
-        progress = current/total
-        block = int(barLength*progress)
-        text = "\r{}Progress: [{}] {:.1f}%".format(prefix, "#"*block + "-"*(barLength-block), progress*100)
+        barLength = 50  # Length of the progress bar
+        progress = current / total
+        block = int(barLength * progress)
+        text = "\r{}Progress: [{}] {:.1f}%".format(
+            prefix, "#" * block + "-" * (barLength - block), progress * 100
+        )
     else:
         text = "\r{}Iter: {}".format(prefix, current)
     sys.stdout.write(text)
     sys.stdout.flush()
-    return len(text)-1      # return length of text string not counting the initial \r
+    return len(text) - 1  # return length of text string not counting the initial \r
+
 
 def json_cooked(x):
     #################################
@@ -22,21 +26,24 @@ def json_cooked(x):
     #
     # Performance: 4x faster than Python JSON parser js = json.loads(x.strip())
     #################################
-    ind1 = x.find(b',',16)              # equal to: x.find(',"_label_prob',16)
-    ind2 = x.find(b',',ind1+23)         # equal to: x.find(',"_label_Action',ind1+23)
-    ind3 = x.find(b',"T',ind2+34)       # equal to: x.find(',"Timestamp',ind2+34)
-    ind7 = x.find(b',"a"',ind3+60)
-    ind8 = x.find(b']',ind7+7)          # equal to: x.find('],"c',ind7+8)
+    ind1 = x.find(b",", 16)  # equal to: x.find(',"_label_prob',16)
+    ind2 = x.find(b",", ind1 + 23)  # equal to: x.find(',"_label_Action',ind1+23)
+    ind3 = x.find(b',"T', ind2 + 34)  # equal to: x.find(',"Timestamp',ind2+34)
+    ind7 = x.find(b',"a"', ind3 + 60)
+    ind8 = x.find(b"]", ind7 + 7)  # equal to: x.find('],"c',ind7+8)
 
     data = {}
-    data['cost'] = x[15:ind1]                   # len('{"_label_cost":') = 15
-    data['p'] = float(x[ind1+22:ind2])          # len(',"_label_probability":') = 22
-    data['a_vec'] = x[ind7+6:ind8].split(b',')  # len(',"a":[') = 6
-    data['a'] = int(data['a_vec'][0])
-    data['num_a'] = len(data['a_vec'])
-    data['skipLearn'] = b'"_skipLearn":true' in x[ind2+34:ind3] # len('"_label_Action":1,"_labelIndex":0,') = 34
-            
+    data["cost"] = x[15:ind1]  # len('{"_label_cost":') = 15
+    data["p"] = float(x[ind1 + 22 : ind2])  # len(',"_label_probability":') = 22
+    data["a_vec"] = x[ind7 + 6 : ind8].split(b",")  # len(',"a":[') = 6
+    data["a"] = int(data["a_vec"][0])
+    data["num_a"] = len(data["a_vec"])
+    data["skipLearn"] = (
+        b'"_skipLearn":true' in x[ind2 + 34 : ind3]
+    )  # len('"_label_Action":1,"_labelIndex":0,') = 34
+
     return data
+
 
 def json_cooked_continuous_actions(x):
     #################################
@@ -46,15 +53,15 @@ def json_cooked_continuous_actions(x):
     #
     # Performance: 4x faster than Python JSON parser js = json.loads(x.strip())
     #################################
-    ind1 = x.find(b',',22)              # equal to: x.find(',"pdf_value',16)
-    ind2 = x.find(b',',ind1+13)         # equal to: x.find(',"action',ind1+23)
-    ind3 = x.find(b'}',ind2+10)
-    ind4 = x.find(b',"T',ind3+34)       # equal to: x.find(',"Timestamp',ind2+34)
+    ind1 = x.find(b",", 22)  # equal to: x.find(',"pdf_value',16)
+    ind2 = x.find(b",", ind1 + 13)  # equal to: x.find(',"action',ind1+23)
+    ind3 = x.find(b"}", ind2 + 10)
+    ind4 = x.find(b',"T', ind3 + 34)  # equal to: x.find(',"Timestamp',ind2+34)
 
     data = {}
-    data['cost'] = float(x[21:ind1])                   # len('{"_label_ca":"cost":') = 21
-    data['p'] = float(x[ind1+13:ind2])          # len(',"pdf_value":') = 13
-    data['a'] = float(x[ind2+10:ind3])
-    data['skipLearn'] = b'"_skipLearn":true' in x
+    data["cost"] = float(x[21:ind1])  # len('{"_label_ca":"cost":') = 21
+    data["p"] = float(x[ind1 + 13 : ind2])  # len(',"pdf_value":') = 13
+    data["a"] = float(x[ind2 + 10 : ind3])
+    data["skipLearn"] = b'"_skipLearn":true' in x
 
     return data

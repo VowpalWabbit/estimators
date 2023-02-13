@@ -17,13 +17,22 @@ class Interval(base.Interval):
         self.rmax = rmax
 
     def _scale(self, r):
-        assert r >= self.rmin and r <= self.rmax, f'Error: {r} is out of [{self.rmin}, {self.rmax}]'
+        assert (
+            r >= self.rmin and r <= self.rmax
+        ), f"Error: {r} is out of [{self.rmin}, {self.rmax}]"
         return (r - self.rmin) / (self.rmax - self.rmin)
 
     def _scale_back(self, r):
         return self.rmin + r * (self.rmax - self.rmin)
 
-    def add_example(self, p_log: float, r: float, p_pred: float, p_drop: float = 0, n_drop: Optional[int] = None) -> None:
+    def add_example(
+        self,
+        p_log: float,
+        r: float,
+        p_pred: float,
+        p_drop: float = 0,
+        n_drop: Optional[int] = None,
+    ) -> None:
         if n_drop is None:
             n_drop = p_drop / (1 - p_drop)
         r = self._scale(r)
@@ -40,10 +49,9 @@ class Interval(base.Interval):
             return [self._scale_back(cp[0]), self._scale_back(cp[1])]
         return [None, None]
 
-    def __add__(self, other: 'Interval') -> 'Interval':
+    def __add__(self, other: "Interval") -> "Interval":
         result = Interval()
         result.examples_count = self.examples_count + other.examples_count
         result.weighted_reward = self.weighted_reward + other.weighted_reward
         result.max_weight = max(self.max_weight, other.max_weight)
         return result
-

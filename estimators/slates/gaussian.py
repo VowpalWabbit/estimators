@@ -14,18 +14,22 @@ class Interval(base.Interval):
         self.weighted_reward = 0
         self.weighted_reward_sq = 0
 
-    def add_example(self, p_logs: List[float], r: float, p_preds: List[float], count: float = 1.0) -> None:
+    def add_example(
+        self, p_logs: List[float], r: float, p_preds: List[float], count: float = 1.0
+    ) -> None:
         """Expects lists for logged probabilities and predicted probabilities. These should correspond to each slot.
         This function is implemented under the simplifying assumptions of
         example 4 in the paper 'Off-policy evaluation for slate recommendation'
         where the slate space is a cartesian product and the logging policy is a
         product distribution"""
         if not isinstance(p_logs, list) or not isinstance(p_preds, list):
-            raise ValueError('Error: p_logs and p_preds must be lists')
+            raise ValueError("Error: p_logs and p_preds must be lists")
 
         if len(p_logs) != len(p_preds):
-            raise ValueError(f'Error: p_logs and p_preds must be the same length, found {len(p_logs)} '
-                             f'and {len(p_preds)} respectively')
+            raise ValueError(
+                f"Error: p_logs and p_preds must be the same length, found {len(p_logs)} "
+                f"and {len(p_preds)} respectively"
+            )
 
         self.examples_count += count
         num_slots = len(p_logs)
@@ -40,13 +44,15 @@ class Interval(base.Interval):
             return [None, None]
 
         z_gaussian_cdf = stats.norm.ppf(1 - alpha / 2)
-        variance = (self.weighted_reward_sq - self.weighted_reward * self.weighted_reward / self.examples_count) \
-            / (self.examples_count - 1)
+        variance = (
+            self.weighted_reward_sq
+            - self.weighted_reward * self.weighted_reward / self.examples_count
+        ) / (self.examples_count - 1)
         gauss_delta = z_gaussian_cdf * math.sqrt(variance / self.examples_count)
         ips = self.weighted_reward / self.examples_count
         return [ips - gauss_delta, ips + gauss_delta]
 
-    def __add__(self, other: 'Interval') -> 'Interval':
+    def __add__(self, other: "Interval") -> "Interval":
         result = Interval()
         result.examples_count = self.examples_count + other.examples_count
         result.weighted_reward = self.weighted_reward + other.weighted_reward

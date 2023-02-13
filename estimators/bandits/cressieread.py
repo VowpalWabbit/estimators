@@ -35,13 +35,13 @@ class EstimatorImpl:
         self.sumr = IncrementalFsum()
 
     def add(self, w: float, r: float) -> None:
-        assert w >= 0, 'Error: negative importance weight'
+        assert w >= 0, "Error: negative importance weight"
 
         self.n += 1
         self.sumw += w
-        self.sumwsq += w ** 2
+        self.sumwsq += w**2
         self.sumwr += w * r
-        self.sumwsqr += w ** 2 * r
+        self.sumwsqr += w**2 * r
         self.sumr += r
 
         self.wmax = max(self.wmax, w)
@@ -65,7 +65,7 @@ class EstimatorImpl:
             beta = 0
         else:
             a = (wfake + sumw) / (1 + n)
-            b = (wfake ** 2 + sumwsq) / (1 + n)
+            b = (wfake**2 + sumwsq) / (1 + n)
             assert a * a < b
             gamma = (b - a) / (a * a - b)
             beta = (1 - a) / (a * a - b)
@@ -77,10 +77,10 @@ class EstimatorImpl:
 
         return vhat
 
-    def __add__(self, other: 'EstimatorImpl') -> 'EstimatorImpl':
+    def __add__(self, other: "EstimatorImpl") -> "EstimatorImpl":
         result = EstimatorImpl(
-            wmin=min(self.wmin, other.wmin),
-            wmax=max(self.wmax, other.wmax))
+            wmin=min(self.wmin, other.wmin), wmax=max(self.wmax, other.wmax)
+        )
 
         result.n = self.n + other.n
         result.sumw = self.sumw + other.sumw
@@ -109,7 +109,14 @@ class IntervalImpl:
     #     which is _not_ the empirical minimum and maximum
     #     but rather the actual smallest and largest possible values
 
-    def __init__(self, wmin: float, wmax: float, rmin: float, rmax: float, empirical_r_bounds: bool):
+    def __init__(
+        self,
+        wmin: float,
+        wmax: float,
+        rmin: float,
+        rmax: float,
+        empirical_r_bounds: bool,
+    ):
         assert wmin < 1
         assert wmax > 1
 
@@ -127,18 +134,18 @@ class IntervalImpl:
         self.sumwsqrsq = IncrementalFsum()
 
     def add(self, w: float, r: float, p_drop: float, n_drop: int) -> None:
-        assert w >= 0, 'Error: negative importance weight'
+        assert w >= 0, "Error: negative importance weight"
 
         if n_drop is None:
             n_drop = p_drop / (1 - p_drop)
 
-        w /= (1 - p_drop)
+        w /= 1 - p_drop
         self.n += 1 + n_drop
         self.sumw += w
-        self.sumwsq += w ** 2
+        self.sumwsq += w**2
         self.sumwr += w * r
-        self.sumwsqr += w ** 2 * r
-        self.sumwsqrsq += w ** 2 * r ** 2
+        self.sumwsqr += w**2 * r
+        self.sumwsqrsq += w**2 * r**2
 
         self.wmax = max(self.wmax, w)
         self.wmin = min(self.wmin, w)
@@ -148,7 +155,9 @@ class IntervalImpl:
             self.rmin = min(self.rmin, r)
         else:
             if r > self.rmax or r < self.rmin:
-                raise ValueError(f'Error: Value of r={r} is outside rmin={self.rmin}, rmax={self.rmax} bounds')
+                raise ValueError(
+                    f"Error: Value of r={r} is outside rmin={self.rmin}, rmax={self.rmax} bounds"
+                )
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[Optional[float]]:
         from math import isclose, sqrt
@@ -169,7 +178,7 @@ class IntervalImpl:
             uncgstar = 1 + 1 / n
         else:
             unca = (uncwfake + sumw) / (1 + n)
-            uncb = (uncwfake ** 2 + sumwsq) / (1 + n)
+            uncb = (uncwfake**2 + sumwsq) / (1 + n)
             uncgstar = (1 + n) * (unca - 1) ** 2 / (uncb - unca * unca)
 
         delta = f.isf(q=alpha, dfn=1, dfd=n)
@@ -181,9 +190,9 @@ class IntervalImpl:
             for wfake in (self.wmin, self.wmax):
                 if wfake == inf:
                     x = sign * (r + (sumwr - sumw * r) / n)
-                    y = ((r * sumw - sumwr) ** 2 / (n * (1 + n))
-                         - (r ** 2 * sumwsq - 2 * r * sumwsqr + sumwsqrsq) / (1 + n)
-                         )
+                    y = (r * sumw - sumwr) ** 2 / (n * (1 + n)) - (
+                        r**2 * sumwsq - 2 * r * sumwsqr + sumwsqrsq
+                    ) / (1 + n)
                     z = phi + 1 / (2 * n)
 
                     if isclose(y * z, 0, abs_tol=atol * atol):
@@ -199,10 +208,14 @@ class IntervalImpl:
                     barwsqr = sign * (wfake * wfake * r + sumwsqr) / (1 + n)
                     barwsqrsq = (wfake * wfake * r * r + sumwsqrsq) / (1 + n)
 
-                    if barwsq > barw ** 2:
-                        x = barwr + ((1 - barw) * (barwsqr - barw * barwr) / (barwsq - barw ** 2))
-                        y = (barwsqr - barw * barwr) ** 2 / (barwsq - barw ** 2) - (barwsqrsq - barwr ** 2)
-                        z = phi + (1 / 2) * (1 - barw) ** 2 / (barwsq - barw ** 2)
+                    if barwsq > barw**2:
+                        x = barwr + (
+                            (1 - barw) * (barwsqr - barw * barwr) / (barwsq - barw**2)
+                        )
+                        y = (barwsqr - barw * barwr) ** 2 / (barwsq - barw**2) - (
+                            barwsqrsq - barwr**2
+                        )
+                        z = phi + (1 / 2) * (1 - barw) ** 2 / (barwsq - barw**2)
 
                         if isclose(y * z, 0, abs_tol=atol * atol):
                             gstar = x - sqrt(2) * atol
@@ -220,19 +233,25 @@ class IntervalImpl:
 
         return bounds
 
-    def __add__(self, other: 'IntervalImpl') -> 'IntervalImpl':
-        assert not (self.empirical_r_bounds ^ other.empirical_r_bounds), 'Summation of estimators with various r bounds policy is prohibited'
-        
+    def __add__(self, other: "IntervalImpl") -> "IntervalImpl":
+        assert not (
+            self.empirical_r_bounds ^ other.empirical_r_bounds
+        ), "Summation of estimators with various r bounds policy is prohibited"
+
         if not self.empirical_r_bounds:
-            assert self.rmin == other.rmin, 'Summation of estimators with various r bounds is prohibited'
-            assert self.rmax == other.rmax, 'Summation of estimators with various r bounds is prohibited'
+            assert (
+                self.rmin == other.rmin
+            ), "Summation of estimators with various r bounds is prohibited"
+            assert (
+                self.rmax == other.rmax
+            ), "Summation of estimators with various r bounds is prohibited"
 
         result = IntervalImpl(
             wmin=min(self.wmin, other.wmin),
             wmax=max(self.wmax, other.wmax),
             rmin=min(self.rmin, other.rmin),
             rmax=max(self.rmax, other.rmax),
-            empirical_r_bounds=self.empirical_r_bounds 
+            empirical_r_bounds=self.empirical_r_bounds,
         )
 
         result.n = self.n + other.n
@@ -257,7 +276,7 @@ class Estimator(base.Estimator):
     def get(self) -> Optional[float]:
         return self._impl.get()
 
-    def __add__(self, other: 'Estimator') -> 'Estimator':
+    def __add__(self, other: "Estimator") -> "Estimator":
         result = Estimator()
         result._impl = self._impl + other._impl
         return result
@@ -266,16 +285,30 @@ class Estimator(base.Estimator):
 class Interval(base.Interval):
     _impl: IntervalImpl
 
-    def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1, empirical_r_bounds = False):
+    def __init__(
+        self,
+        wmin: float = 0,
+        wmax: float = inf,
+        rmin: float = 0,
+        rmax: float = 1,
+        empirical_r_bounds=False,
+    ):
         self._impl = IntervalImpl(wmin, wmax, rmin, rmax, empirical_r_bounds)
 
-    def add_example(self, p_log: float, r: float, p_pred: float, p_drop: float = 0, n_drop: Optional[int] = None) -> None:
+    def add_example(
+        self,
+        p_log: float,
+        r: float,
+        p_pred: float,
+        p_drop: float = 0,
+        n_drop: Optional[int] = None,
+    ) -> None:
         self._impl.add(p_pred / p_log, r, p_drop, n_drop)
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[Optional[float]]:
         return self._impl.get(alpha, atol)
 
-    def __add__(self, other: 'Interval') -> 'Interval':
+    def __add__(self, other: "Interval") -> "Interval":
         result = Interval()
         result._impl = self._impl + other._impl
         return result

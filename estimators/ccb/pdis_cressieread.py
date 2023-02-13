@@ -15,13 +15,17 @@ class Estimator(base.Estimator):
         self.wmax = wmax
         self._impl = []
 
-    def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float]) -> None:
+    def add_example(
+        self, p_logs: List[float], rs: List[float], p_preds: List[float]
+    ) -> None:
         ws = [p_pred / p_log for p_pred, p_log in zip(p_preds, p_logs)]
         w = 1.0
         for i in range(len(ws)):
             w *= ws[i]
             if len(self._impl) <= i:
-                self._impl.append(EstimatorImpl(self.wmin ** (i + 1), self.wmax ** (i + 1)))
+                self._impl.append(
+                    EstimatorImpl(self.wmin ** (i + 1), self.wmax ** (i + 1))
+                )
             self._impl[i].add(w, rs[i])
 
     def get(self) -> List[float]:
@@ -32,11 +36,19 @@ class Estimator(base.Estimator):
                 result.append(impl.get() * float(impl.n) / n0)
         return result
 
-    def __add__(self, other: 'Estimator') -> 'Estimator':
-        (large, small) = (self, other) if len(self._impl) >= len(other._impl) else (other, self)
-        result = Estimator(wmin = min(self.wmin, other.wmin), wmax = max(self.wmax, other.wmax))
+    def __add__(self, other: "Estimator") -> "Estimator":
+        (large, small) = (
+            (self, other) if len(self._impl) >= len(other._impl) else (other, self)
+        )
+        result = Estimator(
+            wmin=min(self.wmin, other.wmin), wmax=max(self.wmax, other.wmax)
+        )
         for i in range(len(large._impl)):
-            result._impl.append(large._impl[i] + small._impl[i] if i < len(small._impl) else deepcopy(large._impl[i]))
+            result._impl.append(
+                large._impl[i] + small._impl[i]
+                if i < len(small._impl)
+                else deepcopy(large._impl[i])
+            )
         return result
 
 
@@ -47,7 +59,14 @@ class Interval(base.Interval):
     rmax: float
     _impl: List[IntervalImpl]
 
-    def __init__(self, wmin: float = 0, wmax: float = inf, rmin: float = 0, rmax: float = 1, empirical_r_bounds: bool = False):
+    def __init__(
+        self,
+        wmin: float = 0,
+        wmax: float = inf,
+        rmin: float = 0,
+        rmax: float = 1,
+        empirical_r_bounds: bool = False,
+    ):
         self.wmin = wmin
         self.wmax = wmax
         self.rmin = rmin
@@ -55,13 +74,28 @@ class Interval(base.Interval):
         self._impl = []
         self.empirical_r_bounds = empirical_r_bounds
 
-    def add_example(self, p_logs: List[float], rs: List[float], p_preds: List[float], p_drop: float = 0, n_drop: Optional[int] = None) -> None:
+    def add_example(
+        self,
+        p_logs: List[float],
+        rs: List[float],
+        p_preds: List[float],
+        p_drop: float = 0,
+        n_drop: Optional[int] = None,
+    ) -> None:
         ws = [p_pred / p_log for p_pred, p_log in zip(p_preds, p_logs)]
         w = 1.0
         for i in range(len(ws)):
             w *= ws[i]
             if len(self._impl) <= i:
-                self._impl.append(IntervalImpl(self.wmin ** (i + 1), self.wmax ** (i + 1), self.rmin, self.rmax, self.empirical_r_bounds))
+                self._impl.append(
+                    IntervalImpl(
+                        self.wmin ** (i + 1),
+                        self.wmax ** (i + 1),
+                        self.rmin,
+                        self.rmax,
+                        self.empirical_r_bounds,
+                    )
+                )
             self._impl[i].add(w, rs[i], p_drop, n_drop)
 
     def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[List[float]]:
@@ -72,20 +106,33 @@ class Interval(base.Interval):
                 result.append([v * float(impl.n) / n0 for v in impl.get()])
         return result
 
-    def __add__(self, other: 'Interval') -> 'Interval':
-        assert not (self.empirical_r_bounds ^ other.empirical_r_bounds), 'Summation of estimators with various r bounds policy is prohibited'
-        
-        if not self.empirical_r_bounds:
-            assert self.rmin == other.rmin, 'Summation of estimators with various r bounds is prohibited'
-            assert self.rmax == other.rmax, 'Summation of estimators with various r bounds is prohibited'
+    def __add__(self, other: "Interval") -> "Interval":
+        assert not (
+            self.empirical_r_bounds ^ other.empirical_r_bounds
+        ), "Summation of estimators with various r bounds policy is prohibited"
 
-        (large, small) = (self, other) if len(self._impl) >= len(other._impl) else (other, self)
+        if not self.empirical_r_bounds:
+            assert (
+                self.rmin == other.rmin
+            ), "Summation of estimators with various r bounds is prohibited"
+            assert (
+                self.rmax == other.rmax
+            ), "Summation of estimators with various r bounds is prohibited"
+
+        (large, small) = (
+            (self, other) if len(self._impl) >= len(other._impl) else (other, self)
+        )
         result = Interval(
-            wmin = min(self.wmin, other.wmin),
+            wmin=min(self.wmin, other.wmin),
             wmax=max(self.wmax, other.wmax),
             rmin=min(self.rmin, other.rmin),
             rmax=max(self.rmax, other.rmax),
-            empirical_r_bounds=self.empirical_r_bounds)
+            empirical_r_bounds=self.empirical_r_bounds,
+        )
         for i in range(len(large._impl)):
-            result._impl.append(large._impl[i] + small._impl[i] if i < len(small._impl) else deepcopy(large._impl[i]))
+            result._impl.append(
+                large._impl[i] + small._impl[i]
+                if i < len(small._impl)
+                else deepcopy(large._impl[i])
+            )
         return result

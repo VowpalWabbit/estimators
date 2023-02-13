@@ -2,8 +2,9 @@ from scipy.stats import beta
 from typing import List, Optional
 from copy import deepcopy
 
+
 class IncrementalFsum:
-    """ Incremental version of https://en.wikipedia.org/wiki/Kahan_summation_algorithm """
+    """Incremental version of https://en.wikipedia.org/wiki/Kahan_summation_algorithm"""
 
     def __init__(self):
         self.partials = []
@@ -32,7 +33,14 @@ class IncrementalFsum:
     def __float__(self):
         return sum(self.partials, 0.0)
 
-def clopper_pearson(successes: float, n: float, alpha: float = 0.05) -> List[Optional[float]]:
-    lower_bound = beta.ppf(alpha / 2, successes, n - successes + 1) if successes > 0 else 0
-    upper_bound = beta.ppf(1 - alpha / 2, successes + 1, n - successes) if successes < n else 1
+
+def clopper_pearson(
+    successes: float, n: float, alpha: float = 0.05
+) -> List[Optional[float]]:
+    lower_bound = (
+        beta.ppf(alpha / 2, successes, n - successes + 1) if successes > 0 else 0
+    )
+    upper_bound = (
+        beta.ppf(1 - alpha / 2, successes + 1, n - successes) if successes < n else 1
+    )
     return [lower_bound, upper_bound]
