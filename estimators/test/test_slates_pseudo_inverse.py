@@ -2,8 +2,9 @@ from estimators.slates import pseudo_inverse
 from estimators.bandits import ips
 from estimators.test.utils import Helper
 
+
 def test_single_slot_pi_equivalent_to_ips():
-    ''' PI should be equivalent to IPS when there is only a single slot '''
+    """PI should be equivalent to IPS when there is only a single slot"""
 
     pi_estimator = pseudo_inverse.Estimator()
     ips_estimator = ips.Estimator()
@@ -15,4 +16,4 @@ def test_single_slot_pi_equivalent_to_ips():
     for p_log, r, p_pred in zip(p_logs, rewards, p_preds):
         pi_estimator.add_example([p_log], r, [p_pred])
         ips_estimator.add_example(p_log, r, p_pred)
-        Helper.assert_is_close(pi_estimator.get() , ips_estimator.get())
+        Helper.assert_is_close(pi_estimator.get(), ips_estimator.get())

@@ -12,7 +12,7 @@ def assert_is_within(value, interval):
         assert value[1] <= interval[1]
     else:
         assert value >= interval[0]
-        assert value <= interval[1]        
+        assert value <= interval[1]
 
 
 def assert_more_examples_tighter_intervals(estimator, simulator):
@@ -24,21 +24,30 @@ def assert_more_examples_tighter_intervals(estimator, simulator):
 
     assert len(less_data.result) == len(more_data.result)
     for i in range(len(less_data.result)):
-        assert_is_within(more_data.result[i], less_data.result[i]) 
+        assert_is_within(more_data.result[i], less_data.result[i])
 
 
 def test_more_examples_tighter_intervals():
-    ''' To test if confidence intervals are getting tighter with more data points '''
+    """To test if confidence intervals are getting tighter with more data points"""
+
     def simulator(n):
         for i in range(n):
-            chosen = i % 2   
-            yield  {'p_logs': [0.5, 1],
-                    'rs': [chosen, (chosen + 1) % 2], 
-                    'p_preds': [0.5 + 0.3 * (-1)**chosen, 1]}
+            chosen = i % 2
+            yield {
+                "p_logs": [0.5, 1],
+                "rs": [chosen, (chosen + 1) % 2],
+                "p_preds": [0.5 + 0.3 * (-1) ** chosen, 1],
+            }
 
-    assert_more_examples_tighter_intervals(lambda: first_slot.Interval(bandits.cressieread.Interval()), simulator)
-    assert_more_examples_tighter_intervals(lambda: first_slot.Interval(bandits.gaussian.Interval()), simulator)
-    assert_more_examples_tighter_intervals(lambda: first_slot.Interval(bandits.clopper_pearson.Interval()), simulator)
+    assert_more_examples_tighter_intervals(
+        lambda: first_slot.Interval(bandits.cressieread.Interval()), simulator
+    )
+    assert_more_examples_tighter_intervals(
+        lambda: first_slot.Interval(bandits.gaussian.Interval()), simulator
+    )
+    assert_more_examples_tighter_intervals(
+        lambda: first_slot.Interval(bandits.clopper_pearson.Interval()), simulator
+    )
     assert_more_examples_tighter_intervals(pdis_cressieread.Interval, simulator)
 
 
@@ -53,10 +62,12 @@ def assert_estimations_within(estimator, simulator, expected):
 def test_estimations_convergence_simple():
     def simulator():
         for i in range(1000):
-            chosen0 = i % 2   
-            yield  {'p_logs': [0.5, 1],
-                    'rs': [chosen0, chosen0], 
-                    'p_preds': [0.2 if chosen0 == 1 else 0.8, 1]}
+            chosen0 = i % 2
+            yield {
+                "p_logs": [0.5, 1],
+                "rs": [chosen0, chosen0],
+                "p_preds": [0.2 if chosen0 == 1 else 0.8, 1],
+            }
 
     expected = [(0.15, 0.25), (0.15, 0.25)]
 
@@ -74,10 +85,12 @@ def assert_intervals_within(estimator, simulator, expected):
 def test_interval_convergence_simple():
     def simulator():
         for i in range(1000):
-            chosen0 = i % 2   
-            yield  {'p_logs': [0.5, 1],
-                    'rs': [chosen0, chosen0], 
-                    'p_preds': [0.2 if chosen0 == 1 else 0.8, 1]}
+            chosen0 = i % 2
+            yield {
+                "p_logs": [0.5, 1],
+                "rs": [chosen0, chosen0],
+                "p_preds": [0.2 if chosen0 == 1 else 0.8, 1],
+            }
 
     expected = [(0.15, 0.25), (0.15, 0.25)]
 
@@ -97,29 +110,34 @@ def assert_higher_alpha_tighter_intervals(estimator, simulator):
 
 
 def test_higher_alpha_tighter_intervals():
-    ''' Get confidence intervals for various alpha levels and assert that they are shrinking as alpha increases'''
+    """Get confidence intervals for various alpha levels and assert that they are shrinking as alpha increases"""
+
     def simulator():
         for i in range(1000):
-            chosen = i % 2   
-            yield  {'p_logs': [0.5, 1],
-                    'rs': [chosen, (chosen + 1) % 2], 
-                    'p_preds': [0.5 + 0.3 * (-1)**chosen, 1]}
+            chosen = i % 2
+            yield {
+                "p_logs": [0.5, 1],
+                "rs": [chosen, (chosen + 1) % 2],
+                "p_preds": [0.5 + 0.3 * (-1) ** chosen, 1],
+            }
 
-    assert_higher_alpha_tighter_intervals(lambda: first_slot.Interval(bandits.cressieread.Interval()), simulator)
-    assert_higher_alpha_tighter_intervals(lambda: first_slot.Interval(bandits.gaussian.Interval()), simulator)
-    assert_higher_alpha_tighter_intervals(lambda: first_slot.Interval(bandits.clopper_pearson.Interval()), simulator)
+    assert_higher_alpha_tighter_intervals(
+        lambda: first_slot.Interval(bandits.cressieread.Interval()), simulator
+    )
+    assert_higher_alpha_tighter_intervals(
+        lambda: first_slot.Interval(bandits.gaussian.Interval()), simulator
+    )
+    assert_higher_alpha_tighter_intervals(
+        lambda: first_slot.Interval(bandits.clopper_pearson.Interval()), simulator
+    )
     assert_higher_alpha_tighter_intervals(pdis_cressieread.Interval, simulator)
 
 
 def test_various_slots_count():
     def simulator():
         for i in range(100):
-            yield {'p_logs': [1, 1],
-                   'rs': [1, 1],
-                   'p_preds': [1, 1]}
-            yield {'p_logs': [1],
-                   'rs': [1],
-                   'p_preds': [1]}
+            yield {"p_logs": [1, 1], "rs": [1, 1], "p_preds": [1, 1]}
+            yield {"p_logs": [1], "rs": [1], "p_preds": [1]}
 
     expected = [(0.9, 1.1), (0.4, 0.6)]
     assert_estimations_within(pdis_cressieread.Estimator, simulator, expected)
@@ -129,13 +147,15 @@ def test_various_slots_count():
 def test_convergence_with_no_overflow():
     def simulator():
         for i in range(1000000):
-            chosen0 = i % 2   
-            yield  {'p_logs': [0.5, 1],
-                    'rs': [chosen0, chosen0], 
-                    'p_preds': [0.2 if chosen0 == 1 else 0.8, 1]}
+            chosen0 = i % 2
+            yield {
+                "p_logs": [0.5, 1],
+                "rs": [chosen0, chosen0],
+                "p_preds": [0.2 if chosen0 == 1 else 0.8, 1],
+            }
 
     expected = [(0.15, 0.25), (0.15, 0.25)]
-    
+
     assert_estimations_within(pdis_cressieread.Estimator, simulator, expected)
     assert_intervals_within(pdis_cressieread.Interval, simulator, expected)
 
@@ -145,6 +165,7 @@ def test_no_data_estimation_is_none():
     assert first_slot.Estimator(bandits.cressieread.Interval()).get() == []
     assert pdis_cressieread.Estimator().get() == []
     assert pdis_cressieread.Interval().get() == []
+
 
 def assert_summation_works(estimator, simulator):
     scenario1000 = Scenario(lambda: simulator(1000), estimator())
@@ -163,23 +184,27 @@ def assert_summation_works(estimator, simulator):
         if isinstance(result_1000_plus_2000[i], float):
             Helper.assert_is_close(result_3000[i], result_1000_plus_2000[i])
         else:
-            Helper.assert_is_close(result_3000[i][0], result_1000_plus_2000[i][0])     
-            Helper.assert_is_close(result_3000[i][1], result_1000_plus_2000[i][1])    
+            Helper.assert_is_close(result_3000[i][0], result_1000_plus_2000[i][0])
+            Helper.assert_is_close(result_3000[i][1], result_1000_plus_2000[i][1])
 
 
 def test_summation_works():
     def simulator(n):
         for i in range(n):
-            chosen0 = i % 2   
-            yield  {'p_logs': [0.5, 1],
-                    'rs': [chosen0, chosen0], 
-                    'p_preds': [0.2 if chosen0 == 1 else 0.8, 1]}
+            chosen0 = i % 2
+            yield {
+                "p_logs": [0.5, 1],
+                "rs": [chosen0, chosen0],
+                "p_preds": [0.2 if chosen0 == 1 else 0.8, 1],
+            }
 
     assert_summation_works(pdis_cressieread.Estimator, simulator)
     assert_summation_works(pdis_cressieread.Interval, simulator)
 
 
-def assert_summation_with_different_simulators_works(estimator, simulator1, simulator2, expected):
+def assert_summation_with_different_simulators_works(
+    estimator, simulator1, simulator2, expected
+):
     scenario1 = Scenario(simulator1, estimator())
     scenario2 = Scenario(simulator2, estimator())
 
@@ -196,19 +221,16 @@ def assert_summation_with_different_simulators_works(estimator, simulator1, simu
 def test_summation_with_various_slots_works():
     def simulator1():
         for i in range(100):
-            yield {'p_logs': [1, 1],
-                   'rs': [1, 1],
-                   'p_preds': [1, 1]}
+            yield {"p_logs": [1, 1], "rs": [1, 1], "p_preds": [1, 1]}
 
     def simulator2():
         for i in range(100):
-            yield {'p_logs': [1],
-                   'rs': [1],
-                   'p_preds': [1]}
+            yield {"p_logs": [1], "rs": [1], "p_preds": [1]}
 
     expected = [(0.9, 1.1), (0.4, 0.6)]
-    assert_summation_with_different_simulators_works(pdis_cressieread.Estimator, simulator1, simulator2, expected)
-    assert_summation_with_different_simulators_works(pdis_cressieread.Interval, simulator1, simulator2, expected)
-
-
-
+    assert_summation_with_different_simulators_works(
+        pdis_cressieread.Estimator, simulator1, simulator2, expected
+    )
+    assert_summation_with_different_simulators_works(
+        pdis_cressieread.Interval, simulator1, simulator2, expected
+    )
