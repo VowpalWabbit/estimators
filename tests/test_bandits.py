@@ -10,11 +10,12 @@ from estimators.bandits import clopper_pearson
 from estimators.bandits import cs
 from utils import Helper, Scenario, get_intervals
 
+import pytest
 
 def assert_estimation_is_close(estimator, simulator, value):
     scenario = Scenario(simulator, estimator())
     scenario.get_estimate()
-    Helper.assert_is_close(scenario.result, value)
+    assert scenario.result == pytest.approx(value)
 
 
 def assert_interval_covers(estimator, simulator, expected):
@@ -251,10 +252,10 @@ def assert_summation_works(estimator, simulator):
     result_3000 = scenario3000.estimator.get()
 
     if isinstance(result_1000_plus_2000, float):
-        Helper.assert_is_close(result_3000, result_1000_plus_2000)
+        assert result_3000 == pytest.approx(result_1000_plus_2000)
     else:
-        Helper.assert_is_close(result_3000[0], result_1000_plus_2000[0])
-        Helper.assert_is_close(result_3000[1], result_1000_plus_2000[1])
+        assert result_3000[0] == pytest.approx(result_1000_plus_2000[0])
+        assert result_3000[1] == pytest.approx(result_1000_plus_2000[1])
 
 
 def test_summation_works():
