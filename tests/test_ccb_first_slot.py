@@ -5,8 +5,6 @@ from estimators.bandits import cressieread
 from estimators.ccb import first_slot
 from utils import Helper
 
-import pytest
-
 # TODO: add test that first slot estimator is equivalent to corresponding cb estimator and remove it from all tests in test_ccb
 
 
@@ -56,6 +54,6 @@ def test_multiple_examples():
     for Estimator, estimate_multiple, estimate_single in zip(
         estimators, estimates_multiple, estimates_single
     ):
-        assert Estimator[1] == pytest.approx(estimate_multiple[0])
-        assert Estimator[1] == pytest.approx(estimate_single[0])
+        Helper.assert_is_close(Estimator[1], estimate_multiple[0])
+        Helper.assert_is_close(Estimator[1], estimate_single[0])
         assert estimate_single[0] == estimate_multiple[0]

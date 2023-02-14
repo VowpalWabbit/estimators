@@ -1,6 +1,6 @@
 from estimators.slates import pseudo_inverse
 from estimators.bandits import ips
-import pytest
+from utils import Helper
 
 
 def test_single_slot_pi_equivalent_to_ips():
@@ -16,4 +16,4 @@ def test_single_slot_pi_equivalent_to_ips():
     for p_log, r, p_pred in zip(p_logs, rewards, p_preds):
         pi_estimator.add_example([p_log], r, [p_pred])
         ips_estimator.add_example(p_log, r, p_pred)
-        assert pi_estimator.get() == pytest.approx(ips_estimator.get())
+        Helper.assert_is_close(pi_estimator.get(), ips_estimator.get())
