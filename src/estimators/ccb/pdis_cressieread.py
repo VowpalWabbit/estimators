@@ -1,7 +1,7 @@
 import typing
 from estimators.ccb import base
 from math import inf
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from estimators.bandits.cressieread import EstimatorImpl, IntervalImpl
 from copy import deepcopy
 
@@ -104,16 +104,17 @@ class Interval(base.Interval):
 
     def get(
         self, alpha: float = 0.05, atol: float = 1e-9
-    ) -> List[List[Optional[float]]]:
+    ) -> List[Tuple[Optional[float], Optional[float]]]:
         result = []
         n0 = float(self._impl[0].n) if any(self._impl) else 0
         if n0 > 0:
             for impl in self._impl:
+                left, right = impl.get(alpha, atol)
                 result.append(
-                    [
-                        v * float(impl.n) / n0 if v is not None else None
-                        for v in impl.get(alpha, atol)
-                    ]
+                    (
+                        left * float(impl.n) / n0 if left is not None else None,
+                        right * float(impl.n) / n0 if right is not None else None,
+                    )
                 )
         return result
 

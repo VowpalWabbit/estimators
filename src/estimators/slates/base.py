@@ -1,7 +1,7 @@
 """ Interface for implementation of slates estimator """
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 
 class Estimator(ABC):
@@ -44,7 +44,7 @@ class Interval(ABC):
         ...
 
     @abstractmethod
-    def get(self, alpha: float) -> List[Optional[float]]:
+    def get(self, alpha: float) -> Tuple[Optional[float], Optional[float]]:
         """Calculates the CI
         Args:
                 alpha: alpha value

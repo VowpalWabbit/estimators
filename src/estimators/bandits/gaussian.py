@@ -1,7 +1,7 @@
 import math
 from estimators.bandits import base
 from scipy import stats  # type: ignore
-from typing import List, Optional, cast
+from typing import List, Optional, Tuple, cast
 
 
 class Interval(base.Interval):
@@ -30,9 +30,9 @@ class Interval(base.Interval):
         self.weighted_reward += r * w
         self.weighted_reward_sq += (r * w) ** 2
 
-    def get(self, alpha: float = 0.05) -> List[Optional[float]]:
+    def get(self, alpha: float = 0.05) -> Tuple[Optional[float], Optional[float]]:
         if self.examples_count <= 1:
-            return [None, None]
+            return (None, None)
 
         z_gaussian_cdf = stats.norm.ppf(1 - alpha / 2)
         variance = (
@@ -40,7 +40,7 @@ class Interval(base.Interval):
         ) / (self.examples_count - 1)
         gauss_delta = z_gaussian_cdf * math.sqrt(max(0, variance) / self.examples_count)
         ips = self.weighted_reward / self.examples_count
-        return [ips - gauss_delta, ips + gauss_delta]
+        return (ips - gauss_delta, ips + gauss_delta)
 
     def __add__(self, other: "Interval") -> "Interval":
         result = Interval()

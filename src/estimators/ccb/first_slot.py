@@ -1,6 +1,6 @@
 from estimators.ccb import base
 from estimators.bandits import base as bandits_base
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 
 class Estimator(base.Estimator):
@@ -74,7 +74,7 @@ class Interval(base.Interval):
         self.slots_count = max(self.slots_count, len(p_logs))
         self.impl.add_example(p_logs[0], rs[0], p_preds[0], p_drop, n_drop)
 
-    def get(self, alpha: float = 0.05) -> List[List[Optional[float]]]:
+    def get(self, alpha: float = 0.05) -> List[Tuple[Optional[float], Optional[float]]]:
         if self.slots_count > 0:
-            return [self.impl.get(alpha)] + [[0, 0]] * (self.slots_count - 1)
+            return [self.impl.get(alpha)] + [(0, 0)] * (self.slots_count - 1)
         return []

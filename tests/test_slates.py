@@ -79,7 +79,7 @@ def test_higher_alpha_tighter_intervals():
 
 
 def test_no_data_estimation_is_none():
-    assert gaussian.Interval().get() == [None, None]
+    assert gaussian.Interval().get() == (None, None)
     assert pseudo_inverse.Estimator().get() is None
 
 
