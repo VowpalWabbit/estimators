@@ -64,5 +64,5 @@ jobs:
       run: twine check dist/*
     - name: Test wheel
       run: |
-        pip install --find-links . vw-estimators
+        pip install --find-links dist/ vw-estimators
         pytest
