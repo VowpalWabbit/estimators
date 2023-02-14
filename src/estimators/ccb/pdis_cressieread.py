@@ -112,7 +112,7 @@ class Interval(base.Interval):
                 result.append(
                     [
                         v * float(impl.n) / n0 if v is not None else None
-                        for v in impl.get()
+                        for v in impl.get(alpha, atol)
                     ]
                 )
         return result
