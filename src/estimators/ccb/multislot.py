@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 from math import inf
 from typing import Callable, List, Dict, Optional
-import typing
 from estimators.bandits.cressieread import EstimatorImpl, IntervalImpl
 from estimators.math import IncrementalFsum, clopper_pearson
 
@@ -72,7 +73,7 @@ class Estimator:
     def get_r_overall(self) -> Optional[float]:
         return sum(self._impl.values(), EstimatorImpl(0, inf)).get()
 
-    def __add__(self, other: "Estimator") -> "Estimator":
+    def __add__(self, other: Estimator) -> Estimator:
         slot_ids = set(self._impl.keys()).union(set(other._impl.keys()))
         result = Estimator(
             wmin=min(self.wmin, other.wmin), wmax=max(self.wmax, other.wmax)
