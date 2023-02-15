@@ -5,7 +5,7 @@ from utils import Scenario, get_r_intervals, get_r_overall_intervals
 
 
 def assert_is_within(value, interval):
-    if isinstance(value, list):
+    if isinstance(value, tuple):
         assert len(value) == 2
         assert value[0] >= interval[0]
         assert value[1] <= interval[1]

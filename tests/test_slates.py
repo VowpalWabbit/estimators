@@ -6,6 +6,7 @@ from utils import Scenario, get_intervals
 
 import pytest
 
+
 def assert_estimation_is_close(estimator, simulator, value):
     scenario = Scenario(simulator, estimator())
     scenario.get_estimate()

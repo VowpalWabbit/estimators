@@ -158,17 +158,17 @@ class Interval:
             impression = self.get_impression(alpha)
             r_given_impression = self.get_r_given_impression(alpha, atol)
             for slot_id in self._impl.keys():
-                impression_left, impression_right = impression[slot_id]
-                r_given_impression_left, r_given_impression_right = r_given_impression[
-                    slot_id
-                ]
-                result[slot_id] = (
-                    impression_left * r_given_impression_left
-                    if r_given_impression_left is not None
-                    else None,
-                    impression_right * r_given_impression_right
-                    if r_given_impression_right is not None
-                    else None,
+                # We can safely cast here because we know the tuples used in the expression are of length 2
+                result[slot_id] = typing.cast(
+                    Tuple[Optional[float], Optional[float]],
+                    tuple(
+                        [
+                            a * b if b is not None else None
+                            for a, b in zip(
+                                impression[slot_id], r_given_impression[slot_id]
+                            )
+                        ]
+                    ),
                 )
         return result
 
