@@ -2,8 +2,9 @@ import numpy as np
 
 from estimators import bandits
 from estimators.ccb import first_slot, pdis_cressieread
-from utils import Helper, Scenario, get_intervals
+from utils import Scenario, get_intervals
 
+import pytest
 
 def assert_is_within(value, interval):
     if isinstance(value, list):
@@ -182,10 +183,10 @@ def assert_summation_works(estimator, simulator):
     assert len(result_1000_plus_2000) == len(result_3000)
     for i in range(len(result_3000)):
         if isinstance(result_1000_plus_2000[i], float):
-            Helper.assert_is_close(result_3000[i], result_1000_plus_2000[i])
+            assert result_3000[i] == pytest.approx(result_1000_plus_2000[i])
         else:
-            Helper.assert_is_close(result_3000[i][0], result_1000_plus_2000[i][0])
-            Helper.assert_is_close(result_3000[i][1], result_1000_plus_2000[i][1])
+            assert result_3000[i][0] == pytest.approx(result_1000_plus_2000[i][0])
+            assert result_3000[i][1] == pytest.approx(result_1000_plus_2000[i][1])
 
 
 def test_summation_works():
