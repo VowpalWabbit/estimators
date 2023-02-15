@@ -1,7 +1,7 @@
 """ Interface for implementation of contextual bandit estimators """
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import Tuple, Optional
 
 
 class Estimator(ABC):
@@ -50,7 +50,7 @@ class Interval(ABC):
         ...
 
     @abstractmethod
-    def get(self, alpha: float) -> List[Optional[float]]:
+    def get(self, alpha: float) -> Tuple[Optional[float], Optional[float]]:
         """Calculates the CI
         Args:
                 alpha: alpha value

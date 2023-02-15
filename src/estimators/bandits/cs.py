@@ -1,6 +1,6 @@
 import typing
 from estimators.bandits import base
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from estimators.math import IncrementalFsum
 
 
@@ -146,9 +146,9 @@ class IntervalImpl:
 
         self.t += 1
 
-    def get(self, alpha: float) -> List[Optional[float]]:
+    def get(self, alpha: float) -> Tuple[Optional[float], Optional[float]]:
         if self.t == 0 or self.rmin == self.rmax:
-            return [None, None]
+            return (None, None)
 
         sumvlow = (
             (
@@ -188,10 +188,10 @@ class IntervalImpl:
             t=self.t, sumXt=sumXhigh, v=sumvhigh, rho=self.rho, alpha=alpha / 2
         )
 
-        return [
+        return (
             self.rmin + l * (self.rmax - self.rmin),
             self.rmin + u * (self.rmax - self.rmin),
-        ]
+        )
 
 
 class Interval(base.Interval):
@@ -212,7 +212,9 @@ class Interval(base.Interval):
     ) -> None:
         self._impl.add(p_pred / p_log, r, p_drop, n_drop)
 
-    def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[Optional[float]]:
+    def get(
+        self, alpha: float = 0.05, atol: float = 1e-9
+    ) -> Tuple[Optional[float], Optional[float]]:
         return self._impl.get(alpha)
 
     def __add__(self, other: "Interval") -> "Interval":

@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from math import inf
-from typing import Callable, List, Dict, Optional
+from typing import Callable, List, Dict, Optional, Tuple
+import typing
 from estimators.bandits.cressieread import EstimatorImpl, IntervalImpl
 from estimators.math import IncrementalFsum, clopper_pearson
 
@@ -132,8 +133,7 @@ class Interval:
                 )
             self._impl[slot_ids[i]].add(w, rs[i], p_drop, n_drop)
 
-    # TODO: update return type to Dict[str, Tuple[float]]
-    def get_impression(self, alpha: float = 0.05) -> Dict[str, List[float]]:
+    def get_impression(self, alpha: float = 0.05) -> Dict[str, Tuple[float, float]]:
         result = {}
         # Does self.n > 0 guarantee that each slot has at least one example?
         if float(self.n) > 0:
@@ -145,7 +145,7 @@ class Interval:
 
     def get_r_given_impression(
         self, alpha: float = 0.05, atol: float = 1e-9
-    ) -> Dict[str, List[Optional[float]]]:
+    ) -> Dict[str, Tuple[Optional[float], Optional[float]]]:
         result = {}
         if float(self.n) > 0:
             for slot_id, estimator in self._impl.items():
@@ -154,21 +154,27 @@ class Interval:
 
     def get_r(
         self, alpha: float = 0.05, atol: float = 1e-9
-    ) -> Dict[str, List[Optional[float]]]:
+    ) -> Dict[str, Tuple[Optional[float], Optional[float]]]:
         result = {}
         if float(self.n) > 0:
             impression = self.get_impression(alpha)
             r_given_impression = self.get_r_given_impression(alpha, atol)
             for slot_id in self._impl.keys():
-                result[slot_id] = [
-                    a * b if b is not None else None
-                    for a, b in zip(impression[slot_id], r_given_impression[slot_id])
-                ]
+                _impression = impression[slot_id]
+                _r_given_impression = r_given_impression[slot_id]
+                result[slot_id] = (
+                    _impression[0] * _r_given_impression[0]
+                    if _r_given_impression[0] is not None
+                    else None,
+                    _impression[1] * _r_given_impression[1]
+                    if _r_given_impression[1] is not None
+                    else None,
+                )
         return result
 
     def get_r_overall(
         self, alpha: float = 0.05, atol: float = 1e-9
-    ) -> List[Optional[float]]:
+    ) -> Tuple[Optional[float], Optional[float]]:
         return sum(
             self._impl.values(),
             IntervalImpl(0, inf, self.rmin, self.rmax, self.empirical_r_bounds),

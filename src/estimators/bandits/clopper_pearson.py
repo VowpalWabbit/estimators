@@ -1,5 +1,5 @@
 from estimators.bandits import base
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from estimators.math import clopper_pearson
 
 
@@ -41,13 +41,13 @@ class Interval(base.Interval):
         self.weighted_reward += r * w
         self.max_weight = max(self.max_weight, w)
 
-    def get(self, alpha: float = 0.05) -> List[Optional[float]]:
+    def get(self, alpha: float = 0.05) -> Tuple[Optional[float], Optional[float]]:
         if self.max_weight > 0.0:
             successes = self.weighted_reward / self.max_weight
             n = self.examples_count / self.max_weight
             cp = clopper_pearson(successes, n, alpha)
-            return [self._scale_back(cp[0]), self._scale_back(cp[1])]
-        return [None, None]
+            return (self._scale_back(cp[0]), self._scale_back(cp[1]))
+        return (None, None)
 
     def __add__(self, other: "Interval") -> "Interval":
         result = Interval()

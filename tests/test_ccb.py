@@ -6,8 +6,9 @@ from utils import Scenario, get_intervals
 
 import pytest
 
+
 def assert_is_within(value, interval):
-    if isinstance(value, list):
+    if isinstance(value, tuple):
         assert len(value) == 2
         assert value[0] >= interval[0]
         assert value[1] <= interval[1]

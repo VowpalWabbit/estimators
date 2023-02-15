@@ -6,6 +6,7 @@ from utils import Scenario, get_intervals
 
 import pytest
 
+
 def assert_estimation_is_close(estimator, simulator, value):
     scenario = Scenario(simulator, estimator())
     scenario.get_estimate()
@@ -79,7 +80,7 @@ def test_higher_alpha_tighter_intervals():
 
 
 def test_no_data_estimation_is_none():
-    assert gaussian.Interval().get() == [None, None]
+    assert gaussian.Interval().get() == (None, None)
     assert pseudo_inverse.Estimator().get() is None
 
 

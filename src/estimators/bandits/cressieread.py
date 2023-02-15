@@ -2,7 +2,7 @@
 
 from math import inf
 from estimators.bandits import base
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from estimators.math import IncrementalFsum
 
 
@@ -156,13 +156,15 @@ class IntervalImpl:
                     f"Error: Value of r={r} is outside rmin={self.rmin}, rmax={self.rmax} bounds"
                 )
 
-    def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[Optional[float]]:
+    def get(
+        self, alpha: float = 0.05, atol: float = 1e-9
+    ) -> Tuple[Optional[float], Optional[float]]:
         from math import isclose, sqrt
         from scipy.stats import f  # type: ignore
 
         n = float(self.n)
         if n == 0:
-            return [None, None]
+            return (None, None)
 
         sumw = float(self.sumw)
         sumwsq = float(self.sumwsq)
@@ -228,7 +230,7 @@ class IntervalImpl:
             vbound = min(self.rmax, max(self.rmin, sign * best))
             bounds.append(vbound)
 
-        return bounds
+        return (bounds[0], bounds[1])
 
     def __add__(self, other: "IntervalImpl") -> "IntervalImpl":
         assert not (
@@ -302,7 +304,9 @@ class Interval(base.Interval):
     ) -> None:
         self._impl.add(p_pred / p_log, r, p_drop, n_drop)
 
-    def get(self, alpha: float = 0.05, atol: float = 1e-9) -> List[Optional[float]]:
+    def get(
+        self, alpha: float = 0.05, atol: float = 1e-9
+    ) -> Tuple[Optional[float], Optional[float]]:
         return self._impl.get(alpha, atol)
 
     def __add__(self, other: "Interval") -> "Interval":
