@@ -2,13 +2,14 @@ import numpy as np
 
 from estimators.slates import pseudo_inverse
 from estimators.slates import gaussian
-from utils import Helper, Scenario, get_intervals
+from utils import Scenario, get_intervals
 
+import pytest
 
 def assert_estimation_is_close(estimator, simulator, value):
     scenario = Scenario(simulator, estimator())
     scenario.get_estimate()
-    Helper.assert_is_close(scenario.result, value)
+    assert scenario.result == pytest.approx(value)
 
 
 def test_estimate_1_from_1s():
