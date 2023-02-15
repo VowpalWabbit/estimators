@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from scipy.stats import beta  # type: ignore
 from typing import List, Tuple
 
@@ -8,7 +10,7 @@ class IncrementalFsum:
     def __init__(self) -> None:
         self.partials: List[float] = []
 
-    def __iadd__(self, x: float) -> "IncrementalFsum":
+    def __iadd__(self, x: float) -> IncrementalFsum:
         i = 0
         for y in self.partials:
             if abs(x) < abs(y):
@@ -23,7 +25,7 @@ class IncrementalFsum:
         return self
 
     @staticmethod
-    def merge(*args: "IncrementalFsum") -> "IncrementalFsum":
+    def merge(*args: IncrementalFsum) -> IncrementalFsum:
         result = IncrementalFsum()
         for x in args:
             for y in x.partials:
