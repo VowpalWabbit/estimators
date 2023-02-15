@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 from estimators.ccb import base
 from estimators.bandits import base as bandits_base
 from typing import List, Optional, Tuple
+from copy import deepcopy
 
 
 class Estimator(base.Estimator):
@@ -33,10 +36,26 @@ class Estimator(base.Estimator):
         self.slots_count = max(self.slots_count, len(p_logs))
         self.impl.add_example(p_logs[0], rs[0], p_preds[0])
 
-    def get(self) -> List[Optional[float]]:
+    def get_impression(self) -> List[float]:
         if self.slots_count > 0:
-            return [self.impl.get()] + [0] * (self.slots_count - 1)
+            return [1.0] + [0] * (self.slots_count - 1)
         return []
+
+    def get_r_given_impression(self) -> List[Optional[float]]:
+        if self.slots_count > 0:
+            result = self.impl.get()
+            return [result] + [0] * (self.slots_count - 1)
+        return []
+
+    def get_r(self) -> List[Optional[float]]:
+        return self.get_r_given_impression()
+
+    def get_r_overall(self) -> Optional[float]:
+        return self.get_r()[0]
+
+    def __add__(self, other: Estimator) -> Estimator:
+        # TODO: dependency on instance -> dependency on factory
+        raise NotImplementedError()
 
 
 class Interval(base.Interval):
@@ -74,7 +93,29 @@ class Interval(base.Interval):
         self.slots_count = max(self.slots_count, len(p_logs))
         self.impl.add_example(p_logs[0], rs[0], p_preds[0], p_drop, n_drop)
 
-    def get(self, alpha: float = 0.05) -> List[Tuple[Optional[float], Optional[float]]]:
+    def get_impression(self, alpha: float = 0.05) -> List[Tuple[float, float]]:
         if self.slots_count > 0:
-            return [self.impl.get(alpha)] + [(0, 0)] * (self.slots_count - 1)
+            result = self.impl.get(alpha)
+            return [(1.0, 1.0)] + [(0.0, 0.0)] * (self.slots_count - 1)
         return []
+
+    def get_r_given_impression(
+        self, alpha: float = 0.05
+    ) -> List[Tuple[Optional[float], Optional[float]]]:
+        if self.slots_count > 0:
+            result = self.impl.get(alpha)
+            return [result] + [(0.0, 0.0)] * (self.slots_count - 1)
+        return []
+
+    def get_r(
+        self, alpha: float = 0.05
+    ) -> List[Tuple[Optional[float], Optional[float]]]:
+        return self.get_r_given_impression(alpha)
+
+    def get_r_overall(
+        self, alpha: float = 0.05
+    ) -> Tuple[Optional[float], Optional[float]]:
+        return self.get_r(alpha)[0]
+
+    def __add__(self, other: Interval) -> Interval:
+        raise NotImplementedError()
