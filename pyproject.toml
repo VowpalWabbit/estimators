@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.mypy]
+files = "src/estimators/**/*.py"
+python_version = "3.8"
+strict = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["tests"]

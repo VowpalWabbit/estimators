@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setuptools.setup(
     name="vw-estimators",
-    version="0.2.1",
+    version="0.2.2",
     description="Python package of estimators to perform off-policy evaluation",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -14,13 +14,15 @@ setuptools.setup(
     classifiers=[
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: BSD License",
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering"
     ],
-    packages=["estimators", "estimators.bandits", "estimators.ccb", "estimators.slates", "estimators.utils"],
+    package_dir={"": "src"},
+    packages=["estimators", "estimators.bandits", "estimators.ccb", "estimators.slates"],
+    package_data={"estimators": ["py.typed"]},
     install_requires= ['scipy>=0.9'],
     tests_require=['pytest'],
-    python_requires=">=3.6",
+    python_requires=">=3.7",
 )
 

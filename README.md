@@ -8,8 +8,23 @@ The alternative is off-policy evaluation: Given data logs collected by using a l
 
 This repo collects estimators to perform such off-policy evaluation.
 
-## Tests
-Run tests with:
+## Install
+
 ```sh
+pip install vw-estimators
+```
+
+Previous published versions at pypi.org: https://pypi.org/project/vw-estimators/
+
+## Development
+
+```sh
+pip install -e .
+pip install -r requirements-dev.txt
+
+## Tests
 python3 -m pytest
+
+# Type check
+mypy
 ```
