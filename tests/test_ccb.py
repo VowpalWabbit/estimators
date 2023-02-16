@@ -2,7 +2,7 @@ import numpy as np
 
 from estimators import bandits
 from estimators.ccb import first_slot, pdis_cressieread
-from utils import Scenario, get_intervals
+from utils import Scenario, get_intervals, get_r_intervals
 
 import pytest
 
@@ -21,8 +21,8 @@ def assert_more_examples_tighter_intervals(estimator, simulator):
     less_data = Scenario(lambda: simulator(100), estimator())
     more_data = Scenario(lambda: simulator(10000), estimator())
 
-    less_data.get_interval()
-    more_data.get_interval()
+    less_data.get_r_interval()
+    more_data.get_r_interval()
 
     assert len(less_data.result) == len(more_data.result)
     for i in range(len(less_data.result)):
@@ -55,7 +55,7 @@ def test_more_examples_tighter_intervals():
 
 def assert_estimations_within(estimator, simulator, expected):
     scenario = Scenario(simulator, estimator())
-    scenario.get_estimate()
+    scenario.get_r_estimate()
     assert len(scenario.result) == len(expected)
     for i in range(len(expected)):
         assert_is_within(scenario.result[i], expected[i])
@@ -78,7 +78,7 @@ def test_estimations_convergence_simple():
 
 def assert_intervals_within(estimator, simulator, expected):
     scenario = Scenario(simulator, estimator())
-    scenario.get_interval()
+    scenario.get_r_interval()
     assert len(scenario.result) == len(expected)
     for i in range(len(expected)):
         assert_is_within(scenario.result[i], expected[i])
@@ -103,7 +103,7 @@ def assert_higher_alpha_tighter_intervals(estimator, simulator):
     alphas = np.arange(0.1, 1, 0.1)
 
     scenarios = [Scenario(simulator, estimator(), alpha=alpha) for alpha in alphas]
-    get_intervals(scenarios)
+    get_r_intervals(scenarios)
 
     for i in range(len(scenarios) - 1):
         assert len(scenarios[i].result) == len(scenarios[i + 1].result)
@@ -163,10 +163,10 @@ def test_convergence_with_no_overflow():
 
 
 def test_no_data_estimation_is_none():
-    assert first_slot.Estimator(bandits.ips.Estimator()).get() == []
-    assert first_slot.Interval(bandits.cressieread.Interval()).get() == []
-    assert pdis_cressieread.Estimator().get() == []
-    assert pdis_cressieread.Interval().get() == []
+    assert first_slot.Estimator(bandits.ips.Estimator()).get_r() == []
+    assert first_slot.Interval(bandits.cressieread.Interval()).get_r() == []
+    assert pdis_cressieread.Estimator().get_r() == []
+    assert pdis_cressieread.Interval().get_r() == []
 
 
 def assert_summation_works(estimator, simulator):
@@ -178,8 +178,8 @@ def assert_summation_works(estimator, simulator):
     scenario2000.aggregate()
     scenario3000.aggregate()
 
-    result_1000_plus_2000 = (scenario1000.estimator + scenario2000.estimator).get()
-    result_3000 = scenario3000.estimator.get()
+    result_1000_plus_2000 = (scenario1000.estimator + scenario2000.estimator).get_r()
+    result_3000 = scenario3000.estimator.get_r()
 
     assert len(result_1000_plus_2000) == len(result_3000)
     for i in range(len(result_3000)):
@@ -213,7 +213,7 @@ def assert_summation_with_different_simulators_works(
     scenario1.aggregate()
     scenario2.aggregate()
 
-    result_1_plus_2 = (scenario1.estimator + scenario2.estimator).get()
+    result_1_plus_2 = (scenario1.estimator + scenario2.estimator).get_r()
 
     assert len(result_1_plus_2) == len(expected)
     for i in range(len(result_1_plus_2)):

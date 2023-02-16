@@ -20,11 +20,38 @@ class Estimator(ABC):
         ...
 
     @abstractmethod
-    def get(self) -> List[Optional[float]]:
-        """Calculates the selected estimator. The length of the list is the maximum number of slots seen so far. Estimations per slot are calculated by CB estimator.
+    def get_impression(self) -> List[float]:
+        """Calculates impression probability per slot. The length of the list is the maximum number of slots seen so far.
 
         Returns:
-                The estimator value.
+                Array of estimated probabilities
+        """
+        ...
+
+    @abstractmethod
+    def get_r_given_impression(self) -> List[Optional[float]]:
+        """Calculates estimated reward per slot conditioned on impression. The length of the list is the maximum number of slots seen so far. Estimations per slot are calculated by CB estimator.
+
+        Returns:
+                Array of estimated reward values.
+        """
+        ...
+
+    @abstractmethod
+    def get_r(self) -> List[Optional[float]]:
+        """Calculates estimated reward per slot (without conditioning on impression). The length of the list is the maximum number of slots seen so far. Estimations per slot are calculated by CB estimator.
+
+        Returns:
+                Array of estimated reward values.
+        """
+        ...
+
+    @abstractmethod
+    def get_r_overall(self) -> Optional[float]:
+        """Calculates estimated reward for sum of rewards over all slots.
+
+        Returns:
+                Estimated reward value
         """
         ...
 
@@ -52,11 +79,47 @@ class Interval(ABC):
         ...
 
     @abstractmethod
-    def get(self, alpha: float) -> List[Tuple[Optional[float], Optional[float]]]:
-        """Calculates the CI
+    def get_impression(self, alpha: float) -> List[Tuple[float, float]]:
+        """Calculates impression probability per slot. The length of the list is the maximum number of slots seen so far.
         Args:
                 alpha: alpha value
+
         Returns:
-                Returns the confidence interval as list[float]
+                Array of tuples (lower_bound / upper_bound)
+        """
+        ...
+
+    @abstractmethod
+    def get_r_given_impression(
+        self, alpha: float
+    ) -> List[Tuple[Optional[float], Optional[float]]]:
+        """Calculates estimated reward per slot conditioned on impression. The length of the list is the maximum number of slots seen so far. Estimations per slot are calculated by CB estimator.
+        Args:
+                alpha: alpha value
+
+        Returns:
+                Array of tuples (lower_bound / upper_bound)
+        """
+        ...
+
+    @abstractmethod
+    def get_r(self, alpha: float) -> List[Tuple[Optional[float], Optional[float]]]:
+        """Calculates estimated reward per slot (without conditioning on impression). The length of the list is the maximum number of slots seen so far. Estimations per slot are calculated by CB estimator.
+        Args:
+                alpha: alpha value
+
+        Returns:
+                Array of tuples (lower_bound / upper_bound)
+        """
+        ...
+
+    @abstractmethod
+    def get_r_overall(self, alpha: float) -> Tuple[Optional[float], Optional[float]]:
+        """Calculates estimated reward for sum of rewards over all slots.
+        Args:
+                alpha: alpha value
+
+        Returns:
+                Tuple (lower_bound / upper_bound)
         """
         ...
