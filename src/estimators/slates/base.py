@@ -44,7 +44,7 @@ class Interval(ABC):
         ...
 
     @abstractmethod
-    def get(self, alpha: float) -> Tuple[Optional[float], Optional[float]]:
+    def get(self, alpha: float) -> Tuple[float, float]:
         """Calculates the CI
         Args:
                 alpha: alpha value

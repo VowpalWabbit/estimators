@@ -145,7 +145,7 @@ class Interval:
 
     def get_r_given_impression(
         self, alpha: float = 0.05, atol: float = 1e-9
-    ) -> Dict[str, Tuple[Optional[float], Optional[float]]]:
+    ) -> Dict[str, Tuple[float, float]]:
         result = {}
         if float(self.n) > 0:
             for slot_id, estimator in self._impl.items():
@@ -154,7 +154,7 @@ class Interval:
 
     def get_r(
         self, alpha: float = 0.05, atol: float = 1e-9
-    ) -> Dict[str, Tuple[Optional[float], Optional[float]]]:
+    ) -> Dict[str, Tuple[float, float]]:
         result = {}
         if float(self.n) > 0:
             impression = self.get_impression(alpha)
@@ -163,24 +163,20 @@ class Interval:
                 _impression = impression[slot_id]
                 _r_given_impression = r_given_impression[slot_id]
                 result[slot_id] = (
-                    _impression[0] * _r_given_impression[0]
-                    if _r_given_impression[0] is not None
-                    else None,
-                    _impression[1] * _r_given_impression[1]
-                    if _r_given_impression[1] is not None
-                    else None,
+                    _impression[0] * _r_given_impression[0],
+                    _impression[1] * _r_given_impression[1],
                 )
         return result
 
     def get_r_overall(
         self, alpha: float = 0.05, atol: float = 1e-9
-    ) -> Tuple[Optional[float], Optional[float]]:
+    ) -> Tuple[float, float]:
         return sum(
             self._impl.values(),
             IntervalImpl(0, inf, self.rmin, self.rmax, self.empirical_r_bounds),
         ).get(alpha, atol)
 
-    def __add__(self, other: "Interval") -> "Interval":
+    def __add__(self, other: Interval) -> Interval:
         assert not (
             self.empirical_r_bounds ^ other.empirical_r_bounds
         ), "Summation of estimators with various r bounds policy is prohibited"

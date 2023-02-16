@@ -1,4 +1,5 @@
 import numpy as np
+from math import inf
 
 from estimators.ccb import multislot
 from utils import Scenario, get_r_intervals, get_r_overall_intervals
@@ -352,8 +353,8 @@ def test_no_data_estimation_is_none():
     assert multislot.Estimator().get_r() == {}
     assert multislot.Interval().get_r() == {}
     assert multislot.Estimator().get_r_overall() == None
-    assert multislot.Interval().get_r_overall()[0] == None
-    assert multislot.Interval().get_r_overall()[1] == None
+    assert multislot.Interval(empirical_r_bounds=True).get_r_overall()[0] == -inf
+    assert multislot.Interval(empirical_r_bounds=True).get_r_overall()[1] == inf
 
 
 def assert_summation_with_different_simulators_works(

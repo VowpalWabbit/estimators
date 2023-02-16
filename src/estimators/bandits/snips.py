@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from estimators.bandits import base
 from typing import Optional
 
@@ -22,7 +24,7 @@ class Estimator(base.Estimator):
             else None
         )
 
-    def __add__(self, other: "Estimator") -> "Estimator":
+    def __add__(self, other: Estimator) -> Estimator:
         result = Estimator()
         result.weighted_examples_count = (
             self.weighted_examples_count + other.weighted_examples_count

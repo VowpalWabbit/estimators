@@ -1,5 +1,7 @@
 # CR(-2) is particularly computationally convenient
 
+from __future__ import annotations
+
 from math import inf
 from estimators.bandits import base
 from typing import List, Optional, Tuple
@@ -156,15 +158,13 @@ class IntervalImpl:
                     f"Error: Value of r={r} is outside rmin={self.rmin}, rmax={self.rmax} bounds"
                 )
 
-    def get(
-        self, alpha: float = 0.05, atol: float = 1e-9
-    ) -> Tuple[Optional[float], Optional[float]]:
+    def get(self, alpha: float = 0.05, atol: float = 1e-9) -> Tuple[float, float]:
         from math import isclose, sqrt
         from scipy.stats import f  # type: ignore
 
         n = float(self.n)
         if n == 0:
-            return (None, None)
+            return (-inf, inf) if self.empirical_r_bounds else (self.rmin, self.rmax)
 
         sumw = float(self.sumw)
         sumwsq = float(self.sumwsq)
@@ -183,7 +183,7 @@ class IntervalImpl:
         delta = f.isf(q=alpha, dfn=1, dfd=n)
         phi = (-uncgstar - delta) / (2 * (1 + n))
 
-        bounds: List[Optional[float]] = []
+        bounds: List[float] = []
         for r, sign in ((self.rmin, 1), (self.rmax, -1)):
             candidates = []
             for wfake in (self.wmin, self.wmax):
@@ -304,12 +304,10 @@ class Interval(base.Interval):
     ) -> None:
         self._impl.add(p_pred / p_log, r, p_drop, n_drop)
 
-    def get(
-        self, alpha: float = 0.05, atol: float = 1e-9
-    ) -> Tuple[Optional[float], Optional[float]]:
+    def get(self, alpha: float = 0.05, atol: float = 1e-9) -> Tuple[float, float]:
         return self._impl.get(alpha, atol)
 
-    def __add__(self, other: "Interval") -> "Interval":
+    def __add__(self, other: Interval) -> Interval:
         result = Interval()
         result._impl = self._impl + other._impl
         return result
