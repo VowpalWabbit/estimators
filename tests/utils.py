@@ -86,6 +86,6 @@ class Helper:
         estimates = []
         for Estimator in estimators:
             estimator = Helper.run_add_example(datagen, Estimator, num_examples)
-            estimates.append(estimator.get())
+            estimates.append(estimator.get_r())
 
         return estimates
