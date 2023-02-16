@@ -48,7 +48,7 @@ class Estimator(ABC):
 
     @abstractmethod
     def get_r_overall(self) -> Optional[float]:
-        """Calculates estimated reward for suma of rewards over all slots.
+        """Calculates estimated reward for sum of rewards over all slots.
 
         Returns:
                 Estimated reward value
@@ -115,7 +115,7 @@ class Interval(ABC):
 
     @abstractmethod
     def get_r_overall(self, alpha: float) -> Tuple[Optional[float], Optional[float]]:
-        """Calculates estimated reward for suma of rewards over all slots.
+        """Calculates estimated reward for sum of rewards over all slots.
         Args:
                 alpha: alpha value
 
