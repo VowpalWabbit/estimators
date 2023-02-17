@@ -99,22 +99,16 @@ class Interval(base.Interval):
             return [(1.0, 1.0)] + [(0.0, 0.0)] * (self.slots_count - 1)
         return []
 
-    def get_r_given_impression(
-        self, alpha: float = 0.05
-    ) -> List[Tuple[Optional[float], Optional[float]]]:
+    def get_r_given_impression(self, alpha: float = 0.05) -> List[Tuple[float, float]]:
         if self.slots_count > 0:
             result = self.impl.get(alpha)
             return [result] + [(0.0, 0.0)] * (self.slots_count - 1)
         return []
 
-    def get_r(
-        self, alpha: float = 0.05
-    ) -> List[Tuple[Optional[float], Optional[float]]]:
+    def get_r(self, alpha: float = 0.05) -> List[Tuple[float, float]]:
         return self.get_r_given_impression(alpha)
 
-    def get_r_overall(
-        self, alpha: float = 0.05
-    ) -> Tuple[Optional[float], Optional[float]]:
+    def get_r_overall(self, alpha: float = 0.05) -> Tuple[float, float]:
         return self.get_r(alpha)[0]
 
     def __add__(self, other: Interval) -> Interval:

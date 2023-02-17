@@ -113,25 +113,22 @@ class Interval(base.Interval):
         total = float(self._impl[0].n) if any(self._impl) else 0
         return [clopper_pearson(float(e.n), total, alpha) for e in self._impl]
 
-    def get_r_given_impression(
-        self, alpha: float = 0.05
-    ) -> List[Tuple[Optional[float], Optional[float]]]:
+    def get_r_given_impression(self, alpha: float = 0.05) -> List[Tuple[float, float]]:
         return [e.get(alpha) for e in self._impl]
 
-    def get_r(
-        self, alpha: float = 0.05
-    ) -> List[Tuple[Optional[float], Optional[float]]]:
+    def get_r(self, alpha: float = 0.05) -> List[Tuple[float, float]]:
         return [
-            (
-                impr[0] * r_given_impr[0] if r_given_impr[0] is not None else None,
-                impr[1] * r_given_impr[1] if r_given_impr[1] is not None else None)
-            for impr, r_given_impr in zip(self.get_impression(alpha), self.get_r_given_impression(alpha))
+            (impr[0] * r_given_impr[0], impr[1] * r_given_impr[1])
+            for impr, r_given_impr in zip(
+                self.get_impression(alpha), self.get_r_given_impression(alpha)
+            )
         ]
 
-    def get_r_overall(
-        self, alpha: float = 0.05
-    ) -> Tuple[Optional[float], Optional[float]]:
-        return sum(self._impl, IntervalImpl(0, inf, self.rmin, self.rmax, self.empirical_r_bounds)).get(alpha)
+    def get_r_overall(self, alpha: float = 0.05) -> Tuple[float, float]:
+        return sum(
+            self._impl,
+            IntervalImpl(0, inf, self.rmin, self.rmax, self.empirical_r_bounds),
+        ).get(alpha)
 
     def __add__(self, other: Interval) -> Interval:
         assert not (

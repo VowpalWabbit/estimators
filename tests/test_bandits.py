@@ -10,6 +10,8 @@ from estimators.bandits import clopper_pearson
 from estimators.bandits import cs
 from utils import Helper, Scenario, get_intervals
 
+from math import inf
+
 import pytest
 
 
@@ -151,8 +153,8 @@ def assert_estimation_is_none(estimator):
 
 
 def assert_interval_is_none(estimator):
-    assert estimator().get()[0] is None
-    assert estimator().get()[1] is None
+    assert estimator().get()[0] == -inf
+    assert estimator().get()[1] == inf
 
 
 def test_no_data_estimation_is_none():
@@ -160,10 +162,10 @@ def test_no_data_estimation_is_none():
     assert_estimation_is_none(snips.Estimator)
     assert_estimation_is_none(mle.Estimator)
     assert_estimation_is_none(cressieread.Estimator)
-    assert_interval_is_none(cressieread.Interval)
+    assert_interval_is_none(lambda: cressieread.Interval(empirical_r_bounds=True))
     assert_interval_is_none(gaussian.Interval)
-    assert_interval_is_none(clopper_pearson.Interval)
-    assert_interval_is_none(cs.Interval)
+    assert_interval_is_none(lambda: clopper_pearson.Interval(empirical_r_bounds=True))
+    assert_interval_is_none(lambda: cs.Interval(empirical_r_bounds=True))
 
 
 def test_simple_convergence():

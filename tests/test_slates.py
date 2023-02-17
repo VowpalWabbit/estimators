@@ -1,4 +1,5 @@
 import numpy as np
+from math import inf
 
 from estimators.slates import pseudo_inverse
 from estimators.slates import gaussian
@@ -80,7 +81,7 @@ def test_higher_alpha_tighter_intervals():
 
 
 def test_no_data_estimation_is_none():
-    assert gaussian.Interval().get() == (None, None)
+    assert gaussian.Interval().get() == (-inf, inf)
     assert pseudo_inverse.Estimator().get() is None
 
 

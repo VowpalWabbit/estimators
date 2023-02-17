@@ -1,7 +1,11 @@
+from __future__ import annotations
+
 import typing
 from estimators.bandits import base
 from typing import List, Optional, Tuple
 from estimators.math import IncrementalFsum
+
+from math import inf
 
 
 def _logwealth(s: float, v: float, rho: float) -> float:
@@ -146,9 +150,9 @@ class IntervalImpl:
 
         self.t += 1
 
-    def get(self, alpha: float) -> Tuple[Optional[float], Optional[float]]:
+    def get(self, alpha: float) -> Tuple[float, float]:
         if self.t == 0 or self.rmin == self.rmax:
-            return (None, None)
+            return (-inf, inf) if self.adjust else (self.rmin, self.rmax)
 
         sumvlow = (
             (
@@ -212,10 +216,8 @@ class Interval(base.Interval):
     ) -> None:
         self._impl.add(p_pred / p_log, r, p_drop, n_drop)
 
-    def get(
-        self, alpha: float = 0.05, atol: float = 1e-9
-    ) -> Tuple[Optional[float], Optional[float]]:
+    def get(self, alpha: float = 0.05, atol: float = 1e-9) -> Tuple[float, float]:
         return self._impl.get(alpha)
 
-    def __add__(self, other: "Interval") -> "Interval":
+    def __add__(self, other: Interval) -> Interval:
         raise NotImplementedError

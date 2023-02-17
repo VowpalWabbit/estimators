@@ -1,5 +1,7 @@
 # Empirical likehood estimator
 
+from __future__ import annotations
+
 from math import fsum, inf
 from estimators.bandits import base
 from typing import List, Optional, Tuple
@@ -68,3 +70,6 @@ class Estimator(base.Estimator):
         vhat += missing * rhatmissing
 
         return vhat
+
+    def __add__(self, other: Estimator) -> Estimator:
+        raise NotImplementedError()

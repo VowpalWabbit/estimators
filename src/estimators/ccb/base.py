@@ -90,9 +90,7 @@ class Interval(ABC):
         ...
 
     @abstractmethod
-    def get_r_given_impression(
-        self, alpha: float
-    ) -> List[Tuple[Optional[float], Optional[float]]]:
+    def get_r_given_impression(self, alpha: float) -> List[Tuple[float, float]]:
         """Calculates estimated reward per slot conditioned on impression. The length of the list is the maximum number of slots seen so far. Estimations per slot are calculated by CB estimator.
         Args:
                 alpha: alpha value
@@ -103,7 +101,7 @@ class Interval(ABC):
         ...
 
     @abstractmethod
-    def get_r(self, alpha: float) -> List[Tuple[Optional[float], Optional[float]]]:
+    def get_r(self, alpha: float) -> List[Tuple[float, float]]:
         """Calculates estimated reward per slot (without conditioning on impression). The length of the list is the maximum number of slots seen so far. Estimations per slot are calculated by CB estimator.
         Args:
                 alpha: alpha value
@@ -114,7 +112,7 @@ class Interval(ABC):
         ...
 
     @abstractmethod
-    def get_r_overall(self, alpha: float) -> Tuple[Optional[float], Optional[float]]:
+    def get_r_overall(self, alpha: float) -> Tuple[float, float]:
         """Calculates estimated reward for sum of rewards over all slots.
         Args:
                 alpha: alpha value
